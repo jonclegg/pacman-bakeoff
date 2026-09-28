@@ -125,9 +125,6 @@ function buildCard(entry, index, color) {
 
   const body = h("div", "cab-body");
   body.append(top, title);
-  const swapped = modelSwap(entry);
-  if (swapped) body.append(h("p", "cab-note", swapped));
-  if (entry.note && entry.note !== `requested ${entry.requested}`) body.append(h("p", "cab-note", entry.note));
 
   const tags = h("div", "cab-tags");
   if (entry.phase != null) tags.append(h("span", "cab-tag", `PHASE ${entry.phase}`));
@@ -167,11 +164,6 @@ function companyOf(model) {
   const company = COMPANIES[model.match(/^[a-z]+/)[0]];
   if (!company) throw new Error(`No company mapped for model ${model}`);
   return company;
-}
-
-function modelSwap(entry) {
-  if (!entry.requested || !entry.actual || entry.requested === entry.actual) return null;
-  return `requested ${entry.requested} · ran ${entry.actual}`;
 }
 
 function stripRows(entry) {

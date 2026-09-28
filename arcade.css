@@ -795,12 +795,6 @@ a {
   outline-offset: 4px;
 }
 
-.cab-note {
-  margin: -2px 0 0;
-  font-size: 0.78rem;
-  color: var(--dot);
-}
-
 .cab-tags {
   display: flex;
   flex-wrap: wrap;
