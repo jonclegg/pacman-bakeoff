@@ -14,6 +14,8 @@ Each card opens a playable HTML entry. Stats come from harness transcripts where
 
 `muse-spark-1.3-openrouter` is a separate OpenRouter Claude Code run of `meta/muse-spark-1.3`. It is not the Cursor Cloud card.
 
+`claude-sonnet-5-5` is an OpenRouter Claude Code run. Requested `anthropic/claude-sonnet-5.5`; OpenRouter served `anthropic/claude-sonnet-5.5-20260928`. It is not the first-party `claude-sonnet-5` card.
+
 ## Repo layout
 
 - `index.html`, `arcade.css`, `arcade.js` — gallery UI

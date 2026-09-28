@@ -519,5 +519,22 @@
     "display_model": "meta/muse-spark-1.3",
     "phase": 5,
     "input_tokens": 34714
+  },
+  {
+    "slug": "claude-sonnet-5-5",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-sonnet-5-5",
+    "requested": "anthropic/claude-sonnet-5.5",
+    "actual": "anthropic/claude-sonnet-5.5-20260928",
+    "effort": "high",
+    "duration_ms": 865983,
+    "output_tokens": 123562,
+    "thinking_tokens": 93156,
+    "tokens_total": null,
+    "cost_usd": 1.6051676000000004,
+    "note": "OpenRouter Claude Code cell. Separate from the first-party claude-sonnet-5 card. First-party Claude Code did not list this model.",
+    "display_model": "anthropic/claude-sonnet-5.5-20260928",
+    "phase": 2,
+    "input_tokens": 18
   }
 ]
