@@ -490,5 +490,22 @@
     "display_model": "meta/muse-glimmer-30b",
     "phase": 5,
     "input_tokens": 68873
+  },
+  {
+    "slug": "muse-spark-1.3-openrouter",
+    "harness": "OpenRouter / Claude Code",
+    "run": "muse-spark-1.3",
+    "requested": "meta/muse-spark-1.3",
+    "actual": "meta/muse-spark-1.3",
+    "effort": "high",
+    "duration_ms": 38433,
+    "output_tokens": 6059,
+    "thinking_tokens": 59,
+    "tokens_total": null,
+    "cost_usd": 0.325158,
+    "note": "OpenRouter Claude Code cell. Separate from the Cursor Cloud muse-spark-1.3 card.",
+    "display_model": "meta/muse-spark-1.3",
+    "phase": 5,
+    "input_tokens": 34714
   }
 ]

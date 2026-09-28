@@ -10,6 +10,8 @@ Each card opens a playable HTML entry. Stats come from harness transcripts where
 
 `gpt-5.6-sol` and `muse-spark-1.3` are fresh blind Cursor Cloud reruns. Their card titles are the spawn slugs `gpt-5.6-sol-high` and `muse-spark-1.3-high`. Tokens and cost are still blank.
 
+`muse-spark-1.3-openrouter` is a separate OpenRouter Claude Code run of `meta/muse-spark-1.3`. It is not the Cursor Cloud card.
+
 ## Repo layout
 
 - `index.html`, `arcade.css`, `arcade.js` — gallery UI
