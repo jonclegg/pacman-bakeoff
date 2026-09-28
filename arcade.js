@@ -1,4 +1,4 @@
-const PREVIEW_SIZE = 760;
+const MAX_LIVE = 2;
 const HARNESS_COLORS = [
   "var(--blinky)",
   "var(--pinky)",
@@ -47,22 +47,41 @@ const SORT_DIR = {
 };
 const ui = {};
 let cards = [];
+const visibleScreens = new Map();
+const mountedScreens = new Set();
+let hoveredScreen = null;
+let scrolling = false;
+let scrollTimer = 0;
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 const previewObserver = new IntersectionObserver(
   (records) => {
     for (const record of records) {
-      if (record.isIntersecting) mountPreview(record.target);
-      else unmountPreview(record.target);
+      if (record.isIntersecting) visibleScreens.set(record.target, record.intersectionRatio);
+      else visibleScreens.delete(record.target);
     }
+    schedulePreviews();
   },
-  { rootMargin: "300px 0px" }
+  { threshold: [0, 0.25, 0.5, 0.75, 1] }
 );
 
-const scaleObserver = new ResizeObserver((records) => {
-  for (const record of records) {
-    record.target.style.setProperty("--s", record.contentRect.width / PREVIEW_SIZE);
-  }
-});
+addEventListener(
+  "scroll",
+  () => {
+    if (!scrolling) {
+      scrolling = true;
+      for (const screen of mountedScreens) freezePreview(screen);
+    }
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      scrolling = false;
+      schedulePreviews();
+    }, 140);
+  },
+  { passive: true }
+);
+
+reducedMotion.addEventListener("change", schedulePreviews);
 
 init();
 
@@ -85,11 +104,13 @@ async function init() {
   const response = await fetch("./entries/meta.json");
   if (!response.ok) throw new Error(`meta.json: HTTP ${response.status}`);
   const entries = await response.json();
+  assertOneCardPerModel(entries);
 
   const harnesses = [...new Set(entries.map((entry) => entry.harness))];
   const colors = new Map(harnesses.map((harness, i) => [harness, HARNESS_COLORS[i % HARNESS_COLORS.length]]));
 
-  cards = entries.map((entry, i) => buildCard(entry, i, colors.get(entry.harness)));
+  const labels = collisionLabels(entries);
+  cards = entries.map((entry, i) => buildCard(entry, i, colors.get(entry.harness), labels.get(entry)));
   ui.grid.append(...cards.map((card) => card.el));
   buildModelFilter();
   ui.modelBoxes = [...ui.modelsList.querySelectorAll("input")];
@@ -98,7 +119,8 @@ async function init() {
   await loadSizes();
 }
 
-function buildCard(entry, index, color) {
+function buildCard(entry, index, color, asked) {
+  const name = displayName(entry);
   const el = h("article", "cab");
   el.style.setProperty("--c", color);
   el.style.setProperty("--i", index);
@@ -107,7 +129,7 @@ function buildCard(entry, index, color) {
   screen.inert = true;
   screen.setAttribute("aria-hidden", "true");
   screen.dataset.src = entryUrl(entry);
-  screen.dataset.title = `${entry.display_model} preview`;
+  screen.dataset.title = `${name} preview`;
   screen.append(h("span", "cab-coin", "INSERT COIN"), h("span", "cab-start", "▶ PRESS START"));
 
   const top = h("div", "cab-top");
@@ -115,16 +137,18 @@ function buildCard(entry, index, color) {
   harness.append(ghostIcon(), document.createTextNode(entry.harness));
   top.append(harness, h("span", "cab-no", `#${String(index + 1).padStart(2, "0")}`));
 
-  const link = h("a", "cab-link", entry.display_model);
+  const link = h("a", "cab-link", name);
   link.href = entryUrl(entry);
   link.target = "_blank";
   link.rel = "noopener";
-  link.append(h("span", "visually-hidden", ` (${entry.harness}, opens in a new tab)`));
+  const qualifier = asked ? `, ${asked}` : "";
+  link.append(h("span", "visually-hidden", ` (${entry.harness}${qualifier}, opens in a new tab)`));
   const title = h("h3", "cab-model");
   title.append(link);
 
   const body = h("div", "cab-body");
   body.append(top, title);
+  if (asked) body.append(h("p", "cab-asked", asked));
 
   const tags = h("div", "cab-tags");
   if (entry.phase != null) tags.append(h("span", "cab-tag", `PHASE ${entry.phase}`));
@@ -139,10 +163,18 @@ function buildCard(entry, index, color) {
 
   body.append(tags, statList("cab-stats", stripRows(entry)), details);
   el.append(screen, body);
+  el.addEventListener("pointerenter", () => holdPreview(screen));
+  el.addEventListener("pointerleave", () => releasePreview(screen));
+  el.addEventListener("focusin", () => holdPreview(screen));
+  el.addEventListener("focusout", (event) => {
+    if (!el.contains(event.relatedTarget)) releasePreview(screen);
+  });
+  el.addEventListener("animationend", () => {
+    el.style.animation = "none";
+  }, { once: true });
   previewObserver.observe(screen);
-  scaleObserver.observe(screen);
 
-  const haystack = [entry.display_model, entry.requested, entry.actual, entry.harness, entry.slug, entry.run]
+  const haystack = [name, entry.display_model, entry.requested, entry.actual, entry.harness, entry.slug, entry.run, asked]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -151,17 +183,58 @@ function buildCard(entry, index, color) {
     sizeTag.hidden = false;
     sizeValue.classList.remove("is-empty");
   };
-  return { el, entry, model: modelName(entry), haystack, setSize };
+  return { el, entry, model: name, haystack, setSize };
 }
 
-function modelName(entry) {
-  const name = entry.display_model.split("/").pop();
-  const effort = `-${entry.effort}`;
-  return entry.effort && name.endsWith(effort) ? name.slice(0, -effort.length) : name;
+function displayName(entry) {
+  let name = shortName(entry.display_model).replace(/-(?:19|20)\d{6}$/, "").replace(/-build$/, "");
+  name = name.replace(/-(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])$/, "");
+  const effort = entry.effort ? `-${entry.effort}` : "";
+  if (effort && name.endsWith(effort)) name = name.slice(0, -effort.length);
+  if (!name) throw new Error(`Empty display name for ${entry.slug}`);
+  return name;
+}
+
+function assertOneCardPerModel(entries) {
+  const seen = new Map();
+  for (const entry of entries) {
+    const name = displayName(entry);
+    const prior = seen.get(name);
+    if (prior) throw new Error(`Duplicate model ${name}: ${prior} and ${entry.slug}`);
+    seen.set(name, entry.slug);
+  }
+}
+
+function shortName(name) {
+  return name.split("/").pop();
+}
+
+function collisionLabels(entries) {
+  const counts = new Map();
+  for (const entry of entries) counts.set(entry.display_model, (counts.get(entry.display_model) ?? 0) + 1);
+
+  const labels = new Map();
+  for (const entry of entries) {
+    if (counts.get(entry.display_model) < 2) continue;
+    const asked = entry.requested && shortName(entry.requested);
+    if (entry.actual && asked && asked !== shortName(entry.display_model)) labels.set(entry, `asked ${asked}`);
+  }
+
+  const stillTied = new Map();
+  for (const entry of entries) {
+    if (counts.get(entry.display_model) < 2 || labels.has(entry)) continue;
+    stillTied.set(entry.display_model, (stillTied.get(entry.display_model) ?? 0) + 1);
+  }
+  for (const entry of entries) {
+    if (labels.has(entry)) continue;
+    if ((stillTied.get(entry.display_model) ?? 0) > 1) labels.set(entry, entry.slug);
+  }
+  return labels;
 }
 
 function companyOf(model) {
-  const company = COMPANIES[model.match(/^[a-z]+/)[0]];
+  const prefix = model.match(/^[a-z]+/)?.[0];
+  const company = COMPANIES[prefix];
   if (!company) throw new Error(`No company mapped for model ${model}`);
   return company;
 }
@@ -219,9 +292,11 @@ function statList(className, rows) {
 async function loadSizes() {
   await Promise.all(
     cards.map(async (card) => {
-      const response = await fetch(entryUrl(card.entry));
+      const response = await fetch(entryUrl(card.entry), { method: "HEAD" });
       if (!response.ok) throw new Error(`${card.entry.slug}: HTTP ${response.status}`);
-      card.setSize((await response.blob()).size);
+      const bytes = Number(response.headers.get("content-length"));
+      if (!Number.isFinite(bytes)) throw new Error(`${card.entry.slug}: no content-length`);
+      card.setSize(bytes);
     })
   );
 }
@@ -255,6 +330,9 @@ function buildModelFilter() {
 function setModelsOpen(open) {
   ui.modelsPanel.hidden = !open;
   ui.modelsToggle.setAttribute("aria-expanded", String(open));
+  if (!open) return;
+  const top = ui.modelsPanel.getBoundingClientRect().top;
+  ui.modelsPanel.style.maxHeight = `${Math.max(160, window.innerHeight - top - 12)}px`;
 }
 
 function bindEvents() {
@@ -266,7 +344,9 @@ function bindEvents() {
   ui.modelsToggle.addEventListener("click", () => setModelsOpen(ui.modelsPanel.hidden));
 
   ui.modelsList.addEventListener("change", (event) => {
-    toggle(state.models, event.target.value);
+    const box = event.target;
+    if (box.checked) state.models.add(box.value);
+    else state.models.delete(box.value);
     applyFilters();
   });
 
@@ -313,7 +393,7 @@ function bindEvents() {
 function applyFilters() {
   const terms = state.query.toLowerCase().split(/\s+/).filter(Boolean);
   const ordered = sortedCards();
-  ui.grid.append(...ordered.map((card) => card.el));
+  orderGrid(ordered);
 
   let shown = 0;
   for (const card of ordered) {
@@ -326,6 +406,13 @@ function applyFilters() {
   syncSort();
   ui.count.textContent = `${shown} / ${cards.length}`;
   ui.gameOver.hidden = shown > 0;
+  schedulePreviews();
+}
+
+function orderGrid(ordered) {
+  const kids = ui.grid.children;
+  if (ordered.length === kids.length && ordered.every((card, i) => card.el === kids[i])) return;
+  ui.grid.append(...ordered.map((card) => card.el));
 }
 
 function cardMatches(card, terms) {
@@ -356,8 +443,10 @@ function sortedCards() {
 function compareMetric(a, b, direction) {
   const aMissing = a.value == null;
   const bMissing = b.value == null;
-  if (aMissing && bMissing) return a.index - b.index;
-  if (aMissing || bMissing) return aMissing ? direction : -direction;
+  if (aMissing || bMissing) {
+    if (aMissing && bMissing) return a.index - b.index;
+    return aMissing ? 1 : -1;
+  }
   if (a.value !== b.value) return (a.value - b.value) * direction;
   return a.index - b.index;
 }
@@ -405,6 +494,49 @@ function bindRadioGroup(group, buttons, onChoose) {
   });
 }
 
+function holdPreview(screen) {
+  hoveredScreen = screen;
+  schedulePreviews();
+}
+
+function releasePreview(screen) {
+  if (hoveredScreen !== screen) return;
+  hoveredScreen = null;
+  schedulePreviews();
+}
+
+function schedulePreviews() {
+  if (scrolling) {
+    for (const screen of mountedScreens) freezePreview(screen);
+    return;
+  }
+
+  const live = new Set(reducedMotion.matches ? [] : liveScreens());
+  for (const screen of [...mountedScreens]) {
+    if (!visibleScreens.has(screen) || screen.closest(".cab").hidden) unmountPreview(screen);
+  }
+  for (const screen of visibleScreens.keys()) {
+    if (screen.closest(".cab").hidden) continue;
+    mountPreview(screen);
+    if (live.has(screen)) thawPreview(screen);
+    else freezePreview(screen);
+  }
+}
+
+function liveScreens() {
+  const ranked = [...visibleScreens.entries()]
+    .filter(([screen]) => !screen.closest(".cab").hidden)
+    .sort((a, b) => b[1] - a[1]);
+  const picked = [];
+  const hoveredHidden = !hoveredScreen || hoveredScreen.closest(".cab").hidden || !visibleScreens.has(hoveredScreen);
+  if (!hoveredHidden) picked.push(hoveredScreen);
+  for (const [screen] of ranked) {
+    if (picked.length >= MAX_LIVE) break;
+    if (!picked.includes(screen)) picked.push(screen);
+  }
+  return picked;
+}
+
 function mountPreview(screen) {
   if (screen.querySelector("iframe")) return;
   const frame = document.createElement("iframe");
@@ -412,12 +544,57 @@ function mountPreview(screen) {
   frame.title = screen.dataset.title;
   frame.tabIndex = -1;
   frame.setAttribute("scrolling", "no");
-  frame.addEventListener("load", () => frame.classList.add("is-live"), { once: true });
+  frame.addEventListener(
+    "load",
+    () => {
+      frame.classList.add("is-live");
+      installPause(frame);
+      if (scrolling || reducedMotion.matches || !liveScreens().includes(screen)) freezePreview(screen);
+    },
+    { once: true }
+  );
+  mountedScreens.add(screen);
   screen.prepend(frame);
 }
 
 function unmountPreview(screen) {
+  mountedScreens.delete(screen);
   screen.querySelector("iframe")?.remove();
+}
+
+function installPause(frame) {
+  const win = frame.contentWindow;
+  if (win.__galleryResume) return;
+  const native = win.requestAnimationFrame.bind(win);
+  const queue = [];
+  const root = win.document.documentElement;
+  const style = win.document.createElement("style");
+  style.textContent = "html.gallery-paused, html.gallery-paused * { animation-play-state: paused !important; }";
+  root.append(style);
+  win.__galleryPaused = false;
+  win.requestAnimationFrame = (callback) => {
+    if (!win.__galleryPaused) return native(callback);
+    queue.push(callback);
+    return 0;
+  };
+  win.__galleryResume = () => {
+    if (!win.__galleryPaused) return;
+    win.__galleryPaused = false;
+    root.classList.remove("gallery-paused");
+    for (const callback of queue.splice(0)) native(callback);
+  };
+  win.__galleryPause = () => {
+    win.__galleryPaused = true;
+    root.classList.add("gallery-paused");
+  };
+}
+
+function freezePreview(screen) {
+  screen.querySelector("iframe")?.contentWindow?.__galleryPause?.();
+}
+
+function thawPreview(screen) {
+  screen.querySelector("iframe")?.contentWindow?.__galleryResume?.();
 }
 
 function formatDuration(ms) {
@@ -457,11 +634,6 @@ function show(value, format) {
 
 function entryUrl(entry) {
   return `./entries/${entry.slug}.html`;
-}
-
-function toggle(set, value) {
-  if (set.has(value)) set.delete(value);
-  else set.add(value);
 }
 
 function ghostIcon() {
