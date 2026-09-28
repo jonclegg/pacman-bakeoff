@@ -171,10 +171,11 @@ function detailRows(entry) {
     ["WALL TIME", show(entry.duration_ms, formatDurationLong)],
     ["INPUT", show(entry.input_tokens, formatFull)],
     ...(entry.cached_input_tokens == null ? [] : [["CACHED", formatFull(entry.cached_input_tokens)]]),
+    ...(entry.cache_write_tokens == null ? [] : [["CACHE WRITE", formatFull(entry.cache_write_tokens)]]),
     ["OUTPUT", show(entry.output_tokens, formatFull)],
     ["THINKING", show(entry.thinking_tokens, formatFull)],
     ["TOTAL", show(entry.tokens_total, formatFull)],
-    ["EST. COST", show(entry.cost_usd, formatCost)],
+    ["COST", show(entry.cost_usd, formatCost)],
     ["HTML SIZE", null, "size"],
   ];
 }
