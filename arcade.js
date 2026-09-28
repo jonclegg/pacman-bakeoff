@@ -170,6 +170,7 @@ function detailRows(entry) {
     ["ACTUAL", show(entry.actual, String)],
     ["WALL TIME", show(entry.duration_ms, formatDurationLong)],
     ["INPUT", show(entry.input_tokens, formatFull)],
+    ...(entry.cached_input_tokens == null ? [] : [["CACHED", formatFull(entry.cached_input_tokens)]]),
     ["OUTPUT", show(entry.output_tokens, formatFull)],
     ["THINKING", show(entry.thinking_tokens, formatFull)],
     ["TOTAL", show(entry.tokens_total, formatFull)],
