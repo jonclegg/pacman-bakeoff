@@ -422,7 +422,7 @@ a {
   flex-direction: column;
   width: min(340px, calc(100vw - 2 * var(--pad)));
   max-height: min(70vh, 520px);
-  background: rgba(0, 0, 0, 0.96);
+  background: var(--bg);
   border: 2px solid var(--maze);
   border-radius: 14px;
   box-shadow:
