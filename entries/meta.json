@@ -14,7 +14,30 @@
     "note": null,
     "display_model": "grok-4.7",
     "phase": 1,
-    "input_tokens": 195470
+    "input_tokens": 195470,
+    "score": 94,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows ignored on title screen; Space not blocked from scrolling"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "Elroy, eyes return"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable pellets"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "siren + full set, mute"
+      }
+    }
   },
   {
     "slug": "grok-4.6",
@@ -31,7 +54,30 @@
     "note": null,
     "display_model": "grok-4.6",
     "phase": 1,
-    "input_tokens": 197156
+    "input_tokens": 197156,
+    "score": 89,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "first arrow press after start is lost"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "ghosts freeze at \u2265165 Hz (fine at 60/120/144)"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable pellets"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "mute (no siren)"
+      }
+    }
   },
   {
     "slug": "grok-4.5",
@@ -48,7 +94,30 @@
     "note": null,
     "display_model": "grok-4.5",
     "phase": 1,
-    "input_tokens": 29647
+    "input_tokens": 29647,
+    "score": 20,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "no pause"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "house ghosts pinned; Blinky trapped in a sealed pocket"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "Pac-Man freezes above 90 fps"
+      },
+      "maze": {
+        "mark": "major",
+        "note": "23 dead ends; 10 unreachable pellets, so the level can't be won"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "no siren or jingle"
+      }
+    }
   },
   {
     "slug": "gpt-6-astra",
@@ -67,7 +136,30 @@
     "note": "Codex API-key rerun on 2026-09-28 (auth_mode apikey, not ChatGPT login). OPENAI_API_KEY from SSM /somewhere/openai-api-key, profile jclegg. Same blind prompt in an empty cell. cost_usd 2.417912 is the sum of 19 response usages at OpenAI Standard short-context rates per 1M tokens ($10 input, $1 cached input, $12.50 cache writes, $50 output). Cache-write tokens are included in input_tokens; uncached input is input minus cached minus cache write (57). Reasoning tokens are included in output_tokens. No response had more than 272000 input tokens. No regional uplift.",
     "display_model": "gpt-6-astra",
     "phase": 1,
-    "cache_write_tokens": 43054
+    "cache_write_tokens": 43054,
+    "score": 87,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "Space pauses instead of starting; Enter or button starts"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "revived ghost can be eaten again in the same power-up"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable pellets"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "first start jingle may be dropped"
+      }
+    }
   },
   {
     "slug": "gpt-6-sol",
@@ -86,7 +178,30 @@
     "note": "Codex API-key rerun on 2026-09-28 (auth_mode apikey, not ChatGPT login). OPENAI_API_KEY from SSM /somewhere/openai-api-key, profile jclegg. Same blind prompt in an empty cell. cost_usd 0.4313754 is the sum of 16 response usages at OpenAI Standard short-context rates per 1M tokens ($2 input, $0.20 cached input, $2.50 cache writes, $10 output). Cache-write tokens are included in input_tokens; uncached input is input minus cached minus cache write (48). Reasoning tokens are included in output_tokens. No response had more than 272000 input tokens. No regional uplift.",
     "display_model": "gpt-6-sol",
     "phase": 1,
-    "cache_write_tokens": 38884
+    "cache_write_tokens": 38884,
+    "score": 83,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "no eyes (eaten ghosts teleport home)"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "0 dead ends, but Pac-Man can walk into the ghost house"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": ""
+      }
+    }
   },
   {
     "slug": "gpt-6-luna",
@@ -105,7 +220,30 @@
     "note": "Codex API-key rerun on 2026-09-28 (auth_mode apikey, not ChatGPT login). OPENAI_API_KEY from SSM /somewhere/openai-api-key, profile jclegg. Same blind prompt in an empty cell. cost_usd 0.01306467 is the sum of 9 response usages at OpenAI Standard short-context rates per 1M tokens ($0.10 input, $0.01 cached input, $0.125 cache writes, $0.50 output). Cache-write tokens are included in input_tokens; uncached input is input minus cached minus cache write (27). Reasoning tokens are included in output_tokens. No response had more than 272000 input tokens. No regional uplift.",
     "display_model": "gpt-6-luna",
     "phase": 1,
-    "cache_write_tokens": 25458
+    "cache_write_tokens": 25458,
+    "score": 45,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "only Enter or button restarts"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "identical chase AI, pass-through, ghost spawns inside a wall"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "major",
+        "note": "9 dead ends; tunnel row doesn't wrap"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   },
   {
     "slug": "claude-opus-4-8",
@@ -122,7 +260,30 @@
     "note": null,
     "display_model": "claude-opus-4-8",
     "phase": 1,
-    "input_tokens": 4
+    "input_tokens": 4,
+    "score": 28,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "mouse-only start or restart"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "freeze at 60 Hz (live: 1\u20137 tiles each)"
+      },
+      "stuck": {
+        "mark": "minor",
+        "note": "can walk off-grid from the tunnel"
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "0 dead ends, but off-grid columns are open"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   },
   {
     "slug": "claude-opus-5",
@@ -139,7 +300,30 @@
     "note": null,
     "display_model": "claude-opus-5",
     "phase": 1,
-    "input_tokens": 42
+    "input_tokens": 42,
+    "score": 58,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "logic OK, but drawn 3 tiles too high; live: ghosts shown over walls 4\u20139% of the time"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "same drawing offset: Pac-Man appears inside walls"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable pellets"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": ""
+      }
+    }
   },
   {
     "slug": "claude-opus-5-5",
@@ -156,7 +340,30 @@
     "note": null,
     "display_model": "claude-opus-5-5",
     "phase": 1,
-    "input_tokens": 22
+    "input_tokens": 22,
+    "score": 99,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": "incl. swipe, auto-pause on blur"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "arcade-accurate"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable pellets"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "best audio: full two-phrase intro with a bass line, continuous siren that rises with progress, arcade-style death sound, master volume bus"
+      }
+    }
   },
   {
     "slug": "claude-fable-5-1",
@@ -173,7 +380,30 @@
     "note": null,
     "display_model": "claude-fable-5-1",
     "phase": 1,
-    "input_tokens": 324
+    "input_tokens": 324,
+    "score": 96,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": ""
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable pellets"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "continuous siren through a master bus, but a generic arpeggio instead of the Pac-Man intro; no separate power-pellet sound"
+      }
+    }
   },
   {
     "slug": "claude-sonnet-5",
@@ -190,7 +420,30 @@
     "note": null,
     "display_model": "claude-sonnet-5",
     "phase": 1,
-    "input_tokens": 6
+    "input_tokens": 6,
+    "score": 18,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": "keys work, but you die within seconds"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "3 of 4 ghosts invisible (NaN position); ghosts go through walls from level 2; power pellets invisible"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "major",
+        "note": "35 dead ends (pillar grid, not a Pac-Man maze)"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   },
   {
     "slug": "cursor-auto",
@@ -209,7 +462,30 @@
     "phase": 1,
     "input_tokens": 37710,
     "cached_input_tokens": 410420,
-    "cache_write_tokens": 17336
+    "cache_write_tokens": 17336,
+    "score": 34,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "speed tied to frame rate (2\u00d7 at 120 Hz)"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "all 4 frozen from the first frame (live: 1 tile each for 90 s)"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable pellets"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   },
   {
     "slug": "gpt-5.6-terra",
@@ -228,7 +504,30 @@
     "phase": 1,
     "input_tokens": 533,
     "cached_input_tokens": 1422234,
-    "cache_write_tokens": 126034
+    "cache_write_tokens": 126034,
+    "score": 30,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "no pause"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "7 ghosts sealed in the house, never get out (live: confirmed)"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "major",
+        "note": "8 dead ends; house has no exit"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   },
   {
     "slug": "gpt-5.6-sol",
@@ -247,8 +546,30 @@
     "cost_usd": 0.7199024,
     "note": "Codex API-key rerun on 2026-09-28 (auth_mode apikey, not ChatGPT login / not Cursor Cloud Ultra). OPENAI_API_KEY from SSM /somewhere/openai-api-key, profile jclegg. Full fair-cell PROMPT.md in an empty git cell /Users/Shared/pacbake/cells/2df14a38-5ee9-4fb1-a071-87818745152e. cost_usd 0.7199024 is from turn.completed aggregate usage (ephemeral Codex run; equals the sum of response usages) at OpenAI Standard short-context rates per 1M tokens ($4 input, $0.40 cached input, $5 cache writes, $20 output; pricing page 2026-09-28; GPT-5.6 Sol promotional pricing through at least 2026-11-21). Cache-write tokens are included in input_tokens; uncached input is input minus cached minus cache write (45). Reasoning tokens are included in output_tokens. No long-context uplift: aggregate cache_write_input_tokens=32440 and sibling gpt-6-sol API cell (higher totals, 16 responses) had 0 responses over 272000 input tokens. No regional uplift. Replaces the prior Cursor Cloud card whose Ultra dashboard had no events for bc-66adde64-\u2026",
     "display_model": "gpt-5.6-sol",
-
-    "phase": 1
+    "phase": 1,
+    "score": 90,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "reverse only at tile centre; no swipe"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "eyes return, no freeze at any fps"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable pellets, tunnel"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "no siren, no mute"
+      }
+    }
   },
   {
     "slug": "gpt-5.6-luna",
@@ -267,7 +588,30 @@
     "phase": 1,
     "input_tokens": 571,
     "cached_input_tokens": 1774416,
-    "cache_write_tokens": 143793
+    "cache_write_tokens": 143793,
+    "score": 60,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "Enter doesn't start (an arrow does)"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "all 4 use the same AI; Pac and a ghost pass through each other about 26% of the time"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "major",
+        "note": "10 dead ends, including Pac-Man's spawn; asymmetric; no tunnel or house"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": ""
+      }
+    }
   },
   {
     "slug": "deepseek-v4-pro",
@@ -284,7 +628,30 @@
     "note": null,
     "display_model": "deepseek/deepseek-v4-pro",
     "phase": 2,
-    "input_tokens": 10893
+    "input_tokens": 10893,
+    "score": 8,
+    "score_notes": {
+      "controls": {
+        "mark": "na",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "TypeError crash at frame 13 kills the game loop"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": ""
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "0 dead ends; Pac-Man can enter the house"
+      },
+      "sound": {
+        "mark": "na",
+        "note": "never reached"
+      }
+    }
   },
   {
     "slug": "deepseek-v4.1-flash",
@@ -301,7 +668,30 @@
     "note": null,
     "display_model": "deepseek/deepseek-v4.1-flash",
     "phase": 2,
-    "input_tokens": 25758
+    "input_tokens": 25758,
+    "score": 72,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": "arrows, WASD, hjkl, swipe"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "frightened ghosts keep chasing Pac-Man"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable pellets"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   },
   {
     "slug": "glm-5.3",
@@ -318,7 +708,30 @@
     "note": null,
     "display_model": "z-ai/glm-5.3",
     "phase": 2,
-    "input_tokens": 92547
+    "input_tokens": 92547,
+    "score": 40,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "auto-starts; Space not handled"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "all 4 freeze (float snap bug); live: static up to 44 s"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "1 dead end (11,15)"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   },
   {
     "slug": "glm-5.3-flash",
@@ -335,7 +748,30 @@
     "note": null,
     "display_model": "z-ai/glm-5.3-flash",
     "phase": 2,
-    "input_tokens": 42596
+    "input_tokens": 42596,
+    "score": 88,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "full cycle verified"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 reachable dead ends (small 19\u00d721 maze)"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "audio context created outside a user gesture (plays in Chrome, may be blocked in Safari)"
+      }
+    }
   },
   {
     "slug": "qwen3.8-max",
@@ -352,7 +788,30 @@
     "note": null,
     "display_model": "qwen/qwen3.8-max-0902",
     "phase": 2,
-    "input_tokens": 162
+    "input_tokens": 162,
+    "score": 74,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "no pause"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": ""
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "2 dead ends (10,18), (17,18)"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   },
   {
     "slug": "qwen3.8-flash",
@@ -369,7 +828,30 @@
     "note": null,
     "display_model": "qwen/qwen3.8-flash",
     "phase": 2,
-    "input_tokens": 192
+    "input_tokens": 192,
+    "score": 76,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": "turns only at tile edges"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "chase OK, but eaten ghosts teleport and can be re-eaten"
+      },
+      "stuck": {
+        "mark": "minor",
+        "note": "visual half-tile jump on turns"
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "3 dead ends; ghost house has no door"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "no mute"
+      }
+    }
   },
   {
     "slug": "kimi-k2.7-code",
@@ -386,7 +868,30 @@
     "note": null,
     "display_model": "moonshotai/kimi-k2.7-code",
     "phase": 2,
-    "input_tokens": 9800
+    "input_tokens": 9800,
+    "score": 6,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows only, button start only"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "freeze; Blinky trapped"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "spawns inside a wall, never moves"
+      },
+      "maze": {
+        "mark": "major",
+        "note": "0 of 270 pellets reachable from spawn"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "never plays"
+      }
+    }
   },
   {
     "slug": "minimax-m3",
@@ -403,7 +908,31 @@
     "note": null,
     "display_model": "minimax/minimax-m3",
     "phase": 2,
-    "input_tokens": 43595
+    "input_tokens": 43595,
+    "score": 2,
+    "score_notes": {
+      "controls": {
+        "mark": "na",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "na",
+        "note": "0 ghosts even if it ran"
+      },
+      "stuck": {
+        "mark": "na",
+        "note": ""
+      },
+      "maze": {
+        "mark": "major",
+        "note": "12 dead ends"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    },
+    "score_summary": "syntax error, blank canvas"
   },
   {
     "slug": "gemini-3.7-flash",
@@ -420,7 +949,30 @@
     "note": "Public-rate estimate from Gemini Flash intro rates ($0.75/1M input, $3.75/1M output+thinking). cache_read_tokens was 0 on the captured transcript prefix and was not confirmed on the full transcript.",
     "display_model": "gemini-3.7-flash-high",
     "phase": 3,
-    "input_tokens": 208799
+    "input_tokens": 208799,
+    "score": 38,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "freeze (live: static about 18 s, Blinky drawn on a wall 43% of the time); eaten eyes never revive"
+      },
+      "stuck": {
+        "mark": "minor",
+        "note": "can leave the maze up an off-screen column"
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "0 dead ends, but that off-grid escape"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "rich (753 tones)"
+      }
+    }
   },
   {
     "slug": "gemini-3.8-flash",
@@ -437,7 +989,30 @@
     "note": "Public-rate estimate from Gemini Flash intro rates ($0.75/1M input, $3.75/1M output+thinking). cache_read_tokens was 0 on the captured transcript prefix and was not confirmed on the full transcript.",
     "display_model": "gemini-3.8-flash-high",
     "phase": 3,
-    "input_tokens": 494199
+    "input_tokens": 494199,
+    "score": 17,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "freeze at the first junction"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "Pac-Man can never turn (live: Up/Down 0 of 17)"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable pellets"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": ""
+      }
+    }
   },
   {
     "slug": "grok-bot",
@@ -454,7 +1029,30 @@
     "note": "in-chat from short prompt; no peeking",
     "display_model": "grok-bot",
     "phase": 4,
-    "input_tokens": null
+    "input_tokens": null,
+    "score": 12,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "all 4 frozen on one tile"
+      },
+      "stuck": {
+        "mark": "minor",
+        "note": "drawn into walls 15% of the time"
+      },
+      "maze": {
+        "mark": "major",
+        "note": "19 dead ends; 6 unreachable pellets, so unwinnable"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   },
   {
     "slug": "muse-spark-1.3",
@@ -471,7 +1069,30 @@
     "note": "Cursor dashboard get-filtered-usage-events on the Ultra account (2026-09-28) has no events for bc-13ea2aed-92ad-5849-847b-c7d940e4f2e6. Rescan the same day: 2146 cloud-agent events, plus the 31 events in the cell window 1790571700000-1790572300000. The cell transcript has 13 assistant turns and no token counts, so there is nothing to price from a rate card. The only nearby muse-spark-1.3-high row is on orchestrator bc-1ff0c20d-b639-570c-b438-972e3dd97079 (conversationId is that orchestrator, one event, chargedCents 13.34620475769043, at spawn). That orchestrator also has a gpt-5.6-terra-high row for a parallel cell that is not the gallery terra card, so the row was not copied. cost_usd stays null.",
     "display_model": "muse-spark-1.3-high",
     "phase": 5,
-    "input_tokens": null
+    "input_tokens": null,
+    "score": 11,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "spawn inside a wall, pass through walls, eyes can't revive"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "Pac-Man frozen at spawn (live: confirmed)"
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "9 dead ends"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": ""
+      }
+    }
   },
   {
     "slug": "muse-glimmer-30b",
@@ -488,7 +1109,30 @@
     "note": null,
     "display_model": "meta/muse-glimmer-30b",
     "phase": 5,
-    "input_tokens": 68873
+    "input_tokens": 68873,
+    "score": 4,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "spawn inside walls, never move"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "2.2 tiles/frame, so Pac-Man teleports into walls"
+      },
+      "maze": {
+        "mark": "major",
+        "note": "8 dead ends; only 17 of 286 pellets eatable"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   },
   {
     "slug": "claude-sonnet-5-5",
@@ -505,6 +1149,29 @@
     "note": "OpenRouter Claude Code cell. Separate from the first-party claude-sonnet-5 card. First-party Claude Code did not list this model.",
     "display_model": "anthropic/claude-sonnet-5.5-20260928",
     "phase": 2,
-    "input_tokens": 18
+    "input_tokens": 18,
+    "score": 95,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": "arrows, WASD, Enter/Space/click, P, M, swipe"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "arcade-accurate, eyes return about 2.5 s"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0 unreachable"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "thinner: only half the intro melody and no bass; the siren is a string of separate beeps, not a smooth sweep (which is why its tone count was inflated); simple death sound. Also less complete: emoji fruit, no attract-mode chase"
+      }
+    }
   }
 ]
