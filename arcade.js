@@ -10,8 +10,22 @@ const HARNESS_COLORS = [
   "var(--dot)",
 ];
 const SVG_NS = "http://www.w3.org/2000/svg";
+const COMPANIES = {
+  claude: "Anthropic",
+  cursor: "Cursor",
+  deepseek: "DeepSeek",
+  gemini: "Google",
+  glm: "Z.ai",
+  gpt: "OpenAI",
+  grok: "xAI",
+  kimi: "Moonshot AI",
+  minimax: "MiniMax",
+  muse: "Meta",
+  qwen: "Alibaba",
+};
+const byName = (a, b) => a.localeCompare(b, "en", { numeric: true, sensitivity: "base" });
 
-const state = { query: "", harnesses: new Set(), sort: "default", descending: false };
+const state = { query: "", models: new Set(), sort: "default", descending: false };
 const SORT_VALUE = {
   cost: (entry) => entry.cost_usd,
   time: (entry) => entry.duration_ms,
@@ -54,7 +68,12 @@ init();
 
 async function init() {
   ui.grid = document.querySelector(".grid");
-  ui.chips = document.querySelector(".chips");
+  ui.models = document.querySelector(".models");
+  ui.modelsToggle = ui.models.querySelector(".models-toggle");
+  ui.modelsValue = ui.models.querySelector("[data-models-value]");
+  ui.modelsPanel = ui.models.querySelector(".models-panel");
+  ui.modelsList = ui.models.querySelector(".models-list");
+  ui.modelsClear = ui.models.querySelector(".models-clear");
   ui.search = document.querySelector("#search");
   ui.count = document.querySelector("[data-count]");
   ui.gameOver = document.querySelector(".game-over");
@@ -72,7 +91,8 @@ async function init() {
 
   cards = entries.map((entry, i) => buildCard(entry, i, colors.get(entry.harness)));
   ui.grid.append(...cards.map((card) => card.el));
-  buildChips(harnesses, colors, entries);
+  buildModelFilter();
+  ui.modelBoxes = [...ui.modelsList.querySelectorAll("input")];
   bindEvents();
   applyFilters();
   await loadSizes();
@@ -134,7 +154,19 @@ function buildCard(entry, index, color) {
     sizeTag.hidden = false;
     sizeValue.classList.remove("is-empty");
   };
-  return { el, entry, harness: entry.harness, haystack, setSize };
+  return { el, entry, model: modelName(entry), haystack, setSize };
+}
+
+function modelName(entry) {
+  const name = entry.display_model.split("/").pop();
+  const effort = `-${entry.effort}`;
+  return entry.effort && name.endsWith(effort) ? name.slice(0, -effort.length) : name;
+}
+
+function companyOf(model) {
+  const company = COMPANIES[model.match(/^[a-z]+/)[0]];
+  if (!company) throw new Error(`No company mapped for model ${model}`);
+  return company;
 }
 
 function modelSwap(entry) {
@@ -201,24 +233,35 @@ async function loadSizes() {
   );
 }
 
-function buildChips(harnesses, colors, entries) {
-  const all = chip("All", entries.length, "var(--pac)");
-  all.dataset.all = "";
-  ui.chips.append(all);
-  for (const harness of harnesses) {
-    const count = entries.filter((entry) => entry.harness === harness).length;
-    const button = chip(harness, count, colors.get(harness));
-    button.dataset.harness = harness;
-    ui.chips.append(button);
+function buildModelFilter() {
+  const counts = new Map();
+  for (const card of cards) counts.set(card.model, (counts.get(card.model) ?? 0) + 1);
+
+  const groups = new Map();
+  for (const model of [...counts.keys()].sort(byName)) {
+    const company = companyOf(model);
+    if (!groups.has(company)) groups.set(company, []);
+    groups.get(company).push(model);
+  }
+
+  for (const company of [...groups.keys()].sort(byName)) {
+    const group = h("fieldset", "models-group");
+    group.append(h("legend", "models-company", company));
+    for (const model of groups.get(company)) {
+      const box = h("input");
+      box.type = "checkbox";
+      box.value = model;
+      const option = h("label", "models-option");
+      option.append(box, h("span", "models-name", model), h("span", "models-count", String(counts.get(model))));
+      group.append(option);
+    }
+    ui.modelsList.append(group);
   }
 }
 
-function chip(label, count, color) {
-  const button = h("button", "chip", label);
-  button.type = "button";
-  button.style.setProperty("--c", color);
-  button.append(h("span", "chip-count", String(count)));
-  return button;
+function setModelsOpen(open) {
+  ui.modelsPanel.hidden = !open;
+  ui.modelsToggle.setAttribute("aria-expanded", String(open));
 }
 
 function bindEvents() {
@@ -227,12 +270,26 @@ function bindEvents() {
     applyFilters();
   });
 
-  ui.chips.addEventListener("click", (event) => {
-    const button = event.target.closest(".chip");
-    if (!button) return;
-    if ("all" in button.dataset) state.harnesses.clear();
-    else toggle(state.harnesses, button.dataset.harness);
+  ui.modelsToggle.addEventListener("click", () => setModelsOpen(ui.modelsPanel.hidden));
+
+  ui.modelsList.addEventListener("change", (event) => {
+    toggle(state.models, event.target.value);
     applyFilters();
+  });
+
+  ui.modelsClear.addEventListener("click", () => {
+    state.models.clear();
+    applyFilters();
+  });
+
+  ui.models.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || ui.modelsPanel.hidden) return;
+    setModelsOpen(false);
+    ui.modelsToggle.focus();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!ui.models.contains(event.target)) setModelsOpen(false);
   });
 
   bindRadioGroup(ui.sortKeys, ui.sortKeyButtons, (button) => {
@@ -248,7 +305,7 @@ function bindEvents() {
   document.querySelector(".game-over-reset").addEventListener("click", () => {
     ui.search.value = "";
     state.query = "";
-    state.harnesses.clear();
+    state.models.clear();
     applyFilters();
     ui.search.focus();
   });
@@ -272,19 +329,25 @@ function applyFilters() {
     if (visible) shown += 1;
   }
 
-  for (const button of ui.chips.children) {
-    const pressed = "all" in button.dataset ? !state.harnesses.size : state.harnesses.has(button.dataset.harness);
-    button.setAttribute("aria-pressed", String(pressed));
-  }
-
+  syncModels();
   syncSort();
   ui.count.textContent = `${shown} / ${cards.length}`;
   ui.gameOver.hidden = shown > 0;
 }
 
 function cardMatches(card, terms) {
-  const harnessOk = !state.harnesses.size || state.harnesses.has(card.harness);
-  return harnessOk && terms.every((term) => card.haystack.includes(term));
+  const modelOk = !state.models.size || state.models.has(card.model);
+  return modelOk && terms.every((term) => card.haystack.includes(term));
+}
+
+function syncModels() {
+  for (const box of ui.modelBoxes) box.checked = state.models.has(box.value);
+  const picked = [...state.models];
+  if (!picked.length) ui.modelsValue.textContent = "All";
+  else if (picked.length === 1) ui.modelsValue.textContent = picked[0];
+  else ui.modelsValue.textContent = `${picked.length} models`;
+  ui.modelsToggle.classList.toggle("is-active", picked.length > 0);
+  ui.modelsClear.disabled = !picked.length;
 }
 
 function sortedCards() {

@@ -61,7 +61,20 @@
           />
           <kbd class="search-kbd" aria-hidden="true">/</kbd>
         </div>
-        <div class="chips" role="group" aria-label="Filter by harness"></div>
+        <div class="models">
+          <button type="button" class="models-toggle" aria-expanded="false" aria-controls="models-panel">
+            <span class="models-label">MODELS</span>
+            <span class="models-value" data-models-value>All</span>
+            <span class="models-caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="models-panel" id="models-panel" role="group" aria-label="Filter by model" hidden>
+            <div class="models-head">
+              <span class="models-hint">None checked shows all</span>
+              <button type="button" class="models-clear">Clear</button>
+            </div>
+            <div class="models-list"></div>
+          </div>
+        </div>
         <div class="sort">
           <span class="sort-label" id="sort-label">Sort</span>
           <div class="sort-keys" role="radiogroup" aria-labelledby="sort-label">
