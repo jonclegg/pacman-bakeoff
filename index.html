@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Pac-Man bench: how well a model and harness can recreate Pac-Man from a single prompt." />
+    <meta name="theme-color" content="#000000" />
+    <title>Pac-Man Bake-off</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 16 L30 7 A15 15 0 1 0 30 25 Z' fill='%23ffd60a'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Press+Start+2P&display=swap" />
+    <link rel="stylesheet" href="./arcade.css" />
+    <script src="./arcade.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#entries">Skip to entries</a>
+
+    <svg width="0" height="0" class="sprites" aria-hidden="true" focusable="false">
+      <symbol id="ghost" viewBox="0 0 14 14">
+        <path fill="currentColor" d="M1 13V6a6 6 0 0 1 12 0v7l-2-1.6L9 13l-2-1.6L5 13l-2-1.6z" />
+        <circle cx="4.6" cy="6" r="1.8" fill="#fff" />
+        <circle cx="9.4" cy="6" r="1.8" fill="#fff" />
+        <circle class="pupil" cx="5.3" cy="6.3" r="0.9" fill="#1b2cff" />
+        <circle class="pupil" cx="10.1" cy="6.3" r="0.9" fill="#1b2cff" />
+      </symbol>
+    </svg>
+
+    <header class="intro">
+      <h1>Pac-Man bench tests how well a model and harness can recreate Pac-Man from a single prompt:</h1>
+      <p class="intro-prompt">“Create a Pac-Man game in a single html page”</p>
+
+      <div class="chase" aria-hidden="true">
+        <div class="chase-dots"></div>
+        <div class="chase-track">
+          <div class="chase-eaten"></div>
+          <div class="chase-runner">
+            <div class="chase-pack">
+              <svg class="chase-ghost" style="--ghost: var(--clyde)"><use href="#ghost" /></svg>
+              <svg class="chase-ghost" style="--ghost: var(--inky)"><use href="#ghost" /></svg>
+              <svg class="chase-ghost" style="--ghost: var(--pinky)"><use href="#ghost" /></svg>
+              <svg class="chase-ghost" style="--ghost: var(--blinky)"><use href="#ghost" /></svg>
+              <span class="chase-pac"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="entries" class="arcade" tabindex="-1">
+      <div class="controls" role="search">
+        <div class="search">
+          <label class="search-label" for="search">SEARCH</label>
+          <input
+            id="search"
+            class="search-input"
+            type="search"
+            placeholder="model, harness, note…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <kbd class="search-kbd" aria-hidden="true">/</kbd>
+        </div>
+        <div class="chips" role="group" aria-label="Filter by harness"></div>
+        <div class="sort">
+          <span class="sort-label" id="sort-label">Sort</span>
+          <div class="sort-keys" role="radiogroup" aria-labelledby="sort-label">
+            <button type="button" class="chip" role="radio" data-sort="default" aria-checked="true" tabindex="0">Default</button>
+            <button type="button" class="chip" role="radio" data-sort="cost" aria-checked="false" tabindex="-1">Cost</button>
+            <button type="button" class="chip" role="radio" data-sort="time" aria-checked="false" tabindex="-1">Time</button>
+            <button type="button" class="chip" role="radio" data-sort="tokens" aria-checked="false" tabindex="-1">Tokens</button>
+          </div>
+          <div class="sort-dir" role="radiogroup" aria-label="Sort direction" hidden>
+            <button type="button" class="chip" role="radio" data-order="asc" aria-checked="true" tabindex="0">↑ Cheap</button>
+            <button type="button" class="chip" role="radio" data-order="desc" aria-checked="false" tabindex="-1">↓ Pricey</button>
+          </div>
+        </div>
+        <p class="count" aria-live="polite"><span data-count>--</span><span class="count-word"> SHOWN</span></p>
+      </div>
+
+      <div class="grid"></div>
+
+      <div class="game-over" hidden>
+        <p class="game-over-title">GAME OVER</p>
+        <p class="game-over-text">No entries match that search.</p>
+        <button type="button" class="game-over-reset">CONTINUE?</button>
+      </div>
+
+      <noscript><p class="noscript">Entries load with JavaScript. Enable it to insert a coin.</p></noscript>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Model labels show the model that actually ran. Stats are wall time and token counts from harness
+        transcripts where available. Phase 2 entries use Claude Code pointed at OpenRouter. Phase 3 entries use
+        Antigravity with Gemini. The Grok Bot entry was written in-chat from the same short prompt (no peeking).
+        Cursor Cloud cells do not expose local token logs yet. Cost is the harness-reported estimate where available;
+        HTML size is the entry file as served. A dash means the run did not record that number.
+      </p>
+      <p class="footer-home"><a href="https://github.com/jonclegg/pacman-bakeoff">github.com/jonclegg/pacman-bakeoff</a></p>
+    </footer>
+  </body>
+</html>

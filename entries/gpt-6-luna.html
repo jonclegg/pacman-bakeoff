@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080b18">
+<title>Pac-Man — Midnight Maze</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+:root{color-scheme:dark;--ink:#f4f5ff;--muted:#858ba7;--cyan:#55e8ff;--pink:#fa62b6;--panel:#11162a;--line:#28304e}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 15%,#17234a 0%,#0c1022 42%,#070914 100%);color:var(--ink);font-family:'Space Grotesk',sans-serif;display:grid;place-items:center;padding:28px 16px 34px}
+.app{width:min(100%,810px)}
+header{display:flex;align-items:center;justify-content:space-between;margin:0 0 17px;gap:18px}
+.brand{display:flex;align-items:center;gap:12px}.mark{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#ffe76a,#ffb93d);box-shadow:0 0 24px #ffd54044;color:#11152b;font-size:22px;font-weight:700}.eyebrow{font:500 10px 'DM Mono',monospace;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase;margin-bottom:3px}h1{font-size:19px;line-height:1;margin:0;font-weight:700;letter-spacing:-.03em}.status{display:flex;align-items:center;gap:8px;color:#b7bed7;font:11px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}.live{width:7px;height:7px;border-radius:50%;background:#68f2a4;box-shadow:0 0 12px #68f2a4;animation:pulse 1.5s infinite}@keyframes pulse{50%{opacity:.4}}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}.stat{background:linear-gradient(135deg,#151b32,#101528);border:1px solid var(--line);border-radius:13px;padding:10px 15px;min-height:62px}.label{font:10px 'DM Mono',monospace;letter-spacing:.13em;color:var(--muted);text-transform:uppercase}.value{margin-top:4px;font-size:19px;font-weight:600;letter-spacing:.02em}.value small{font-size:11px;color:var(--muted);font-weight:400}
+.board-wrap{position:relative;background:#080d22;border:1px solid #2a355a;border-radius:17px;padding:10px;box-shadow:0 22px 75px #0008,0 0 42px #172d7e26;overflow:hidden}.board-wrap:before{content:"";pointer-events:none;position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 35px #192b6740}.canvas-box{width:100%;aspect-ratio:19/19;position:relative}canvas{display:block;width:100%;height:100%;image-rendering:pixelated;border-radius:10px}
+.overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#050817bb;backdrop-filter:blur(5px);z-index:2}.overlay.show{display:flex}.dialog{text-align:center;padding:27px 35px;border:1px solid #485685;border-radius:19px;background:linear-gradient(145deg,#192344,#10152a);box-shadow:0 15px 55px #0009;max-width:340px}.dialog .big{font-size:35px;margin-bottom:5px}.dialog h2{margin:0 0 7px;font-size:25px}.dialog p{color:#aeb6d0;margin:0 0 19px;font-size:13px;line-height:1.5}.primary{border:0;color:#11152b;font:700 13px 'Space Grotesk',sans-serif;background:linear-gradient(100deg,#ffe36c,#ffba48);padding:11px 20px;border-radius:10px;cursor:pointer;box-shadow:0 5px 20px #ffd34a35}.primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.below{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font:10px 'DM Mono',monospace;padding:12px 3px 0;letter-spacing:.03em}.keys{display:flex;align-items:center;gap:6px}kbd{font:10px 'DM Mono',monospace;color:#c2c9e2;background:#151a2e;border:1px solid #353e5d;border-radius:5px;padding:3px 6px;box-shadow:0 2px 0 #080b16}.mobile-controls{display:none;justify-content:center;margin:15px auto 0;max-width:220px;grid-template:repeat(2,47px)/repeat(3,58px);gap:5px}.mobile-controls button{border:1px solid #303957;background:#151a2e;color:#d9e0fa;border-radius:12px;font-size:20px;touch-action:manipulation}.mobile-controls button:active{background:#26375e;color:var(--cyan)}.mobile-controls [data-dir=up]{grid-area:1/2}.mobile-controls [data-dir=left]{grid-area:2/1}.mobile-controls [data-dir=down]{grid-area:2/2}.mobile-controls [data-dir=right]{grid-area:2/3}
+@media(max-width:560px){body{padding:18px 11px}.status{font-size:9px}.brand{gap:9px}.mark{width:35px;height:35px}.stats{gap:6px}.stat{padding:8px 10px;min-height:56px}.value{font-size:17px}.below{font-size:9px}.mobile-controls{display:grid}.keys{display:none}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header>
+    <div class="brand"><div class="mark">◕</div><div><div class="eyebrow">Arcade / 001</div><h1>Midnight Maze</h1></div></div>
+    <div class="status"><span class="live"></span><span id="status">Ready to play</span></div>
+  </header>
+  <section class="stats" aria-label="Game stats">
+    <div class="stat"><div class="label">Score</div><div class="value" id="score">00000</div></div>
+    <div class="stat"><div class="label">Maze</div><div class="value">01 <small>/ 01</small></div></div>
+    <div class="stat"><div class="label">Lives</div><div class="value" id="lives">♥ ♥ ♥</div></div>
+  </section>
+  <div class="board-wrap">
+    <div class="canvas-box"><canvas id="game" aria-label="Pac-Man maze game"></canvas></div>
+    <div class="overlay show" id="overlay"><div class="dialog"><div class="big" id="dialogIcon">🟡</div><h2 id="dialogTitle">Ready?</h2><p id="dialogText">Clear the maze, collect every dot, and keep clear of the ghosts.</p><button class="primary" id="startBtn">Start game</button></div></div>
+  </div>
+  <div class="below"><span class="keys">MOVE <kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span><span>SPACE&nbsp; PAUSE &nbsp;·&nbsp; R&nbsp; RESTART</span></div>
+  <div class="mobile-controls" aria-label="Touch controls"><button data-dir="up" aria-label="Move up">↑</button><button data-dir="left" aria-label="Move left">←</button><button data-dir="down" aria-label="Move down">↓</button><button data-dir="right" aria-label="Move right">→</button></div>
+</main>
+<script>
+(() => {
+  const raw = [
+    '###################',
+    '#........#........#',
+    '#.###.##.#.##.###.#',
+    '#o###.##.#.##.###o#',
+    '#.................#',
+    '#.###.#.#####.#.###',
+    '#.....#...#...#...#',
+    '####.###.#.###.####',
+    '####.#.......#.####',
+    '####.#.##.##.#.####',
+    '#....#..GGG..#....#',
+    '####.#.##.##.#.####',
+    '####.#...P...#.####',
+    '#....#.......#....#',
+    '#.##.###.#.###.##.#',
+    '#o...#.......#...o#',
+    '#.##.#.###.###.#.##',
+    '#.................#',
+    '###################'
+  ];
+  const N = 19, canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score'), livesEl = document.getElementById('lives'), statusEl = document.getElementById('status');
+  const overlay = document.getElementById('overlay'), titleEl = document.getElementById('dialogTitle'), textEl = document.getElementById('dialogText'), iconEl = document.getElementById('dialogIcon'), startBtn = document.getElementById('startBtn');
+  const dirs = {up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};
+  const ghostColors = ['#ff557d','#ff9d55','#62e6ff'];
+  let tile = 28, board, player, ghosts, score, lives, pellets, state = 'ready', powerUntil = 0, lastTime = 0, playerAcc = 0, ghostAcc = 0, mouth = 0;
+  function resize(){const box=canvas.parentElement.getBoundingClientRect();const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(box.width*dpr);canvas.height=Math.round(box.height*dpr);ctx.setTransform(canvas.width/N,0,0,canvas.height/N,0,0);tile=1;draw()}
+  function fresh(){board=raw.map(r=>r.split(''));score=0;lives=3;powerUntil=0;player={x:9,y:12,dir:dirs.left,next:dirs.left};ghosts=[{x:8,y:10,color:ghostColors[0],dir:dirs.left},{x:9,y:10,color:ghostColors[1],dir:dirs.up},{x:10,y:10,color:ghostColors[2],dir:dirs.right}];pellets=board.flat().filter(c=>c==='.'||c==='o').length;updateHud();draw()}
+  function updateHud(){scoreEl.textContent=String(score).padStart(5,'0');livesEl.textContent=lives>0?Array.from({length:lives},()=> '♥').join(' '):'—';statusEl.textContent=state==='playing'?'In the maze':state==='paused'?'Paused':state==='won'?'Maze cleared':state==='lost'?'Game over':'Ready to play'}
+  function walkable(x,y){return x>=0&&y>=0&&x<N&&y<N&&board[y][x]!=='#'}
+  function movePlayer(){const p=player;const nx=p.x+p.next.x,ny=p.y+p.next.y;if(walkable(nx,ny))p.dir=p.next;const tx=p.x+p.dir.x,ty=p.y+p.dir.y;if(walkable(tx,ty)){p.x=tx;p.y=ty}const c=board[p.y][p.x];if(c==='.'||c==='o'){board[p.y][p.x]=' ';score+=c==='o'?50:10;pellets--;if(c==='o')powerUntil=performance.now()+6500;updateHud();if(!pellets)finish(true)}}
+  function moveGhost(g){const options=Object.values(dirs).filter(d=>walkable(g.x+d.x,g.y+d.y));if(!options.length)return;const reverse={x:-g.dir.x,y:-g.dir.y};let choices=options.filter(d=>!(d.x===reverse.x&&d.y===reverse.y));if(!choices.length)choices=options;const powered=performance.now()<powerUntil;choices.sort((a,b)=>{const da=Math.abs(g.x+a.x-player.x)+Math.abs(g.y+a.y-player.y),db=Math.abs(g.x+b.x-player.x)+Math.abs(g.y+b.y-player.y);return (powered?db-da:da-db)+(Math.random()-.5)*2.4});g.dir=choices[0];g.x+=g.dir.x;g.y+=g.dir.y}
+  function collision(){for(const g of ghosts){if(g.x===player.x&&g.y===player.y){if(performance.now()<powerUntil){score+=200;g.x=9;g.y=10;updateHud()}else{lives--;updateHud();if(lives<=0)finish(false);else{player.x=9;player.y=12;player.dir=dirs.left;player.next=dirs.left;ghosts.forEach((q,i)=>{q.x=8+i;q.y=10})}}break}}}
+  function finish(won){state=won?'won':'lost';updateHud();iconEl.textContent=won?'🏆':'👾';titleEl.textContent=won?'Maze cleared!':'Game over';textEl.textContent=won?`Nice run. Final score: ${score}.`:`Final score: ${score}. Give it another go?`;startBtn.textContent='Play again';overlay.classList.add('show')}
+  function togglePause(){if(state==='playing'){state='paused';overlay.classList.add('show');iconEl.textContent='Ⅱ';titleEl.textContent='Paused';textEl.textContent='Take a breather. The ghosts are waiting.';startBtn.textContent='Resume'}else if(state==='paused'){state='playing';overlay.classList.remove('show')}updateHud()}
+  function start(){if(state==='ready'||state==='won'||state==='lost')fresh();state='playing';overlay.classList.remove('show');updateHud();lastTime=performance.now()}
+  function setDir(name){if(player&&dirs[name])player.next=dirs[name]}
+  function tick(t){const dt=Math.min(50,t-lastTime);lastTime=t;if(state==='playing'){mouth+=dt*.018;playerAcc+=dt;ghostAcc+=dt;while(playerAcc>=145&&state==='playing'){movePlayer();playerAcc-=145}while(ghostAcc>=310&&state==='playing'){ghosts.forEach(moveGhost);ghostAcc-=310}collision()}draw();requestAnimationFrame(tick)}
+  function draw(){const w=N;ctx.clearRect(0,0,w,w);ctx.fillStyle='#080d22';ctx.fillRect(0,0,w,w);
+    // softly lit wall tiles
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(board[y][x]==='#'){ctx.fillStyle='#142452';ctx.fillRect(x+.035,y+.035,.93,.93);ctx.strokeStyle='#3b5bba';ctx.lineWidth=.055;ctx.strokeRect(x+.07,y+.07,.86,.86);ctx.fillStyle='#1d3471';ctx.fillRect(x+.15,y+.15,.7,.7)}
+    for(let y=0;y<N;y++)for(let x=0;x<N;x++){const c=board[y][x];if(c==='.'||c==='o'){ctx.beginPath();ctx.fillStyle=c==='o'?'#ffe875':'#d8e1ff';const r=c==='o'?.19:.065;ctx.arc(x+.5,y+.5,c==='o'?r*(.78+.22*Math.sin(mouth)):r,0,Math.PI*2);ctx.fill();if(c==='o'){ctx.shadowColor='#ffdd65';ctx.shadowBlur=.5;ctx.fill();ctx.shadowBlur=0}}}
+    // player with an animated wedge mouth
+    if(player){const angle=Math.max(.07,.28+.15*Math.sin(mouth));const heading=Math.atan2(player.dir.y,player.dir.x);ctx.fillStyle='#ffd943';ctx.shadowColor='#ffda49';ctx.shadowBlur=.23;ctx.beginPath();ctx.moveTo(player.x+.5,player.y+.5);ctx.arc(player.x+.5,player.y+.5,.39,heading+angle,heading+Math.PI*2-angle);ctx.closePath();ctx.fill();ctx.shadowBlur=0}
+    const powered=performance.now()<powerUntil;for(const g of ghosts||[]){const x=g.x+.5,y=g.y+.5,r=.37;ctx.fillStyle=powered?'#547bff':g.color;ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=.16;ctx.beginPath();ctx.arc(x,y-.02,r,Math.PI,0);ctx.lineTo(x+r,y+.32);ctx.lineTo(x+r*.48,y+.23);ctx.lineTo(x,y+.34);ctx.lineTo(x-r*.48,y+.23);ctx.lineTo(x-r,y+.34);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(x-.13,y-.06,.105,.13,0,0,Math.PI*2);ctx.ellipse(x+.13,y-.06,.105,.13,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=powered?'#fff':'#26356d';ctx.beginPath();ctx.arc(x-.1,y-.045,.045,0,Math.PI*2);ctx.arc(x+.16,y-.045,.045,0,Math.PI*2);ctx.fill()}
+  }
+  window.addEventListener('keydown',e=>{const k=e.key.toLowerCase(), map={arrowup:'up',w:'up',arrowdown:'down',s:'down',arrowleft:'left',a:'left',arrowright:'right',d:'right'};if(map[k]){e.preventDefault();setDir(map[k])}else if(k===' '){e.preventDefault();togglePause()}else if(k==='r'){fresh();state='ready';overlay.classList.add('show');iconEl.textContent='🟡';titleEl.textContent='Ready?';textEl.textContent='Clear the maze, collect every dot, and keep clear of the ghosts.';startBtn.textContent='Start game';updateHud()}});
+  document.querySelectorAll('[data-dir]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();setDir(b.dataset.dir)})});startBtn.addEventListener('click',start);window.addEventListener('resize',resize);
+  fresh();resize();requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pac-Man</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 20%, #182048, #070914 64%);
+      color: #f6f4dc;
+      font-family: "Courier New", monospace;
+    }
+    .cabinet {
+      width: min(94vw, 670px);
+      padding: clamp(12px, 3vw, 22px);
+      border: 3px solid #3346ac;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #11182f, #080a14);
+      box-shadow: 0 0 0 7px #05060c, 0 22px 60px #000;
+    }
+    .marquee {
+      margin: 0 0 12px;
+      color: #ffe74f;
+      font-size: clamp(20px, 5vw, 32px);
+      font-weight: 900;
+      letter-spacing: .15em;
+      text-align: center;
+      text-shadow: 0 0 12px #ffb000;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 2px solid #253899;
+      background: #000;
+      image-rendering: pixelated;
+      touch-action: none;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    button {
+      min-width: 88px;
+      padding: 9px 12px;
+      border: 1px solid #5369d9;
+      border-radius: 7px;
+      background: #171f48;
+      color: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: .05em;
+    }
+    button:hover, button:focus-visible { background: #2d3c91; outline: 2px solid #ffe74f; outline-offset: 2px; }
+    .help { margin: 13px 0 0; color: #b6bddc; font-size: 11px; line-height: 1.5; text-align: center; }
+    kbd { padding: 1px 4px; border: 1px solid #68719d; border-radius: 3px; color: #fff; font-family: inherit; }
+  </style>
+</head>
+<body>
+  <main class="cabinet">
+    <h1 class="marquee">PAC-MAN</h1>
+    <canvas id="game" width="616" height="712" aria-label="Playable Pac-Man game"></canvas>
+    <div class="controls">
+      <button id="start" type="button">START / RESTART</button>
+      <button id="pause" type="button">PAUSE</button>
+    </div>
+    <p class="help">Move with <kbd>Arrow keys</kbd> or <kbd>W A S D</kbd> · <kbd>Space</kbd> pauses · eat all dots to advance</p>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const canvas = document.querySelector("#game");
+      const ctx = canvas.getContext("2d");
+      const startButton = document.querySelector("#start");
+      const pauseButton = document.querySelector("#pause");
+      const TILE = 22;
+      const COLS = 28;
+      const ROWS = 29;
+      const HUD = 74;
+      const mazeTemplate = [
+        "############################",
+        "#............##............#",
+        "#.####.#####.##.#####.####.#",
+        "#o####.#####.##.#####.####o#",
+        "#.####.#####.##.#####.####.#",
+        "#..........................#",
+        "#.####.##.########.##.####.#",
+        "#.####.##.########.##.####.#",
+        "#......##....##....##......#",
+        "######.#####.##.#####.######",
+        "     #.#####.##.#####.#     ",
+        "     #.##..........##.#     ",
+        "     #.##.###--###.##.#     ",
+        "######.##.#      #.##.######",
+        "      .  .#      #.  .      ",
+        "######.##.#      #.##.######",
+        "     #.##.########.##.#     ",
+        "     #.##..........##.#     ",
+        "     #.##.########.##.#     ",
+        "######.##.########.##.######",
+        "#............##............#",
+        "#.####.#####.##.#####.####.#",
+        "#o..##................##..o#",
+        "###.##.##.########.##.##.###",
+        "#......##....##....##......#",
+        "#.##########.##.##########.#",
+        "#.##########.##.##########.#",
+        "#..........................#",
+        "############################"
+      ];
+
+      const directions = {
+        left: { x: -1, y: 0, angle: Math.PI },
+        right: { x: 1, y: 0, angle: 0 },
+        up: { x: 0, y: -1, angle: -Math.PI / 2 },
+        down: { x: 0, y: 1, angle: Math.PI / 2 }
+      };
+      const opposite = { left: "right", right: "left", up: "down", down: "up" };
+      const directionForKey = {
+        ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down",
+        a: "left", d: "right", w: "up", s: "down",
+        A: "left", D: "right", W: "up", S: "down"
+      };
+      const ghostDefinitions = [
+        { name: "Blinky", color: "#ff3448", home: { x: 13.5, y: 14.5 }, corner: { x: 26.5, y: .5 } },
+        { name: "Pinky", color: "#ff9fc6", home: { x: 12.5, y: 14.5 }, corner: { x: 1.5, y: .5 } },
+        { name: "Inky", color: "#45e7ed", home: { x: 14.5, y: 14.5 }, corner: { x: 26.5, y: 27.5 } },
+        { name: "Clyde", color: "#ffb14b", home: { x: 15.5, y: 14.5 }, corner: { x: 1.5, y: 27.5 } }
+      ];
+      let maze;
+      let pellets;
+      let player;
+      let ghosts;
+      let score;
+      let lives;
+      let level;
+      let state;
+      let stateTime;
+      let frightenedUntil;
+      let flashTime;
+      let fruit;
+      let animationClock = 0;
+      let lastFrame = 0;
+
+      function resetMaze() {
+        maze = mazeTemplate.map(row => row.split(""));
+        pellets = 0;
+        for (const row of maze) {
+          for (const cell of row) {
+            if (cell === "." || cell === "o") pellets++;
+          }
+        }
+      }
+
+      function createPlayer() {
+        return { x: 13.5, y: 22.5, direction: "left", nextDirection: "left", mouth: 0 };
+      }
+
+      function createGhosts() {
+        return ghostDefinitions.map((definition, index) => ({
+          ...definition,
+          x: definition.home.x,
+          y: definition.home.y,
+          direction: index % 2 ? "left" : "right",
+          released: index === 0,
+          releaseAt: index * 2.2,
+          eaten: false
+        }));
+      }
+
+      function newGame() {
+        score = 0;
+        lives = 3;
+        level = 1;
+        resetLevel();
+      }
+
+      function resetLevel() {
+        resetMaze();
+        player = createPlayer();
+        ghosts = createGhosts();
+        frightenedUntil = 0;
+        fruit = null;
+        state = "ready";
+        stateTime = 1.8;
+        flashTime = 0;
+      }
+
+      function startPlay() {
+        if (state === "gameover") newGame();
+        if (state === "ready") {
+          state = "playing";
+          stateTime = 0;
+        }
+      }
+
+      function tileAt(x, y) {
+        if (y < 0 || y >= ROWS) return "#";
+        if (x < 0 || x >= COLS) return y === 14 ? " " : "#";
+        return maze[y][x];
+      }
+
+      function isOpen(x, y, ghost = false) {
+        const tile = tileAt(x, y);
+        return tile !== "#" && (ghost || tile !== "-");
+      }
+
+      function centered(entity) {
+        return Math.abs(entity.x - (Math.floor(entity.x) + .5)) < .115 &&
+          Math.abs(entity.y - (Math.floor(entity.y) + .5)) < .115;
+      }
+
+      function snapToCenter(entity) {
+        entity.x = Math.floor(entity.x) + .5;
+        entity.y = Math.floor(entity.y) + .5;
+      }
+
+      function canLeave(entity, direction, ghost = false) {
+        const d = directions[direction];
+        const x = Math.floor(entity.x) + d.x;
+        const y = Math.floor(entity.y) + d.y;
+        return isOpen(x, y, ghost);
+      }
+
+      function move(entity, speed, dt, ghost = false) {
+        if (centered(entity)) {
+          snapToCenter(entity);
+          if (!ghost && entity.nextDirection && canLeave(entity, entity.nextDirection)) {
+            entity.direction = entity.nextDirection;
+          }
+          if (!canLeave(entity, entity.direction, ghost)) return;
+        }
+        const d = directions[entity.direction];
+        entity.x += d.x * speed * dt;
+        entity.y += d.y * speed * dt;
+        if (entity.x < -.5) entity.x = COLS - .5;
+        if (entity.x > COLS - .5) entity.x = -.5;
+      }
+
+      function targetForGhost(ghost) {
+        const playerDirection = directions[player.direction];
+        if (ghost.name === "Blinky") return { x: player.x, y: player.y };
+        if (ghost.name === "Pinky") return { x: player.x + playerDirection.x * 4, y: player.y + playerDirection.y * 4 };
+        if (ghost.name === "Inky") {
+          const blinky = ghosts[0];
+          const pivot = { x: player.x + playerDirection.x * 2, y: player.y + playerDirection.y * 2 };
+          return { x: pivot.x + (pivot.x - blinky.x), y: pivot.y + (pivot.y - blinky.y) };
+        }
+        const distance = Math.hypot(player.x - ghost.x, player.y - ghost.y);
+        return distance > 7.5 ? { x: player.x, y: player.y } : ghost.corner;
+      }
+
+      function chooseGhostDirection(ghost, now) {
+        if (!centered(ghost)) return;
+        snapToCenter(ghost);
+        const valid = Object.keys(directions).filter(direction => canLeave(ghost, direction, true));
+        if (!valid.length) return;
+        const noReverse = valid.filter(direction => direction !== opposite[ghost.direction]);
+        const options = noReverse.length ? noReverse : valid;
+        if (ghost.eaten) {
+          ghost.direction = options.reduce((best, direction) =>
+            squaredDistance(ghost, ghost.home, direction, ghost) < squaredDistance(ghost, ghost.home, best, ghost) ? direction : best
+          );
+          return;
+        }
+        if (now < frightenedUntil) {
+          ghost.direction = options[Math.floor(Math.random() * options.length)];
+          return;
+        }
+        const cycle = (now % 27) < 7;
+        const target = cycle ? ghost.corner : targetForGhost(ghost);
+        ghost.direction = options.reduce((best, direction) =>
+          squaredDistance(ghost, target, direction, ghost) < squaredDistance(ghost, target, best, ghost) ? direction : best
+        );
+      }
+
+      function squaredDistance(from, target, direction, entity) {
+        const d = directions[direction];
+        const x = entity.x + d.x;
+        const y = entity.y + d.y;
+        return (target.x - x) ** 2 + (target.y - y) ** 2;
+      }
+
+      function eatAtPlayer(now) {
+        const x = Math.floor(player.x);
+        const y = Math.floor(player.y);
+        const tile = tileAt(x, y);
+        if (tile === "." || tile === "o") {
+          maze[y][x] = " ";
+          pellets--;
+          score += tile === "o" ? 50 : 10;
+          if (tile === "o") {
+            frightenedUntil = now + 7;
+            ghosts.forEach(ghost => {
+              if (!ghost.eaten) ghost.direction = opposite[ghost.direction];
+            });
+          }
+          if (pellets === 0) {
+            level++;
+            state = "level";
+            stateTime = 2.2;
+            flashTime = 1.5;
+          }
+          if (!fruit && pellets < 130) fruit = { x: 13.5, y: 17.5, until: now + 9 };
+        }
+        if (fruit && Math.hypot(player.x - fruit.x, player.y - fruit.y) < .6) {
+          score += 500;
+          fruit = null;
+        }
+      }
+
+      function checkGhostCollisions(now) {
+        for (const ghost of ghosts) {
+          if (ghost.eaten || Math.hypot(player.x - ghost.x, player.y - ghost.y) > .62) continue;
+          if (now < frightenedUntil) {
+            ghost.eaten = true;
+            score += 200;
+          } else {
+            lives--;
+            if (lives <= 0) {
+              state = "gameover";
+            } else {
+              state = "ready";
+              stateTime = 1.8;
+              player = createPlayer();
+              ghosts = createGhosts();
+            }
+            return;
+          }
+        }
+      }
+
+      function update(dt) {
+        animationClock += dt;
+        if (state === "paused" || state === "gameover") return;
+        if (state === "ready" || state === "level") {
+          stateTime -= dt;
+          if (stateTime <= 0) {
+            if (state === "level") resetLevel();
+            else state = "playing";
+          }
+          return;
+        }
+        const now = animationClock;
+        move(player, 6.25 + Math.min(level, 5) * .12, dt);
+        eatAtPlayer(now);
+        const ghostSpeed = now < frightenedUntil ? 3.55 : 5.15 + Math.min(level, 5) * .13;
+        ghosts.forEach(ghost => {
+          if (!ghost.released && now >= ghost.releaseAt) ghost.released = true;
+          if (!ghost.released) return;
+          chooseGhostDirection(ghost, now);
+          move(ghost, ghost.eaten ? 8.2 : ghostSpeed, dt, true);
+          if (ghost.eaten && Math.hypot(ghost.x - ghost.home.x, ghost.y - ghost.home.y) < .55) {
+            ghost.eaten = false;
+            ghost.released = false;
+            ghost.releaseAt = now + 2;
+          }
+        });
+        if (fruit && now > fruit.until) fruit = null;
+        checkGhostCollisions(now);
+      }
+
+      function drawWall(x, y, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
+        ctx.strokeRect(x * TILE + 2, y * TILE + HUD + 2, TILE - 4, TILE - 4);
+      }
+
+      function drawMaze() {
+        const wallColor = flashTime > 0 && Math.floor(animationClock * 10) % 2 ? "#f7f7ff" : "#214cff";
+        for (let y = 0; y < ROWS; y++) {
+          for (let x = 0; x < COLS; x++) {
+            const tile = tileAt(x, y);
+            const px = x * TILE + TILE / 2;
+            const py = y * TILE + HUD + TILE / 2;
+            if (tile === "#") drawWall(x, y, wallColor);
+            if (tile === ".") {
+              ctx.fillStyle = "#ffd9a6";
+              ctx.beginPath();
+              ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            if (tile === "o") {
+              ctx.fillStyle = "#ffe6bb";
+              ctx.beginPath();
+              ctx.arc(px, py, 5.5 + Math.sin(animationClock * 8) * .8, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            if (tile === "-") {
+              ctx.fillStyle = "#ff9ab0";
+              ctx.fillRect(x * TILE + 1, y * TILE + HUD + TILE / 2 - 1, TILE - 2, 3);
+            }
+          }
+        }
+      }
+
+      function drawPlayer() {
+        const x = player.x * TILE;
+        const y = player.y * TILE + HUD;
+        const d = directions[player.direction];
+        const mouth = .16 + Math.abs(Math.sin(animationClock * 14)) * .26;
+        ctx.fillStyle = "#ffe531";
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, TILE * .42, d.angle + mouth, d.angle + Math.PI * 2 - mouth);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function drawGhost(ghost) {
+        const x = ghost.x * TILE;
+        const y = ghost.y * TILE + HUD;
+        const frightened = animationClock < frightenedUntil && !ghost.eaten;
+        if (ghost.eaten) {
+          ctx.fillStyle = "#e8f6ff";
+          ctx.beginPath();
+          ctx.arc(x - 5, y - 1, 3, 0, Math.PI * 2);
+          ctx.arc(x + 5, y - 1, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#193ebc";
+          const d = directions[ghost.direction];
+          ctx.beginPath();
+          ctx.arc(x - 5 + d.x * 1.5, y - 1 + d.y * 1.5, 1.5, 0, Math.PI * 2);
+          ctx.arc(x + 5 + d.x * 1.5, y - 1 + d.y * 1.5, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+          return;
+        }
+        ctx.fillStyle = frightened ? (frightenedUntil - animationClock < 2 && Math.floor(animationClock * 9) % 2 ? "#f7f7f7" : "#244bdb") : ghost.color;
+        ctx.beginPath();
+        ctx.arc(x, y - 2, TILE * .42, Math.PI, 0);
+        ctx.lineTo(x + TILE * .42, y + TILE * .36);
+        for (let tooth = 0; tooth < 3; tooth++) ctx.lineTo(x + TILE * (.42 - tooth * .28), y + TILE * (.22 + (tooth % 2) * .14));
+        ctx.lineTo(x - TILE * .42, y + TILE * .36);
+        ctx.closePath();
+        ctx.fill();
+        if (frightened) {
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x - 7, y + 6);
+          ctx.lineTo(x - 3, y + 3);
+          ctx.lineTo(x + 1, y + 6);
+          ctx.lineTo(x + 5, y + 3);
+          ctx.lineTo(x + 8, y + 6);
+          ctx.stroke();
+          return;
+        }
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(x - 5, y - 2, 5.5, 0, Math.PI * 2);
+        ctx.arc(x + 5, y - 2, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+        const d = directions[ghost.direction];
+        ctx.fillStyle = "#202a9d";
+        ctx.beginPath();
+        ctx.arc(x - 5 + d.x * 2, y - 2 + d.y * 2, 2.4, 0, Math.PI * 2);
+        ctx.arc(x + 5 + d.x * 2, y - 2 + d.y * 2, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function drawFruit() {
+        if (!fruit) return;
+        const x = fruit.x * TILE;
+        const y = fruit.y * TILE + HUD;
+        ctx.fillStyle = "#ff3c4b";
+        ctx.beginPath();
+        ctx.arc(x - 4, y + 2, 5, 0, Math.PI * 2);
+        ctx.arc(x + 4, y + 2, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#70dd62";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, y - 2);
+        ctx.lineTo(x + 4, y - 8);
+        ctx.stroke();
+      }
+
+      function drawHud() {
+        ctx.fillStyle = "#05050b";
+        ctx.fillRect(0, 0, canvas.width, HUD);
+        ctx.fillStyle = "#fff4d3";
+        ctx.font = "bold 15px monospace";
+        ctx.textAlign = "left";
+        ctx.fillText("SCORE", 16, 22);
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 22px monospace";
+        ctx.fillText(String(score).padStart(5, "0"), 16, 48);
+        ctx.fillStyle = "#fff4d3";
+        ctx.font = "bold 15px monospace";
+        ctx.textAlign = "right";
+        ctx.fillText(`LEVEL ${level}`, canvas.width - 16, 22);
+        ctx.font = "15px monospace";
+        ctx.fillText("LIVES", canvas.width - 16, 48);
+        ctx.textAlign = "left";
+        for (let life = 0; life < lives - 1; life++) {
+          const x = canvas.width - 106 + life * 24;
+          ctx.fillStyle = "#ffe531";
+          ctx.beginPath();
+          ctx.moveTo(x, 43);
+          ctx.arc(x, 43, 9, .35, Math.PI * 2 - .35);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
+
+      function drawMessage() {
+        let message = "";
+        if (state === "ready") message = "READY!";
+        if (state === "level") message = "LEVEL CLEAR!";
+        if (state === "paused") message = "PAUSED";
+        if (state === "gameover") message = "GAME OVER";
+        if (!message) return;
+        ctx.fillStyle = state === "gameover" ? "#ff5e72" : "#ffe531";
+        ctx.font = "bold 25px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(message, canvas.width / 2, HUD + TILE * 17);
+        if (state === "gameover") {
+          ctx.fillStyle = "#fff";
+          ctx.font = "13px monospace";
+          ctx.fillText("PRESS START TO PLAY AGAIN", canvas.width / 2, HUD + TILE * 19);
+        }
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawHud();
+        drawMaze();
+        drawFruit();
+        if (state !== "gameover") {
+          ghosts.forEach(drawGhost);
+          drawPlayer();
+        }
+        drawMessage();
+      }
+
+      function togglePause() {
+        if (state === "playing") state = "paused";
+        else if (state === "paused") state = "playing";
+      }
+
+      function frame(timestamp) {
+        const dt = Math.min((timestamp - lastFrame) / 1000 || 0, .04);
+        lastFrame = timestamp;
+        if (flashTime > 0) flashTime -= dt;
+        update(dt);
+        render();
+        requestAnimationFrame(frame);
+      }
+
+      window.addEventListener("keydown", event => {
+        if (event.key in directionForKey) {
+          event.preventDefault();
+          player.nextDirection = directionForKey[event.key];
+          if (state === "ready") startPlay();
+        }
+        if (event.code === "Space") {
+          event.preventDefault();
+          togglePause();
+        }
+        if (event.key === "Enter") startPlay();
+      });
+      startButton.addEventListener("click", () => {
+        if (state === "gameover") newGame();
+        startPlay();
+        canvas.focus();
+      });
+      pauseButton.addEventListener("click", togglePause);
+      canvas.addEventListener("pointerdown", event => {
+        const rect = canvas.getBoundingClientRect();
+        const dx = event.clientX - rect.left - rect.width / 2;
+        const dy = event.clientY - rect.top - rect.height / 2;
+        player.nextDirection = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up");
+        startPlay();
+      });
+
+      newGame();
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>

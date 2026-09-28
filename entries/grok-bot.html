@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pac-Man</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: #000;
+    color: #fff;
+    font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    user-select: none;
+  }
+  #hud {
+    width: min(560px, 96vw);
+    display: flex;
+    justify-content: space-between;
+    font: 700 16px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.04em;
+  }
+  canvas {
+    display: block;
+    width: min(560px, 96vw);
+    height: auto;
+    image-rendering: pixelated;
+    background: #000;
+    border-radius: 4px;
+  }
+  #msg {
+    min-height: 1.2em;
+    font: 600 14px/1.2 system-ui, sans-serif;
+    color: #ffeb3b;
+    text-align: center;
+  }
+  #hint { color: #888; font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+  <div id="hud">
+    <span id="score">SCORE 0</span>
+    <span id="lives">LIVES 3</span>
+  </div>
+  <canvas id="c" width="560" height="620"></canvas>
+  <div id="msg">Press any arrow / WASD to start</div>
+  <div id="hint">Arrow keys or WASD · Space to pause</div>
+<script>
+(() => {
+  "use strict";
+
+  // Maze: 0 empty, 1 wall, 2 pellet, 3 power, 4 gate
+  // 28 cols x 31 rows (classic proportions)
+  const COLS = 28, ROWS = 31, TILE = 20;
+  const map = [
+    "1111111111111111111111111111",
+    "1222222222111222222222222221",
+    "1211112112111211211121111121",
+    "1311112112111211211121111131",
+    "1211112112111211211121111121",
+    "1222222222222222222222222221",
+    "1211112111111211111211111121",
+    "1211112111111211111211111121",
+    "1222222111222111222112222221",
+    "1111112112111111121211111111",
+    "0000012112111111121210000000",
+    "0000012112000000021210000000",
+    "0000012112114411121210000000",
+    "1111112112100000121211111111",
+    "0000002000100000100020000000",
+    "1111112112100000121211111111",
+    "0000012112111111121210000000",
+    "0000012112000000021210000000",
+    "0000012112111111121210000000",
+    "1111112112111111121211111111",
+    "1222222222111222222222222221",
+    "1211112112111211211121111121",
+    "1211112112111211211121111121",
+    "1322112222222222222221122231",
+    "1112112111111211111211211111",
+    "1112112111111211111211211111",
+    "1222222111222111222112222221",
+    "1211111112111211211111111121",
+    "1211111112111211211111111121",
+    "1222222222222222222222222221",
+    "1111111111111111111111111111",
+  ].map(r => r.split("").map(Number));
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const scoreEl = document.getElementById("score");
+  const livesEl = document.getElementById("lives");
+  const msgEl = document.getElementById("msg");
+
+  const DIRS = {
+    left:  { x: -1, y:  0 },
+    right: { x:  1, y:  0 },
+    up:    { x:  0, y: -1 },
+    down:  { x:  0, y:  1 },
+  };
+  const OPP = { left: "right", right: "left", up: "down", down: "up" };
+
+  let score = 0, lives = 3, level = 1;
+  let state = "ready"; // ready | play | pause | die | win | over
+  let mouth = 0, frightTimer = 0, eatStreak = 0;
+  let dieFlash = 0, winFlash = 0;
+  let pelletsLeft = 0;
+  let last = 0, acc = 0;
+  const STEP = 1000 / 60;
+
+  const pacHome = { x: 13.5, y: 23 };
+  const ghostHome = [
+    { name: "blinky", color: "#ff3b3b", x: 13.5, y: 11, scatter: { x: 25, y: 1 } },
+    { name: "pinky",  color: "#ff9ad5", x: 13.5, y: 14, scatter: { x: 2,  y: 1 } },
+    { name: "inky",   color: "#00e5ff", x: 11.5, y: 14, scatter: { x: 25, y: 29 } },
+    { name: "clyde",  color: "#ffb347", x: 15.5, y: 14, scatter: { x: 2,  y: 29 } },
+  ];
+
+  let pac, ghosts;
+
+  function countPellets() {
+    let n = 0;
+    for (let y = 0; y < ROWS; y++)
+      for (let x = 0; x < COLS; x++)
+        if (map[y][x] === 2 || map[y][x] === 3) n++;
+    return n;
+  }
+
+  function resetLevel(full) {
+    if (full) {
+      // restore pellets
+      const fresh = [
+        "1111111111111111111111111111",
+        "1222222222111222222222222221",
+        "1211112112111211211121111121",
+        "1311112112111211211121111131",
+        "1211112112111211211121111121",
+        "1222222222222222222222222221",
+        "1211112111111211111211111121",
+        "1211112111111211111211111121",
+        "1222222111222111222112222221",
+        "1111112112111111121211111111",
+        "0000012112111111121210000000",
+        "0000012112000000021210000000",
+        "0000012112114411121210000000",
+        "1111112112100000121211111111",
+        "0000002000100000100020000000",
+        "1111112112100000121211111111",
+        "0000012112111111121210000000",
+        "0000012112000000021210000000",
+        "0000012112111111121210000000",
+        "1111112112111111121211111111",
+        "1222222222111222222222222221",
+        "1211112112111211211121111121",
+        "1211112112111211211121111121",
+        "1322112222222222222221122231",
+        "1112112111111211111211211111",
+        "1112112111111211111211211111",
+        "1222222111222111222112222221",
+        "1211111112111211211111111121",
+        "1211111112111211211111111121",
+        "1222222222222222222222222221",
+        "1111111111111111111111111111",
+      ];
+      for (let y = 0; y < ROWS; y++)
+        for (let x = 0; x < COLS; x++)
+          map[y][x] = Number(fresh[y][x]);
+    }
+    pelletsLeft = countPellets();
+    pac = {
+      x: pacHome.x, y: pacHome.y,
+      dir: "left", next: "left",
+      speed: 0.12,
+      dying: false,
+    };
+    ghosts = ghostHome.map((g, i) => ({
+      ...g,
+      dir: i === 0 ? "left" : "up",
+      mode: i === 0 ? "scatter" : "house",
+      fright: 0,
+      eaten: false,
+      speed: 0.105,
+      leaveAt: i * 90, // frames before leaving house
+      timer: 0,
+    }));
+    frightTimer = 0;
+    eatStreak = 0;
+    state = "ready";
+    msgEl.textContent = lives > 0 ? "Press any arrow / WASD to start" : "GAME OVER — press R";
+    updateHud();
+  }
+
+  function updateHud() {
+    scoreEl.textContent = "SCORE " + score;
+    livesEl.textContent = "LIVES " + lives;
+  }
+
+  function tileAt(tx, ty) {
+    if (ty < 0 || ty >= ROWS) return 1;
+    // tunnel wrap on row 14
+    if (tx < 0 || tx >= COLS) {
+      if (ty === 14) return 0;
+      return 1;
+    }
+    return map[ty][tx];
+  }
+
+  function isWall(tx, ty, allowGate) {
+    const t = tileAt(tx, ty);
+    if (t === 1) return true;
+    if (t === 4 && !allowGate) return true;
+    return false;
+  }
+
+  function canEnter(nx, ny, allowGate) {
+    // entity center; check tile of intended cell
+    const tx = Math.floor(nx);
+    const ty = Math.floor(ny);
+    // also require alignment: only enter if nearly centered on the other axis
+    return !isWall(tx, ty, allowGate);
+  }
+
+  function aligned(v) {
+    return Math.abs(v - Math.round(v)) < 0.08;
+  }
+
+  function snap(v) {
+    return Math.round(v * 1000) / 1000;
+  }
+
+  function tryTurn(ent, want, allowGate) {
+    if (!want || want === ent.dir) return;
+    const d = DIRS[want];
+    // only turn when near tile center
+    const cx = Math.round(ent.x);
+    const cy = Math.round(ent.y);
+    if (Math.abs(ent.x - cx) > 0.15 || Math.abs(ent.y - cy) > 0.15) return;
+    const nx = cx + d.x * 0.5;
+    const ny = cy + d.y * 0.5;
+    const tx = Math.floor(cx + d.x);
+    const ty = Math.floor(cy + d.y);
+    if (!isWall(tx, ty, allowGate)) {
+      ent.x = cx;
+      ent.y = cy;
+      ent.dir = want;
+    }
+  }
+
+  function moveEntity(ent, speed, allowGate) {
+    tryTurn(ent, ent.next, allowGate);
+    const d = DIRS[ent.dir];
+    let nx = ent.x + d.x * speed;
+    let ny = ent.y + d.y * speed;
+
+    // tunnel wrap
+    if (ny >= 13.5 && ny <= 14.5) {
+      if (nx < -0.5) nx = COLS - 0.5;
+      if (nx > COLS - 0.5) nx = -0.5;
+    }
+
+    // block into wall: stop at center of current tile
+    const lookX = Math.floor(ent.x + d.x * 0.55);
+    const lookY = Math.floor(ent.y + d.y * 0.55);
+    if (isWall(lookX, lookY, allowGate)) {
+      if (d.x) ent.x = Math.round(ent.x);
+      if (d.y) ent.y = Math.round(ent.y);
+      return false;
+    }
+    ent.x = nx;
+    ent.y = ny;
+    return true;
+  }
+
+  function dist2(ax, ay, bx, by) {
+    const dx = ax - bx, dy = ay - by;
+    return dx * dx + dy * dy;
+  }
+
+  function ghostTarget(g) {
+    if (g.eaten) return { x: 13.5, y: 14 };
+    if (g.fright > 0) {
+      // random-ish flee: pick scatter opposite of pac
+      return {
+        x: COLS - 1 - pac.x,
+        y: ROWS - 1 - pac.y,
+      };
+    }
+    if (g.mode === "scatter") return g.scatter;
+    // chase
+    if (g.name === "blinky") return { x: pac.x, y: pac.y };
+    if (g.name === "pinky") {
+      const d = DIRS[pac.dir];
+      return { x: pac.x + d.x * 4, y: pac.y + d.y * 4 };
+    }
+    if (g.name === "inky") {
+      const d = DIRS[pac.dir];
+      const px = pac.x + d.x * 2;
+      const py = pac.y + d.y * 2;
+      const blinky = ghosts[0];
+      return { x: px * 2 - blinky.x, y: py * 2 - blinky.y };
+    }
+    // clyde: chase unless close
+    if (dist2(g.x, g.y, pac.x, pac.y) < 64) return g.scatter;
+    return { x: pac.x, y: pac.y };
+  }
+
+  function chooseGhostDir(g) {
+    if (g.mode === "house" && !g.eaten) return;
+    const target = ghostTarget(g);
+    const cx = Math.round(g.x);
+    const cy = Math.round(g.y);
+    if (Math.abs(g.x - cx) > 0.12 || Math.abs(g.y - cy) > 0.12) return;
+
+    const options = ["up", "left", "down", "right"].filter(dir => {
+      if (dir === OPP[g.dir] && !g.eaten) return false;
+      const d = DIRS[dir];
+      const tx = cx + d.x;
+      const ty = cy + d.y;
+      // ghosts can't go up through certain tiles near ghost house exits except when eaten
+      const allowGate = g.eaten || g.mode === "house";
+      if (isWall(tx, ty, allowGate)) return false;
+      // classic: no upward turn into tunnels beside house (simplify: skip)
+      return true;
+    });
+    if (!options.length) {
+      g.dir = OPP[g.dir];
+      return;
+    }
+    let best = options[0], bestD = Infinity;
+    for (const dir of options) {
+      const d = DIRS[dir];
+      const nd = dist2(cx + d.x, cy + d.y, target.x, target.y);
+      if (nd < bestD) { bestD = nd; best = dir; }
+    }
+    g.dir = best;
+    g.x = cx;
+    g.y = cy;
+  }
+
+  function eatTile() {
+    const tx = Math.round(pac.x);
+    const ty = Math.round(pac.y);
+    if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return;
+    const t = map[ty][tx];
+    if (t === 2) {
+      map[ty][tx] = 0;
+      score += 10;
+      pelletsLeft--;
+      updateHud();
+    } else if (t === 3) {
+      map[ty][tx] = 0;
+      score += 50;
+      pelletsLeft--;
+      frightTimer = 480; // ~8s
+      eatStreak = 0;
+      for (const g of ghosts) {
+        if (!g.eaten && g.mode !== "house") {
+          g.fright = frightTimer;
+          g.dir = OPP[g.dir];
+        }
+      }
+      updateHud();
+    }
+    if (pelletsLeft <= 0) {
+      state = "win";
+      winFlash = 180;
+      msgEl.textContent = "YOU WIN — press N for next level";
+    }
+  }
+
+  function collideGhosts() {
+    for (const g of ghosts) {
+      if (dist2(pac.x, pac.y, g.x, g.y) > 0.55) continue;
+      if (g.eaten) continue;
+      if (g.fright > 0) {
+        g.eaten = true;
+        g.fright = 0;
+        g.mode = "scatter";
+        eatStreak++;
+        const pts = 200 * Math.pow(2, eatStreak - 1);
+        score += pts;
+        updateHud();
+      } else {
+        state = "die";
+        dieFlash = 90;
+        msgEl.textContent = "";
+      }
+    }
+  }
+
+  function updateGhosts() {
+    for (const g of ghosts) {
+      g.timer++;
+      if (g.mode === "house") {
+        // bob then leave
+        g.y = 14 + Math.sin(g.timer / 10) * 0.3;
+        if (g.timer > g.leaveAt) {
+          g.mode = "scatter";
+          g.x = 13.5;
+          g.y = 11;
+          g.dir = "left";
+        }
+        continue;
+      }
+      if (g.eaten) {
+        // return to house
+        chooseGhostDir(g);
+        moveEntity(g, 0.2, true);
+        if (dist2(g.x, g.y, 13.5, 14) < 0.4) {
+          g.eaten = false;
+          g.mode = "house";
+          g.timer = 0;
+          g.leaveAt = 60;
+          g.x = 13.5;
+          g.y = 14;
+        }
+        continue;
+      }
+      if (g.fright > 0) g.fright--;
+      // mode flip every ~7s scatter / 20s chase simplified
+      if (frightTimer <= 0) {
+        const cycle = g.timer % 900;
+        g.mode = cycle < 420 ? "scatter" : "chase";
+      }
+      chooseGhostDir(g);
+      const spd = g.fright > 0 ? 0.06 : g.speed + Math.min(0.02, (level - 1) * 0.005);
+      moveEntity(g, spd, false);
+    }
+  }
+
+  function tick() {
+    if (state === "play") {
+      mouth += 0.25;
+      if (frightTimer > 0) frightTimer--;
+      moveEntity(pac, pac.speed + Math.min(0.03, (level - 1) * 0.004), false);
+      eatTile();
+      updateGhosts();
+      collideGhosts();
+    } else if (state === "die") {
+      dieFlash--;
+      mouth += 0.15;
+      if (dieFlash <= 0) {
+        lives--;
+        updateHud();
+        if (lives <= 0) {
+          state = "over";
+          msgEl.textContent = "GAME OVER — press R to restart";
+        } else {
+          resetLevel(false);
+        }
+      }
+    } else if (state === "win") {
+      winFlash--;
+    }
+  }
+
+  function drawMaze() {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const t = map[y][x];
+        const px = x * TILE, py = y * TILE;
+        if (t === 1) {
+          ctx.fillStyle = "#1a3cff";
+          ctx.fillRect(px + 1, py + 1, TILE - 2, TILE - 2);
+          ctx.strokeStyle = "#4d7cff";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(px + 2.5, py + 2.5, TILE - 5, TILE - 5);
+        } else if (t === 4) {
+          ctx.fillStyle = "#ff9ad5";
+          ctx.fillRect(px + 2, py + TILE / 2 - 1, TILE - 4, 2);
+        } else if (t === 2) {
+          ctx.fillStyle = "#ffcc99";
+          ctx.beginPath();
+          ctx.arc(px + TILE / 2, py + TILE / 2, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (t === 3) {
+          ctx.fillStyle = "#ffcc99";
+          ctx.beginPath();
+          ctx.arc(px + TILE / 2, py + TILE / 2, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+  }
+
+  function drawPac() {
+    const px = pac.x * TILE + TILE / 2;
+    const py = pac.y * TILE + TILE / 2;
+    const r = TILE * 0.42;
+    let start = 0, end = Math.PI * 2;
+    const chomp = state === "die"
+      ? Math.min(1, (90 - dieFlash) / 70)
+      : (Math.sin(mouth) * 0.5 + 0.5) * 0.55;
+    const ang = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 }[pac.dir] || 0;
+    if (state === "die") {
+      start = ang + chomp * Math.PI;
+      end = ang + Math.PI * 2 - chomp * Math.PI;
+    } else {
+      start = ang + chomp;
+      end = ang + Math.PI * 2 - chomp;
+    }
+    ctx.fillStyle = "#ffe600";
+    ctx.beginPath();
+    ctx.moveTo(px, py);
+    ctx.arc(px, py, r, start, end, false);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawGhost(g) {
+    const px = g.x * TILE + TILE / 2;
+    const py = g.y * TILE + TILE / 2;
+    const r = TILE * 0.42;
+    if (g.eaten) {
+      // eyes only
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(px - 4, py - 2, 3.5, 0, Math.PI * 2);
+      ctx.arc(px + 4, py - 2, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#2233ff";
+      const ed = DIRS[g.dir];
+      ctx.beginPath();
+      ctx.arc(px - 4 + ed.x * 1.5, py - 2 + ed.y * 1.5, 1.6, 0, Math.PI * 2);
+      ctx.arc(px + 4 + ed.x * 1.5, py - 2 + ed.y * 1.5, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+      return;
+    }
+    let col = g.color;
+    if (g.fright > 0) {
+      col = g.fright < 120 && Math.floor(g.fright / 8) % 2 === 0 ? "#fff" : "#3b5bff";
+    }
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(px, py - 2, r, Math.PI, 0);
+    ctx.lineTo(px + r, py + r);
+    for (let i = 0; i < 4; i++) {
+      const wx = px + r - (i + 0.5) * (r / 2);
+      ctx.quadraticCurveTo(wx + r / 4, py + r - 5, wx, py + r);
+    }
+    ctx.closePath();
+    ctx.fill();
+    // eyes
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(px - 4, py - 3, 3.2, 0, Math.PI * 2);
+    ctx.arc(px + 4, py - 3, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = g.fright > 0 ? "#fff" : "#2233ff";
+    const ed = DIRS[g.dir];
+    ctx.beginPath();
+    ctx.arc(px - 4 + ed.x * 1.2, py - 3 + ed.y * 1.2, 1.5, 0, Math.PI * 2);
+    ctx.arc(px + 4 + ed.x * 1.2, py - 3 + ed.y * 1.2, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function draw() {
+    drawMaze();
+    if (state !== "die" || dieFlash > 20) {
+      for (const g of ghosts) drawGhost(g);
+    }
+    if (state !== "over") drawPac();
+    if (state === "pause") {
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 28px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+    }
+  }
+
+  function keyToDir(e) {
+    const k = e.key.toLowerCase();
+    if (k === "arrowleft" || k === "a") return "left";
+    if (k === "arrowright" || k === "d") return "right";
+    if (k === "arrowup" || k === "w") return "up";
+    if (k === "arrowdown" || k === "s") return "down";
+    return null;
+  }
+
+  window.addEventListener("keydown", (e) => {
+    const dir = keyToDir(e);
+    if (e.key === " " || e.code === "Space") {
+      e.preventDefault();
+      if (state === "play") { state = "pause"; msgEl.textContent = "Paused"; }
+      else if (state === "pause") { state = "play"; msgEl.textContent = ""; }
+      return;
+    }
+    if (e.key.toLowerCase() === "r") {
+      score = 0; lives = 3; level = 1;
+      resetLevel(true);
+      return;
+    }
+    if (e.key.toLowerCase() === "n" && state === "win") {
+      level++;
+      resetLevel(true);
+      state = "ready";
+      msgEl.textContent = "Level " + level + " — press a direction";
+      return;
+    }
+    if (!dir) return;
+    e.preventDefault();
+    if (state === "ready" || state === "pause") {
+      state = "play";
+      msgEl.textContent = "";
+    }
+    if (state === "play") {
+      pac.next = dir;
+      // allow immediate reverse
+      if (dir === OPP[pac.dir]) {
+        pac.dir = dir;
+      }
+    }
+  });
+
+  // touch / on-screen not required; swipe optional
+  let touchStart = null;
+  canvas.addEventListener("touchstart", (e) => {
+    const t = e.changedTouches[0];
+    touchStart = { x: t.clientX, y: t.clientY };
+  }, { passive: true });
+  canvas.addEventListener("touchend", (e) => {
+    if (!touchStart) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStart.x;
+    const dy = t.clientY - touchStart.y;
+    touchStart = null;
+    let dir = null;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 20) dir = dx > 0 ? "right" : "left";
+    else if (Math.abs(dy) > 20) dir = dy > 0 ? "down" : "up";
+    if (!dir) return;
+    if (state === "ready" || state === "pause") { state = "play"; msgEl.textContent = ""; }
+    if (state === "play") {
+      pac.next = dir;
+      if (dir === OPP[pac.dir]) pac.dir = dir;
+    }
+  }, { passive: true });
+
+  function loop(ts) {
+    if (!last) last = ts;
+    acc += ts - last;
+    last = ts;
+    while (acc >= STEP) {
+      tick();
+      acc -= STEP;
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  resetLevel(true);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
