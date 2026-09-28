@@ -104,6 +104,7 @@ async function init() {
   const response = await fetch("./entries/meta.json");
   if (!response.ok) throw new Error(`meta.json: HTTP ${response.status}`);
   const entries = await response.json();
+  assertOneCardPerModel(entries);
 
   const harnesses = [...new Set(entries.map((entry) => entry.harness))];
   const colors = new Map(harnesses.map((harness, i) => [harness, HARNESS_COLORS[i % HARNESS_COLORS.length]]));
@@ -119,6 +120,7 @@ async function init() {
 }
 
 function buildCard(entry, index, color, asked) {
+  const name = displayName(entry);
   const el = h("article", "cab");
   el.style.setProperty("--c", color);
   el.style.setProperty("--i", index);
@@ -127,7 +129,7 @@ function buildCard(entry, index, color, asked) {
   screen.inert = true;
   screen.setAttribute("aria-hidden", "true");
   screen.dataset.src = entryUrl(entry);
-  screen.dataset.title = `${entry.display_model} preview`;
+  screen.dataset.title = `${name} preview`;
   screen.append(h("span", "cab-coin", "INSERT COIN"), h("span", "cab-start", "▶ PRESS START"));
 
   const top = h("div", "cab-top");
@@ -135,7 +137,7 @@ function buildCard(entry, index, color, asked) {
   harness.append(ghostIcon(), document.createTextNode(entry.harness));
   top.append(harness, h("span", "cab-no", `#${String(index + 1).padStart(2, "0")}`));
 
-  const link = h("a", "cab-link", entry.display_model);
+  const link = h("a", "cab-link", name);
   link.href = entryUrl(entry);
   link.target = "_blank";
   link.rel = "noopener";
@@ -172,7 +174,7 @@ function buildCard(entry, index, color, asked) {
   }, { once: true });
   previewObserver.observe(screen);
 
-  const haystack = [entry.display_model, entry.requested, entry.actual, entry.harness, entry.slug, entry.run, asked]
+  const haystack = [name, entry.display_model, entry.requested, entry.actual, entry.harness, entry.slug, entry.run, asked]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -181,13 +183,26 @@ function buildCard(entry, index, color, asked) {
     sizeTag.hidden = false;
     sizeValue.classList.remove("is-empty");
   };
-  return { el, entry, model: modelName(entry), haystack, setSize };
+  return { el, entry, model: name, haystack, setSize };
 }
 
-function modelName(entry) {
-  const name = shortName(entry.display_model);
-  const effort = `-${entry.effort}`;
-  return entry.effort && name.endsWith(effort) ? name.slice(0, -effort.length) : name;
+function displayName(entry) {
+  let name = shortName(entry.display_model).replace(/-(?:19|20)\d{6}$/, "").replace(/-build$/, "");
+  name = name.replace(/-(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])$/, "");
+  const effort = entry.effort ? `-${entry.effort}` : "";
+  if (effort && name.endsWith(effort)) name = name.slice(0, -effort.length);
+  if (!name) throw new Error(`Empty display name for ${entry.slug}`);
+  return name;
+}
+
+function assertOneCardPerModel(entries) {
+  const seen = new Map();
+  for (const entry of entries) {
+    const name = displayName(entry);
+    const prior = seen.get(name);
+    if (prior) throw new Error(`Duplicate model ${name}: ${prior} and ${entry.slug}`);
+    seen.set(name, entry.slug);
+  }
 }
 
 function shortName(name) {
