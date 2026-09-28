@@ -108,23 +108,6 @@
     "cache_write_tokens": 25458
   },
   {
-    "slug": "claude-opus-5-5-r2",
-    "harness": "Claude Code",
-    "run": "claude-opus-5-5-r2",
-    "requested": "claude-opus-4-6",
-    "actual": "claude-opus-5-5",
-    "effort": "high",
-    "duration_ms": 833717,
-    "output_tokens": 89158,
-    "thinking_tokens": 60207,
-    "tokens_total": null,
-    "cost_usd": 2.8390804000000003,
-    "note": "requested was claude-opus-4-6 but model that ran was claude-opus-5-5",
-    "display_model": "claude-opus-5-5",
-    "phase": 1,
-    "input_tokens": 24
-  },
-  {
     "slug": "claude-opus-4-8",
     "harness": "Claude Code",
     "run": "claude-opus-4-8-r2",
@@ -502,23 +485,6 @@
     "display_model": "meta/muse-glimmer-30b",
     "phase": 5,
     "input_tokens": 68873
-  },
-  {
-    "slug": "muse-spark-1.3-openrouter",
-    "harness": "OpenRouter / Claude Code",
-    "run": "muse-spark-1.3",
-    "requested": "meta/muse-spark-1.3",
-    "actual": "meta/muse-spark-1.3",
-    "effort": "high",
-    "duration_ms": 38433,
-    "output_tokens": 6059,
-    "thinking_tokens": 59,
-    "tokens_total": null,
-    "cost_usd": 0.325158,
-    "note": "OpenRouter Claude Code cell. Separate from the Cursor Cloud muse-spark-1.3 card.",
-    "display_model": "meta/muse-spark-1.3",
-    "phase": 5,
-    "input_tokens": 34714
   },
   {
     "slug": "claude-sonnet-5-5",
