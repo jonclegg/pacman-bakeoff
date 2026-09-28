@@ -242,7 +242,7 @@
     "thinking_tokens": null,
     "tokens_total": null,
     "cost_usd": null,
-    "note": "Cursor dashboard get-filtered-usage-events on the Ultra account (2026-09-28) has no events for bc-66adde64-5896-5f01-a03b-fc52c7c39972. All 2137 cloud-agent events were scanned. The only nearby gpt-5.6-sol-high event is on a different agent, bc-1ff0c20d, and was not copied here. Tokens and cost stay blank.",
+    "note": "Cursor dashboard get-filtered-usage-events on the Ultra account (2026-09-28) has no events for bc-66adde64-5896-5f01-a03b-fc52c7c39972. Rescan the same day: 2146 cloud-agent events, plus the 31 events in the cell window 1790571700000-1790572300000. The cell transcript has 66 assistant turns and no token counts, so there is nothing to price from a rate card. The only nearby gpt-5.6-sol-high row is on orchestrator bc-1ff0c20d-b639-570c-b438-972e3dd97079 (conversationId is that orchestrator, one event, chargedCents 97.15239715576172, at spawn). That orchestrator also has a gpt-5.6-terra-high row for a parallel cell that is not the gallery terra card, so the row was not copied. cost_usd stays null.",
     "display_model": "gpt-5.6-sol-high",
     "phase": 1
   },
@@ -464,7 +464,7 @@
     "thinking_tokens": null,
     "tokens_total": null,
     "cost_usd": null,
-    "note": "Cursor dashboard get-filtered-usage-events on the Ultra account (2026-09-28) has no events for bc-13ea2aed-92ad-5849-847b-c7d940e4f2e6. All 2137 cloud-agent events were scanned. The only nearby muse-spark-1.3-high event is on a different agent, bc-1ff0c20d, and was not copied here. Tokens and cost stay blank.",
+    "note": "Cursor dashboard get-filtered-usage-events on the Ultra account (2026-09-28) has no events for bc-13ea2aed-92ad-5849-847b-c7d940e4f2e6. Rescan the same day: 2146 cloud-agent events, plus the 31 events in the cell window 1790571700000-1790572300000. The cell transcript has 13 assistant turns and no token counts, so there is nothing to price from a rate card. The only nearby muse-spark-1.3-high row is on orchestrator bc-1ff0c20d-b639-570c-b438-972e3dd97079 (conversationId is that orchestrator, one event, chargedCents 13.34620475769043, at spawn). That orchestrator also has a gpt-5.6-terra-high row for a parallel cell that is not the gallery terra card, so the row was not copied. cost_usd stays null.",
     "display_model": "muse-spark-1.3-high",
     "phase": 5,
     "input_tokens": null
