@@ -24,14 +24,33 @@ const COMPANIES = {
   qwen: "Alibaba",
 };
 const byName = (a, b) => a.localeCompare(b, "en", { numeric: true, sensitivity: "base" });
+const SCORE_CHECKS = [
+  ["controls", "Controls", 20],
+  ["ghosts", "Ghosts", 25],
+  ["stuck", "Pac-Man stuck", 20],
+  ["maze", "Maze", 20],
+  ["sound", "Sound", 15],
+];
+const SCORE_MARKS = {
+  ok: ["✓", "OK"],
+  minor: ["!", "Minor issue"],
+  major: ["✗", "Major issue"],
+  na: ["—", "Not testable"],
+};
+const SCORE_BY = "Scored by Opus 5.5 from reviewing the live games on this site (2026-09-28), not by the models themselves.";
 
-const state = { query: "", models: new Set(), sort: "default", descending: false };
+const state = { query: "", models: new Set(), sort: "score", descending: true };
 const SORT_VALUE = {
+  score: (entry) => entry.score,
   cost: (entry) => entry.cost_usd,
   time: (entry) => entry.duration_ms,
   tokens: (entry) => stripToken(entry).value,
 };
 const SORT_DIR = {
+  score: [
+    ["↑ Low", "Lowest score first"],
+    ["↓ High", "Highest score first"],
+  ],
   cost: [
     ["↑ Cheap", "Lowest cost first"],
     ["↓ Pricey", "Highest cost first"],
@@ -100,6 +119,9 @@ async function init() {
   ui.sortDir = document.querySelector(".sort-dir");
   ui.sortKeyButtons = [...ui.sortKeys.querySelectorAll("[data-sort]")];
   ui.sortDirButtons = [...ui.sortDir.querySelectorAll("[data-order]")];
+  const rubric = SCORE_CHECKS.map(([, label, points]) => `${label} ${points}`).join(" · ");
+  document.querySelector(".score-credit").textContent =
+    `${SCORE_BY} Method: a 90 s automated play test plus a source and maze audit of each game. 100 points: ${rubric}. Open a card's details for why it scored that way.`;
 
   const response = await fetch("./entries/meta.json");
   if (!response.ok) throw new Error(`meta.json: HTTP ${response.status}`);
@@ -135,7 +157,10 @@ function buildCard(entry, index, color, asked) {
   const top = h("div", "cab-top");
   const harness = h("span", "cab-harness");
   harness.append(ghostIcon(), document.createTextNode(entry.harness));
-  top.append(harness, h("span", "cab-no", `#${String(index + 1).padStart(2, "0")}`));
+  const score = h("span", "cab-score");
+  score.setAttribute("aria-label", `Score ${entry.score} of 100`);
+  score.append(h("b", "", String(entry.score)), document.createTextNode("/100"));
+  top.append(harness, score);
 
   const link = h("a", "cab-link", name);
   link.href = entryUrl(entry);
@@ -158,7 +183,9 @@ function buildCard(entry, index, color, asked) {
   tags.append(sizeTag);
 
   const details = h("details", "cab-details");
-  details.append(h("summary", "cab-details-toggle", "RUN DATA"), statList("cab-detail-list", detailRows(entry)));
+  const panel = h("div", "cab-detail-panel");
+  panel.append(scoreWhy(entry), h("p", "cab-panel-head", "RUN DATA"), statList("cab-detail-list", detailRows(entry)));
+  details.append(h("summary", "cab-details-toggle", "SCORE + RUN DATA"), panel);
   const sizeValue = details.querySelector('[data-field="size"]');
 
   body.append(tags, statList("cab-stats", stripRows(entry)), details);
@@ -275,6 +302,27 @@ function detailRows(entry) {
     ["COST", show(entry.cost_usd, formatCost)],
     ["HTML SIZE", null, "size"],
   ];
+}
+
+function scoreWhy(entry) {
+  const section = h("section", "cab-why");
+  const head = h("p", "cab-panel-head", `SCORE ${entry.score}/100`);
+  if (entry.score_summary) head.append(h("span", "cab-why-summary", entry.score_summary));
+  const list = h("ul", "cab-checks");
+  for (const [key, label, points] of SCORE_CHECKS) {
+    const { mark, note } = entry.score_notes[key];
+    const [glyph, fallback] = SCORE_MARKS[mark];
+    const item = h("li", `cab-check is-${mark}`);
+    const name = h("span", "cab-check-name", label);
+    name.append(h("span", "cab-check-pts", ` /${points}`));
+    const markEl = h("span", "cab-check-mark", glyph);
+    markEl.setAttribute("role", "img");
+    markEl.setAttribute("aria-label", fallback);
+    item.append(markEl, name, h("span", "cab-check-note", note || fallback));
+    list.append(item);
+  }
+  section.append(head, list, h("p", "cab-why-credit", SCORE_BY));
+  return section;
 }
 
 function statList(className, rows) {
@@ -431,7 +479,6 @@ function syncModels() {
 }
 
 function sortedCards() {
-  if (state.sort === "default") return cards;
   const valueOf = SORT_VALUE[state.sort];
   const direction = state.descending ? -1 : 1;
   return cards
@@ -453,10 +500,6 @@ function compareMetric(a, b, direction) {
 
 function syncSort() {
   for (const button of ui.sortKeyButtons) markRadio(button, button.dataset.sort === state.sort);
-  if (state.sort === "default") {
-    ui.sortDir.hidden = true;
-    return;
-  }
   const labels = SORT_DIR[state.sort];
   for (const button of ui.sortDirButtons) {
     const descending = button.dataset.order === "desc";
