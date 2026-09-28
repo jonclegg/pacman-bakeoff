@@ -142,7 +142,7 @@ function buildCard(entry, index, color) {
   previewObserver.observe(screen);
   scaleObserver.observe(screen);
 
-  const haystack = [entry.display_model, entry.requested, entry.actual, entry.harness, entry.slug, entry.run, entry.note]
+  const haystack = [entry.display_model, entry.requested, entry.actual, entry.harness, entry.slug, entry.run]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
