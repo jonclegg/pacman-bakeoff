@@ -78,18 +78,20 @@
         <div class="sort">
           <span class="sort-label" id="sort-label">Sort</span>
           <div class="sort-keys" role="radiogroup" aria-labelledby="sort-label">
-            <button type="button" class="chip" role="radio" data-sort="default" aria-checked="true" tabindex="0">Default</button>
+            <button type="button" class="chip" role="radio" data-sort="score" aria-checked="true" tabindex="0">Score</button>
             <button type="button" class="chip" role="radio" data-sort="cost" aria-checked="false" tabindex="-1">Cost</button>
             <button type="button" class="chip" role="radio" data-sort="time" aria-checked="false" tabindex="-1">Time</button>
             <button type="button" class="chip" role="radio" data-sort="tokens" aria-checked="false" tabindex="-1">Tokens</button>
           </div>
-          <div class="sort-dir" role="radiogroup" aria-label="Sort direction" hidden>
-            <button type="button" class="chip" role="radio" data-order="asc" aria-checked="true" tabindex="0">↑ Cheap</button>
-            <button type="button" class="chip" role="radio" data-order="desc" aria-checked="false" tabindex="-1">↓ Pricey</button>
+          <div class="sort-dir" role="radiogroup" aria-label="Sort direction">
+            <button type="button" class="chip" role="radio" data-order="asc" aria-checked="false" tabindex="-1">↑ Low</button>
+            <button type="button" class="chip" role="radio" data-order="desc" aria-checked="true" tabindex="0">↓ High</button>
           </div>
         </div>
         <p class="count" aria-live="polite"><span data-count>--</span><span class="count-word"> SHOWN</span></p>
       </div>
+
+      <p class="score-credit"></p>
 
       <div class="grid"></div>
 

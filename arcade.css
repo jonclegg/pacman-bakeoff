@@ -598,6 +598,15 @@ a {
   color: var(--pac);
 }
 
+.score-credit {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 16px var(--pad) 0;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
 /* Cabinets */
 
 .grid {
@@ -743,8 +752,15 @@ a {
   color: var(--c);
 }
 
-.cab-no {
+.cab-score {
   color: #5e5d84;
+  white-space: nowrap;
+}
+
+.cab-score b {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--pac);
 }
 
 .cab-model {
@@ -861,20 +877,98 @@ a {
   rotate: 90deg;
 }
 
-.cab-detail-list {
+.cab-detail-panel {
   position: absolute;
   top: 12px;
   left: 12px;
   right: 12px;
   bottom: 46px;
   z-index: 3;
-  margin: 0;
-  padding: 8px 12px;
+  padding: 10px 12px 8px;
   overflow-y: auto;
   background: rgba(0, 0, 0, 0.94);
   border: 1px dashed color-mix(in srgb, var(--c) 55%, transparent);
   border-radius: 10px;
   animation: detail-in 0.18s ease-out;
+}
+
+.cab-panel-head {
+  margin: 0 0 6px;
+  font: 8px/1.6 var(--pixel);
+  color: var(--c);
+}
+
+.cab-why {
+  margin-bottom: 14px;
+}
+
+.cab-why-summary {
+  margin-left: 8px;
+  font: 0.75rem var(--mono);
+  color: var(--blinky);
+}
+
+.cab-checks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cab-check {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 2px 8px;
+  padding: 5px 0;
+  border-bottom: 1px dotted #22223f;
+}
+
+.cab-check-mark {
+  grid-row: span 2;
+  font-weight: 700;
+  text-align: center;
+}
+
+.cab-check.is-ok .cab-check-mark {
+  color: var(--mint);
+}
+
+.cab-check.is-minor .cab-check-mark {
+  color: var(--clyde);
+}
+
+.cab-check.is-major .cab-check-mark {
+  color: var(--blinky);
+}
+
+.cab-check.is-na .cab-check-mark {
+  color: var(--muted);
+}
+
+.cab-check-name {
+  font: 7px/1.6 var(--pixel);
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.cab-check-pts {
+  color: #4a4970;
+}
+
+.cab-check-note {
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.cab-why-credit {
+  margin: 8px 0 0;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.cab-detail-list {
+  margin: 0;
 }
 
 .cab-detail-list .cab-stat {
