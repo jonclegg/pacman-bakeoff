@@ -296,7 +296,7 @@ a {
   display: grid;
   grid-template-columns: minmax(240px, 340px) 1fr auto;
   grid-template-areas:
-    "search chips count"
+    "search models count"
     "sort sort sort";
   align-items: center;
   gap: 14px 20px;
@@ -363,11 +363,194 @@ a {
   visibility: hidden;
 }
 
-.chips {
-  grid-area: chips;
+.models {
+  grid-area: models;
+  position: relative;
+  justify-self: start;
+  max-width: 100%;
+}
+
+.models-toggle {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  max-width: 100%;
+  padding: 11px 16px 11px 18px;
+  color: var(--text);
+  cursor: pointer;
+  background: var(--bg);
+  border: 2px solid var(--maze);
+  border-radius: 999px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.models-toggle:hover,
+.models-toggle[aria-expanded="true"],
+.models-toggle.is-active {
+  border-color: var(--pac);
+  box-shadow: 0 0 18px rgba(255, 214, 10, 0.35);
+}
+
+.models-label {
+  font: 9px var(--pixel);
+  color: var(--pac);
+}
+
+.models-value {
+  min-width: 0;
+  overflow: hidden;
+  font: 0.95rem var(--mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.models-caret {
+  color: var(--muted);
+  transition: rotate 0.15s;
+}
+
+.models-toggle[aria-expanded="true"] .models-caret {
+  rotate: 180deg;
+}
+
+.models-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(340px, calc(100vw - 2 * var(--pad)));
+  max-height: min(70vh, 520px);
+  background: var(--bg);
+  border: 2px solid var(--maze);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 0 0 3px var(--bg),
+    inset 0 0 0 4px var(--maze-dim),
+    0 0 26px rgba(43, 43, 255, 0.4);
+  animation: detail-in 0.18s ease-out;
+  transform-origin: top;
+}
+
+.models-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px 10px;
+  border-bottom: 1px dotted #22223f;
+}
+
+.models-hint {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.models-clear {
+  padding: 6px 10px;
+  font: 8px var(--pixel);
+  color: var(--pac);
+  text-transform: uppercase;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--pac) 50%, transparent);
+  border-radius: 999px;
+}
+
+.models-clear:hover {
+  border-color: var(--pac);
+}
+
+.models-clear:disabled {
+  color: #4a4970;
+  cursor: default;
+  border-color: #2a2a4d;
+}
+
+.models-list {
+  overflow-y: auto;
+  padding: 4px 8px 10px;
+  overscroll-behavior: contain;
+}
+
+.models-group {
+  min-width: 0;
+  margin: 0;
+  padding: 8px 0 4px;
+  border: 0;
+}
+
+.models-group + .models-group {
+  border-top: 1px dotted #22223f;
+}
+
+.models-company {
+  padding: 4px 8px 6px;
+  font: 8px var(--pixel);
+  color: var(--maze-bright);
+  text-transform: uppercase;
+}
+
+.models-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.models-option:hover {
+  background: rgba(43, 43, 255, 0.16);
+}
+
+.models-option input {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  appearance: none;
+  border: 2px solid var(--maze);
+  border-radius: 4px;
+}
+
+.models-option input::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pac);
+  transform: scale(0);
+  transition: transform 0.12s;
+}
+
+.models-option input:checked {
+  border-color: var(--pac);
+  box-shadow: 0 0 10px rgba(255, 214, 10, 0.45);
+}
+
+.models-option input:checked::before {
+  transform: scale(1);
+}
+
+.models-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.models-option:has(:checked) .models-name {
+  color: var(--pac);
+}
+
+.models-count {
+  font: 8px var(--pixel);
+  color: var(--muted);
 }
 
 .sort {
@@ -416,16 +599,11 @@ a {
   box-shadow: 0 0 12px color-mix(in srgb, var(--c) 45%, transparent);
 }
 
-.chip[aria-pressed="true"],
 .chip[aria-checked="true"] {
   color: #000;
   background: var(--c);
   border-color: var(--c);
   box-shadow: 0 0 16px color-mix(in srgb, var(--c) 55%, transparent);
-}
-
-.chip-count {
-  opacity: 0.65;
 }
 
 .count {
@@ -615,12 +793,6 @@ a {
 .cab-link:focus-visible::after {
   outline: 3px solid var(--pac);
   outline-offset: 4px;
-}
-
-.cab-note {
-  margin: -2px 0 0;
-  font-size: 0.78rem;
-  color: var(--dot);
 }
 
 .cab-tags {
@@ -831,20 +1003,8 @@ a {
     grid-template-columns: 1fr auto;
     grid-template-areas:
       "search count"
-      "chips chips"
+      "models models"
       "sort sort";
-  }
-
-  .chips {
-    flex-wrap: nowrap;
-    margin-inline: calc(-1 * var(--pad));
-    padding-inline: var(--pad);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .chips::-webkit-scrollbar {
-    display: none;
   }
 }
 

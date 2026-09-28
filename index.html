@@ -55,13 +55,26 @@
             id="search"
             class="search-input"
             type="search"
-            placeholder="model, harness, note…"
+            placeholder="model, harness…"
             autocomplete="off"
             spellcheck="false"
           />
           <kbd class="search-kbd" aria-hidden="true">/</kbd>
         </div>
-        <div class="chips" role="group" aria-label="Filter by harness"></div>
+        <div class="models">
+          <button type="button" class="models-toggle" aria-expanded="false" aria-controls="models-panel">
+            <span class="models-label">MODELS</span>
+            <span class="models-value" data-models-value>All</span>
+            <span class="models-caret" aria-hidden="true">▾</span>
+          </button>
+          <div class="models-panel" id="models-panel" role="group" aria-label="Filter by model" hidden>
+            <div class="models-head">
+              <span class="models-hint">None checked shows all</span>
+              <button type="button" class="models-clear">Clear</button>
+            </div>
+            <div class="models-list"></div>
+          </div>
+        </div>
         <div class="sort">
           <span class="sort-label" id="sort-label">Sort</span>
           <div class="sort-keys" role="radiogroup" aria-labelledby="sort-label">
@@ -95,9 +108,8 @@
         transcripts where available. Phase 2 entries use Claude Code pointed at OpenRouter. Phase 3 entries use
         Antigravity with Gemini. The Grok Bot entry was written in-chat from the same short prompt (no peeking).
         The gpt-6 Codex cards are API-key reruns. Their cost is OpenAI's published Standard rate card applied to
-        captured response usage. Cursor Cloud costs, where filled, are the dashboard chargedCents sum. Other costs
-        are the harness-reported figure, or a noted public-rate estimate when the card says so. HTML size is the
-        entry file as served. A dash means the run did not record that number.
+        captured response usage. Cursor Cloud costs, where filled, are the dashboard chargedCents sum. HTML size is
+        the entry file as served. A dash means the run did not record that number.
       </p>
       <p class="footer-home"><a href="https://github.com/jonclegg/pacman-bakeoff">github.com/jonclegg/pacman-bakeoff</a></p>
     </footer>
