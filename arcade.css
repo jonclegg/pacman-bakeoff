@@ -34,7 +34,7 @@
 
 html {
   background: var(--bg);
-  scroll-padding-top: 140px;
+  scroll-padding-top: 220px;
 }
 
 body {
@@ -46,27 +46,9 @@ body {
   line-height: 1.5;
   background:
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(43, 43, 255, 0.28), transparent 70%),
+    radial-gradient(circle, rgba(255, 199, 168, 0.08) 1.5px, transparent 2px) 0 0 / 28px 28px,
     var(--bg);
   -webkit-font-smoothing: antialiased;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(circle, rgba(255, 199, 168, 0.1) 1.5px, transparent 2px) 0 0 / 28px 28px;
-  mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%);
-}
-
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  pointer-events: none;
-  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 3px);
 }
 
 a {
@@ -301,9 +283,7 @@ a {
   align-items: center;
   gap: 14px 20px;
   padding: 14px max(var(--pad), calc((100% - var(--max)) / 2 + var(--pad)));
-  background: rgba(0, 0, 0, 0.84);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: #000;
   border-bottom: 1px solid rgba(43, 43, 255, 0.45);
 }
 
@@ -658,6 +638,7 @@ a {
   overflow: hidden;
   background: #000;
   border-radius: 10px;
+  container-type: inline-size;
 }
 
 .cab-screen::after {
@@ -689,7 +670,7 @@ a {
   border: 0;
   background: #000;
   pointer-events: none;
-  transform: scale(var(--s, 0.35));
+  transform: scale(calc(100cqi / 760px));
   transform-origin: 0 0;
   opacity: 0;
   transition: opacity 0.35s ease;
@@ -771,6 +752,12 @@ a {
   font: 700 1rem/1.35 var(--mono);
   color: #fff;
   overflow-wrap: anywhere;
+}
+
+.cab-asked {
+  margin: -2px 0 0;
+  font-size: 0.78rem;
+  color: var(--dot);
 }
 
 .cab-link {

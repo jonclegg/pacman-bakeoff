@@ -62,7 +62,7 @@
           <kbd class="search-kbd" aria-hidden="true">/</kbd>
         </div>
         <div class="models">
-          <button type="button" class="models-toggle" aria-expanded="false" aria-controls="models-panel">
+          <button type="button" class="models-toggle" aria-expanded="false" aria-controls="models-panel" aria-haspopup="true">
             <span class="models-label">MODELS</span>
             <span class="models-value" data-models-value>All</span>
             <span class="models-caret" aria-hidden="true">▾</span>
@@ -95,7 +95,7 @@
 
       <div class="game-over" hidden>
         <p class="game-over-title">GAME OVER</p>
-        <p class="game-over-text">No entries match that search.</p>
+        <p class="game-over-text">No entries match.</p>
         <button type="button" class="game-over-reset">CONTINUE?</button>
       </div>
 
@@ -104,7 +104,9 @@
 
     <footer class="footer">
       <p>
-        Model labels show the model that actually ran. Stats are wall time and token counts from harness
+        Model labels show the model that ran when the harness recorded it, and the requested model when it did not.
+        When two cards share a label, a card that was asked for a different model says so under the title. Stats are
+        wall time and token counts from harness
         transcripts where available. Phase 2 entries use Claude Code pointed at OpenRouter. Phase 3 entries use
         Antigravity with Gemini. The Grok Bot entry was written in-chat from the same short prompt (no peeking).
         The gpt-6 Codex cards are API-key reruns. Their cost is OpenAI's published Standard rate card applied to
