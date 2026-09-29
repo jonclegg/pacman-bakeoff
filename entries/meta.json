@@ -1190,6 +1190,28 @@
     "display_model": "claude-fable-5",
     "phase": 1,
     "input_tokens": 80,
-    "score": null
+    "score": 95,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, P, M; no restart key, no click start; basic swipe only"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "arcade targeting, eyes always return (1.4–4.7 s), no freeze at 30–240 fps"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0/244 unreachable, symmetric"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "good continuous siren, but a generic 12-note arpeggio instead of the Pac-Man intro; thin death sound; no power-pellet sound; likely silent on touch-only devices"
+      }
+    }
   }
 ]
