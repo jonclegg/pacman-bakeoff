@@ -124,6 +124,7 @@ async function init() {
   ui.play = document.querySelector(".play");
   ui.playBack = document.querySelector(".play-back");
   ui.playName = document.querySelector(".play-name");
+  ui.playStats = document.querySelector(".play-stats");
   ui.playFrame = null;
   ui.gallery = [
     document.querySelector(".skip-link"),
@@ -290,6 +291,15 @@ function stripRows(entry) {
     ["THINK", show(entry.thinking_tokens, formatCount)],
     ["COST", show(entry.cost_usd, formatCost)],
   ];
+}
+
+function playRows(entry) {
+  const rows = [
+    ["TIME", show(entry.duration_ms, formatDuration)],
+    ["COST", show(entry.cost_usd, formatCost)],
+  ];
+  if (entry.score != null) rows.push(["SCORE", `${entry.score}/100`, "score"]);
+  return rows;
 }
 
 function stripToken(entry) {
@@ -775,6 +785,9 @@ function showPlay(entry) {
   const name = displayName(entry);
   ui.playName.textContent = name;
   ui.playName.title = name;
+  const stats = statList("play-stats", playRows(entry));
+  ui.playStats.replaceWith(stats);
+  ui.playStats = stats;
   if (ui.play.hidden) ui.scrollY = window.scrollY;
   ui.play.hidden = false;
   document.documentElement.classList.add("is-playing");
