@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Pac-Man bench: how well a model and harness can recreate Pac-Man from a single prompt." />
+    <meta name="description" content="PacBench: how well a model and harness can recreate Pac-Man from a single prompt." />
     <meta name="theme-color" content="#000000" />
-    <title>Pac-Man Bake-off</title>
+    <title>PacBench</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 16 L30 7 A15 15 0 1 0 30 25 Z' fill='%23ffd60a'/%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -27,7 +27,8 @@
     </svg>
 
     <header class="intro">
-      <h1>Pac-Man bench tests how well a model and harness can recreate Pac-Man from a single prompt:</h1>
+      <h1 class="site-title">PacBench</h1>
+      <p class="intro-lead">Pac-Man bench tests how well a model and harness can recreate Pac-Man from a single prompt:</p>
       <p class="intro-prompt">“Create a Pac-Man game in a single html page”</p>
 
       <div class="chase" aria-hidden="true">
@@ -91,8 +92,6 @@
         <p class="count" aria-live="polite"><span data-count>--</span><span class="count-word"> SHOWN</span></p>
       </div>
 
-      <p class="score-credit"></p>
-
       <div class="grid"></div>
 
       <div class="game-over" hidden>
@@ -103,6 +102,14 @@
 
       <noscript><p class="noscript">Entries load with JavaScript. Enable it to insert a coin.</p></noscript>
     </main>
+
+    <div class="play" role="dialog" aria-modal="true" aria-labelledby="play-name" hidden>
+      <header class="play-bar">
+        <button type="button" class="play-back">← PacBench</button>
+        <p class="play-name" id="play-name"></p>
+      </header>
+      <iframe class="play-frame" title="Game"></iframe>
+    </div>
 
     <footer class="footer">
       <p>
