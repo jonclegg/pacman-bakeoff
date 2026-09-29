@@ -124,7 +124,7 @@ async function init() {
   ui.play = document.querySelector(".play");
   ui.playBack = document.querySelector(".play-back");
   ui.playName = document.querySelector(".play-name");
-  ui.playFrame = document.querySelector(".play-frame");
+  ui.playFrame = null;
   ui.gallery = [
     document.querySelector(".skip-link"),
     document.querySelector(".intro"),
@@ -747,12 +747,16 @@ function openPlay(entry, returnEl) {
 }
 
 function requestClosePlay() {
-  if (history.state?.play) {
+  const pushed = history.state?.play;
+  // Drop the game frame before history.back(). iOS Safari otherwise
+  // commits the iframe's about:blank document as the top-level page.
+  closePlaySurface();
+  if (pushed) {
     history.back();
     return;
   }
   if (location.hash) history.replaceState(null, "", location.pathname + location.search);
-  hidePlay();
+  finishClose();
 }
 
 function syncPlayFromHash() {
@@ -761,36 +765,54 @@ function syncPlayFromHash() {
     showPlay(card.entry);
     return;
   }
-  hidePlay();
+  closePlaySurface();
+  finishClose();
 }
 
 function showPlay(entry) {
   const name = displayName(entry);
   ui.playName.textContent = name;
   ui.playName.title = name;
-  ui.playFrame.title = `${name} game`;
-  const src = entryUrl(entry);
-  if (ui.playFrame.dataset.src !== src) {
-    ui.playFrame.dataset.src = src;
-    ui.playFrame.src = src;
-  }
+  if (ui.play.hidden) ui.scrollY = window.scrollY;
   ui.play.hidden = false;
   document.documentElement.classList.add("is-playing");
   for (const el of ui.gallery) el.inert = true;
+  const src = entryUrl(entry);
+  if (ui.playFrame?.dataset.src !== src) mountPlayFrame(src, `${name} game`);
   for (const screen of [...mountedScreens]) unmountPreview(screen);
   ui.playBack.focus();
 }
 
-function hidePlay() {
-  if (ui.play.hidden) return;
+function mountPlayFrame(src, title) {
+  ui.playFrame?.remove();
+  const frame = document.createElement("iframe");
+  frame.className = "play-frame";
+  frame.title = title;
+  frame.dataset.src = src;
+  ui.play.append(frame);
+  // Replace the frame's initial document so this load is not its own
+  // session-history entry. Assigning iframe.src pushes one, and the
+  // matching src="about:blank" on close turns the gallery white on iOS.
+  frame.contentWindow.location.replace(new URL(src, location.href).href);
+  ui.playFrame = frame;
+}
+
+function closePlaySurface() {
   ui.play.hidden = true;
   document.documentElement.classList.remove("is-playing");
   for (const el of ui.gallery) el.inert = false;
-  ui.playFrame.src = "about:blank";
-  delete ui.playFrame.dataset.src;
+  ui.playFrame?.remove();
+  ui.playFrame = null;
+}
+
+function finishClose() {
   const returnEl = playReturn;
   playReturn = null;
   returnEl?.focus();
+  if (ui.scrollY != null) {
+    window.scrollTo(0, ui.scrollY);
+    ui.scrollY = null;
+  }
   schedulePreviews();
 }
 
