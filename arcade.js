@@ -38,6 +38,7 @@ const SCORE_MARKS = {
   na: ["—", "Not testable"],
 };
 const SCORE_BY = "Scored by Opus 5.5 from reviewing the live games on this site (2026-09-28), not by the models themselves.";
+const SCORE_RUBRIC = `100 points: ${SCORE_CHECKS.map(([, label, points]) => `${label} ${points}`).join(" · ")}.`;
 
 const state = { query: "", models: new Set(), sort: "score", descending: true };
 const SORT_VALUE = {
@@ -69,6 +70,7 @@ let cards = [];
 const visibleScreens = new Map();
 const mountedScreens = new Set();
 let hoveredScreen = null;
+let playReturn = null;
 let scrolling = false;
 let scrollTimer = 0;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -119,9 +121,16 @@ async function init() {
   ui.sortDir = document.querySelector(".sort-dir");
   ui.sortKeyButtons = [...ui.sortKeys.querySelectorAll("[data-sort]")];
   ui.sortDirButtons = [...ui.sortDir.querySelectorAll("[data-order]")];
-  const rubric = SCORE_CHECKS.map(([, label, points]) => `${label} ${points}`).join(" · ");
-  document.querySelector(".score-credit").textContent =
-    `${SCORE_BY} Method: a 90 s automated play test plus a source and maze audit of each game. 100 points: ${rubric}. Open a card's details for why it scored that way.`;
+  ui.play = document.querySelector(".play");
+  ui.playBack = document.querySelector(".play-back");
+  ui.playName = document.querySelector(".play-name");
+  ui.playFrame = document.querySelector(".play-frame");
+  ui.gallery = [
+    document.querySelector(".skip-link"),
+    document.querySelector(".intro"),
+    document.querySelector(".arcade"),
+    document.querySelector(".footer"),
+  ];
 
   const response = await fetch("./entries/meta.json");
   if (!response.ok) throw new Error(`meta.json: HTTP ${response.status}`);
@@ -138,6 +147,8 @@ async function init() {
   ui.modelBoxes = [...ui.modelsList.querySelectorAll("input")];
   bindEvents();
   applyFilters();
+  const playing = cardFromHash();
+  if (playing) showPlay(playing.entry);
   await loadSizes();
 }
 
@@ -164,10 +175,13 @@ function buildCard(entry, index, color, asked) {
 
   const link = h("a", "cab-link", name);
   link.href = entryUrl(entry);
-  link.target = "_blank";
-  link.rel = "noopener";
   const qualifier = asked ? `, ${asked}` : "";
-  link.append(h("span", "visually-hidden", ` (${entry.harness}${qualifier}, opens in a new tab)`));
+  link.append(h("span", "visually-hidden", ` (${entry.harness}${qualifier}, play)`));
+  link.addEventListener("click", (event) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    openPlay(entry, link);
+  });
   const title = h("h3", "cab-model");
   title.append(link);
 
@@ -306,8 +320,11 @@ function detailRows(entry) {
 
 function scoreWhy(entry) {
   const section = h("section", "cab-why");
-  const head = h("p", "cab-panel-head", `SCORE ${entry.score}/100`);
-  if (entry.score_summary) head.append(h("span", "cab-why-summary", entry.score_summary));
+  const head = h("div", "cab-why-head");
+  const title = h("p", "cab-panel-head", `SCORE ${entry.score}/100`);
+  if (entry.score_summary) title.append(h("span", "cab-why-summary", entry.score_summary));
+  head.append(title);
+  appendHowScored(head, entry.slug);
   const list = h("ul", "cab-checks");
   for (const [key, label, points] of SCORE_CHECKS) {
     const { mark, note } = entry.score_notes[key];
@@ -321,8 +338,32 @@ function scoreWhy(entry) {
     item.append(markEl, name, h("span", "cab-check-note", note || fallback));
     list.append(item);
   }
-  section.append(head, list, h("p", "cab-why-credit", SCORE_BY));
+  section.append(head, list);
   return section;
+}
+
+function appendHowScored(head, slug) {
+  const button = h("button", "how-scored-toggle", "How scored?");
+  button.type = "button";
+  button.setAttribute("aria-expanded", "false");
+  const tip = h("div", "how-scored-tip");
+  tip.id = `how-${slug}`;
+  button.setAttribute("aria-controls", tip.id);
+  const [before, after] = SCORE_BY.split("Opus 5.5");
+  const credit = h("p");
+  credit.append(before, h("strong", "", "Opus 5.5"), after);
+  tip.append(
+    credit,
+    h("p", "", "Method: a 90 s automated play test plus a source and maze audit of each game."),
+    h("p", "", SCORE_RUBRIC)
+  );
+  tip.hidden = true;
+  button.addEventListener("click", () => {
+    const open = tip.hidden;
+    tip.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+  });
+  head.append(button, tip);
 }
 
 function statList(className, rows) {
@@ -431,7 +472,16 @@ function bindEvents() {
     ui.search.focus();
   });
 
+  ui.playBack.addEventListener("click", requestClosePlay);
+
+  addEventListener("popstate", syncPlayFromHash);
+
   document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !ui.play.hidden) {
+      event.preventDefault();
+      requestClosePlay();
+      return;
+    }
     if (event.key !== "/" || event.target.closest("input, textarea, [contenteditable]")) return;
     event.preventDefault();
     ui.search.focus();
@@ -549,6 +599,11 @@ function releasePreview(screen) {
 }
 
 function schedulePreviews() {
+  if (document.documentElement.classList.contains("is-playing")) {
+    for (const screen of [...mountedScreens]) unmountPreview(screen);
+    return;
+  }
+
   if (scrolling) {
     for (const screen of mountedScreens) freezePreview(screen);
     return;
@@ -677,6 +732,66 @@ function show(value, format) {
 
 function entryUrl(entry) {
   return `./entries/${entry.slug}.html`;
+}
+
+function cardFromHash() {
+  const slug = decodeURIComponent(location.hash.replace(/^#/, ""));
+  if (!slug) return null;
+  return cards.find((card) => card.entry.slug === slug) ?? null;
+}
+
+function openPlay(entry, returnEl) {
+  playReturn = returnEl;
+  history.pushState({ play: entry.slug }, "", `#${entry.slug}`);
+  showPlay(entry);
+}
+
+function requestClosePlay() {
+  if (history.state?.play) {
+    history.back();
+    return;
+  }
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  hidePlay();
+}
+
+function syncPlayFromHash() {
+  const card = cardFromHash();
+  if (card) {
+    showPlay(card.entry);
+    return;
+  }
+  hidePlay();
+}
+
+function showPlay(entry) {
+  const name = displayName(entry);
+  ui.playName.textContent = name;
+  ui.playName.title = name;
+  ui.playFrame.title = `${name} game`;
+  const src = entryUrl(entry);
+  if (ui.playFrame.dataset.src !== src) {
+    ui.playFrame.dataset.src = src;
+    ui.playFrame.src = src;
+  }
+  ui.play.hidden = false;
+  document.documentElement.classList.add("is-playing");
+  for (const el of ui.gallery) el.inert = true;
+  for (const screen of [...mountedScreens]) unmountPreview(screen);
+  ui.playBack.focus();
+}
+
+function hidePlay() {
+  if (ui.play.hidden) return;
+  ui.play.hidden = true;
+  document.documentElement.classList.remove("is-playing");
+  for (const el of ui.gallery) el.inert = false;
+  ui.playFrame.src = "about:blank";
+  delete ui.playFrame.dataset.src;
+  const returnEl = playReturn;
+  playReturn = null;
+  returnEl?.focus();
+  schedulePreviews();
 }
 
 function ghostIcon() {
