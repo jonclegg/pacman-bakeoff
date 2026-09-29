@@ -4,6 +4,8 @@ Models and harnesses recreate Pac-Man from one short prompt. Compare entries by 
 
 **Live site:** [https://jonclegg.github.io/pacman-bakeoff/](https://jonclegg.github.io/pacman-bakeoff/)
 
+**Dev preview:** the live site URL plus `dev/` (serves the `dev` branch)
+
 Each card opens a playable HTML entry. The gallery has one card per model. Stats come from harness transcripts where available (wall time, tokens, cost estimates). A dash means that run did not record the number.
 
 Scores (out of 100) come from Opus 5.5's 2026-09-28 re-test of the live games on this site: a 90 s automated play test plus a source and maze audit. The rubric is Controls 20, Ghosts 25, Pac-Man stuck 20, Maze 20, Sound 15. Each entry's `score` and per-check `score_notes` live in `entries/meta.json`. The gallery sorts by score, highest first, and shows the per-check notes under a card's details.
@@ -14,8 +16,28 @@ Scores (out of 100) come from Opus 5.5's 2026-09-28 re-test of the live games on
 
 `claude-sonnet-5-5` is an OpenRouter Claude Code run. The card title is `claude-sonnet-5.5`. Requested `anthropic/claude-sonnet-5.5`; OpenRouter served `anthropic/claude-sonnet-5.5-20260928`, which stays under Run data. It is not the first-party `claude-sonnet-5` card.
 
+## Dev preview
+
+`.github/workflows/pages.yml` deploys GitHub Pages on every push to `main` or `dev`. Each deploy publishes `main` at the site root and `dev` under `/dev/`, so the preview never replaces production.
+
+To preview a branch, push it to `dev` and wait for the "Deploy Pages" run to finish:
+
+```sh
+git push --force origin my-branch:dev
+```
+
+Check the gallery at `/dev/`, then merge the branch to `main` as usual. To reset the preview to production, run `git push --force origin main:dev`.
+
+One-time setup (repo admin):
+
+1. Create the branch: `git push origin main:dev`.
+2. Settings → Environments → `github-pages` → Deployment branches: add `dev`.
+3. Settings → Pages → Source: **GitHub Actions**.
+4. Actions → "Deploy Pages" → Run workflow on `main`.
+
 ## Repo layout
 
 - `index.html`, `arcade.css`, `arcade.js` — gallery UI
 - `entries/` — one HTML file per run plus `meta.json`
 - `.nojekyll` — serve static assets as-is on GitHub Pages
+- `.github/workflows/pages.yml` — deploys `main` to the site root and `dev` to `/dev/`
