@@ -1213,5 +1213,47 @@
         "note": "good continuous siren, but a generic 12-note arpeggio instead of the Pac-Man intro; thin death sound; no power-pellet sound; likely silent on touch-only devices"
       }
     }
+  },
+  {
+    "slug": "gpt-6.1-sol",
+    "harness": "Codex",
+    "run": "gpt-6.1-sol-api",
+    "requested": "gpt-6.1-sol",
+    "actual": "gpt-6.1-sol",
+    "effort": "high",
+    "duration_ms": 518694,
+    "input_tokens": 283790,
+    "cached_input_tokens": 237922,
+    "output_tokens": 36807,
+    "thinking_tokens": 12572,
+    "tokens_total": 320597,
+    "cost_usd": 0.5065172,
+    "note": "Codex API-key run on 2026-09-29 (auth_mode apikey, not ChatGPT login). OPENAI_API_KEY from SSM /somewhere/openai-api-key, profile jclegg. Fair-cell PROMPT.md in empty git cell /Users/Shared/pacbake/cells/80b30d4e-6351-4ae5-ab0e-8062050dc92f. codex exec --ephemeral --json, model gpt-6.1-sol, reasoning effort high, web_search disabled, no --sandbox and no --search. Codex CLI 0.155.1 logged that local model metadata for gpt-6.1-sol was missing and used fallback metadata; the exec model flag was gpt-6.1-sol, which is on /v1/models. cost_usd 0.5065172 is the turn.completed aggregate usage at OpenAI Standard short-context rates per 1M tokens (pricing page and model page fetched 2026-09-29: $2 input, $0.10 cached input, $2.50 cache writes, $10 output). Cache-write tokens are included in input_tokens; uncached input is input minus cached minus cache write (30). Reasoning tokens are included in output_tokens. Ephemeral mode did not persist per-response usage, so long-context rates (a single request over 272000 input tokens: 2x input and cache, 1.5x output) were not applied. The same harness's gpt-6-sol API cell had a higher aggregate (411829 input tokens) and a max single-request input of 38887. No regional uplift.",
+    "display_model": "gpt-6.1-sol",
+    "phase": 1,
+    "cache_write_tokens": 45838,
+    "score": 91,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space, P, M, d-pad + swipe, instant reverse; no cornering; R restarts with no confirmation"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "arcade targeting incl. Pinky quirk, eyes return in 2–5.5 s, no freeze at 30–240 fps (fixed 120 Hz step)"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28×31, 0 dead ends, 0/244 unreachable"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "real intro notes but flat rhythm, cut short, no bass; continuous siren with fright/eyes variants; generic death sound. Missing character intro and fruit history"
+      }
+    }
   }
 ]
