@@ -1173,5 +1173,23 @@
         "note": "thinner: only half the intro melody and no bass; the siren is a string of separate beeps, not a smooth sweep (which is why its tone count was inflated); simple death sound. Also less complete: emoji fruit, no attract-mode chase"
       }
     }
+  },
+  {
+    "slug": "claude-fable-5",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-code-openrouter__anthropic--claude-fable-5",
+    "requested": "anthropic/claude-fable-5",
+    "actual": "anthropic/claude-fable-5",
+    "effort": "high",
+    "duration_ms": 2221638,
+    "output_tokens": 161713,
+    "thinking_tokens": 107290,
+    "tokens_total": null,
+    "cost_usd": 17.2829895,
+    "note": "OpenRouter Claude Code cell. First-party Claude Code org entitlement remaps claude-fable-5 to claude-sonnet-5 (org model catalog lists claude-fable-5-1 only). Separate from the first-party claude-fable-5-1 card. Cost from Claude usage total_cost_usd; matches OpenRouter account usage delta.",
+    "display_model": "claude-fable-5",
+    "phase": 1,
+    "input_tokens": 80,
+    "score": null
   }
 ]
