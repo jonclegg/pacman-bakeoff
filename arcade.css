@@ -1125,6 +1125,7 @@ a {
 }
 
 .play-name {
+  flex: 1;
   min-width: 0;
   margin: 0;
   overflow: hidden;
@@ -1132,6 +1133,29 @@ a {
   color: var(--text);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.play-stats {
+  display: flex;
+  flex: none;
+  align-items: baseline;
+  gap: 14px;
+  margin: 0;
+}
+
+.play-stats .cab-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.play-stats dd {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.play-stats [data-field="score"] {
+  color: var(--pac);
 }
 
 .play-frame {
@@ -1192,8 +1216,13 @@ html.is-playing body {
 
 @media (max-width: 560px) {
   .search-kbd,
-  .count-word {
+  .count-word,
+  .play-stats dt {
     display: none;
+  }
+
+  .play-stats {
+    gap: 10px;
   }
 
   .grid {
