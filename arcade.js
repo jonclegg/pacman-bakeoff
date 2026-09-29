@@ -168,9 +168,10 @@ function buildCard(entry, index, color, asked) {
   const top = h("div", "cab-top");
   const harness = h("span", "cab-harness");
   harness.append(ghostIcon(), document.createTextNode(entry.harness));
+  const scored = entry.score != null;
   const score = h("span", "cab-score");
-  score.setAttribute("aria-label", `Score ${entry.score} of 100`);
-  score.append(h("b", "", String(entry.score)), document.createTextNode("/100"));
+  score.setAttribute("aria-label", scored ? `Score ${entry.score} of 100` : "Not scored yet");
+  score.append(h("b", "", scored ? String(entry.score) : "—"), document.createTextNode("/100"));
   top.append(harness, score);
 
   const link = h("a", "cab-link", name);
@@ -198,7 +199,8 @@ function buildCard(entry, index, color, asked) {
 
   const details = h("details", "cab-details");
   const panel = h("div", "cab-detail-panel");
-  panel.append(scoreWhy(entry), h("p", "cab-panel-head", "RUN DATA"), statList("cab-detail-list", detailRows(entry)));
+  if (scored) panel.append(scoreWhy(entry));
+  panel.append(h("p", "cab-panel-head", "RUN DATA"), statList("cab-detail-list", detailRows(entry)));
   details.append(h("summary", "cab-details-toggle", "SCORE + RUN DATA"), panel);
   const sizeValue = details.querySelector('[data-field="size"]');
 
