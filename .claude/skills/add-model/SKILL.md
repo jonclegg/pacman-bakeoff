@@ -37,9 +37,10 @@ git worktree add -b add-<slug> .claude/worktrees/add-<slug> origin/main
 ## 3. Run the cell
 
 ```bash
-python3 bench/run_cell.py <harness> <model-id> <harness>__<model-id with / as -->
+python3 bench/run_cell.py <harness> <model-id> <harness>__<model-id with / as -->[__YYYY-MM-DD for a rerun]
 ```
 
+- **OpenRouter runs go through the provider pin.** OpenRouter otherwise routes to the cheapest host, often an fp4 quantization. Add the vendor to `PROVIDERS_BY_VENDOR` in `bench/or_proxy.py` (use the vendor's own endpoint from `https://openrouter.ai/api/v1/models/<id>/endpoints`), start `python3 bench/or_proxy.py 8791` in the background, and run with `PACBAKE_OR_BASE_URL=http://127.0.0.1:8791`. Afterwards, count `"provider":` values in the transcript: every response should come from the pinned host.
 - The prompt is `bench/prompts/pacman.md` (sha256 `55c6d2ec…`), the fair-cell spec used by claude-fable-5, gpt-5.6-sol and gpt-6.1-sol. Older cards used the one-line prompt `build a Pac-Man game in a single html page`. Record which prompt ran in the entry note.
 - It runs up to an hour. Run it in the background and post a progress line every five minutes: elapsed time, transcript event count, and whether `pacman.html` exists in the cell yet.
 - A new harness runs `--prompt bench/prompts/canary.md` first. All four canary probes (sibling dir, real home, `~/dev`, web fetch) must fail before the real run.
@@ -79,7 +80,7 @@ Read `bench/scoring/v2.md` first: the rubric, the method, and the calibration ta
    ```
    The anchors should reproduce their v2 behaviour (starts, no stuck events, audio running). If they don't, fix the harness before trusting the new entry.
 2. **Source and maze audit.** Give a general-purpose agent `bench/scoring/audit.md` and `entries/<slug>.html`. For a close call near the top of the table, run two blind reviewers and reconcile.
-3. **Check every anomaly yourself** in the browser pane: stuck events, frozen ghosts, silent audio, console errors, and the audio code for quality (the harness can't hear).
+3. **Check every anomaly yourself** in the browser pane: stuck events, frozen ghosts, silent audio, console errors, and the audio code for quality (the harness can't hear). Compare against the anchors: if Pac-Man's `pac_path_tiles` is far below the ghosts' or turn success is far below the anchors' 50–85%, drive the page with Playwright and log the game's own globals (position, direction, buffered turn, state) every 250 ms until you can name the line that causes it.
 4. **Assign points.** Controls 20, Ghosts 25, Pac-Man stuck 20, Maze 20, Sound 15. Cap low when the ghosts don't work or Pac-Man can't move. Write `score`, `score_notes` (`controls`, `ghosts`, `stuck`, `maze`, `sound`; each `{mark: ok|minor|major|na, note}`) and, only for a one-line cause like a blank canvas, `score_summary` in `entries/meta.json`.
 5. **Record the analysis.** Add the entry's row to the results table in `bench/scoring/v2.md` in rank order, marked *(added YYYY-MM-DD)*, and a short paragraph under "Later additions" if it changes a takeaway.
 

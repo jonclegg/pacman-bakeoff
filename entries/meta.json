@@ -1198,7 +1198,7 @@
       },
       "ghosts": {
         "mark": "ok",
-        "note": "arcade targeting, eyes always return (1.4–4.7 s), no freeze at 30–240 fps"
+        "note": "arcade targeting, eyes always return (1.4\u20134.7 s), no freeze at 30\u2013240 fps"
       },
       "stuck": {
         "mark": "ok",
@@ -1240,7 +1240,7 @@
       },
       "ghosts": {
         "mark": "ok",
-        "note": "arcade targeting incl. Pinky quirk, eyes return in 2–5.5 s, no freeze at 30–240 fps (fixed 120 Hz step)"
+        "note": "arcade targeting incl. Pinky quirk, eyes return in 2\u20135.5 s, no freeze at 30\u2013240 fps (fixed 120 Hz step)"
       },
       "stuck": {
         "mark": "ok",
@@ -1248,11 +1248,54 @@
       },
       "maze": {
         "mark": "ok",
-        "note": "classic 28×31, 0 dead ends, 0/244 unreachable"
+        "note": "classic 28\u00d731, 0 dead ends, 0/244 unreachable"
       },
       "sound": {
         "mark": "minor",
         "note": "real intro notes but flat rhythm, cut short, no bass; continuous siren with fright/eyes variants; generic death sound. Missing character intro and fruit history"
+      }
+    }
+  },
+  {
+    "slug": "kimi-k3",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-code-openrouter__moonshotai--kimi-k3__2026-09-30",
+    "requested": "moonshotai/kimi-k3",
+    "actual": "moonshotai/kimi-k3",
+    "effort": "high",
+    "duration_ms": 1882437,
+    "input_tokens": 79353,
+    "cached_input_tokens": 964352,
+    "cache_write_tokens": 0,
+    "output_tokens": 60141,
+    "thinking_tokens": 40954,
+    "tokens_total": null,
+    "cost_usd": 2.382466,
+    "note": "OpenRouter Claude Code fair cell on 2026-09-30: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py, effort high, no web tools. Requests went through bench/or_proxy.py pinned to OpenRouter's Moonshot AI endpoint with fallbacks off; all 44 responses report provider Moonshot AI (default routing would have picked fp4 hosts). cost_usd is Claude Code total_cost_usd for the run (OpenRouter list  input, /bin/zsh.30 cached input,  output per 1M, read 2026-09-30). The model listed /Applications to find Chrome; it read nothing else outside the cell. An earlier unpublished 2026-09-27 cell of the same model and prompt took 56 min and $5.54.",
+    "display_model": "kimi-k3",
+    "phase": 2,
+    "score": 19,
+    "score_summary": "eaten pellets turn into walls",
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space, P/Esc, M, cornering, no page scroll; no restart key, no touch or click start"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "arcade targeting and waves, but eaten corridors wall ghosts in; 7/40 eaten eyes never get home; revived ghost can be eaten again"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "every eaten pellet becomes a wall, so Pac-Man seals himself in within 3\u201330 s (live: stuck 57 s)"
+      },
+      "maze": {
+        "mark": "major",
+        "note": "classic 28\u00d731, 0 dead ends at load, but cleared tiles turn to walls: the level can\u2019t be won (best route found 162/244)"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "continuous siren with fright/eyes variants, full event set, mute, master bus; generic arpeggio instead of the Pac-Man intro, thin death sound"
       }
     }
   }
