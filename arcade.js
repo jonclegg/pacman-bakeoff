@@ -793,7 +793,10 @@ function showPlay(entry) {
   document.documentElement.classList.add("is-playing");
   for (const el of ui.gallery) el.inert = true;
   const src = entryUrl(entry);
-  if (ui.playFrame?.dataset.src !== src) mountPlayFrame(src, `${name} game`);
+  if (ui.playFrame?.dataset.src !== src) {
+    mountPlayFrame(src, `${name} game`);
+    gtag("event", "play_entry", { entry_slug: entry.slug, entry_name: name });
+  }
   for (const screen of [...mountedScreens]) unmountPreview(screen);
   ui.playBack.focus();
 }
