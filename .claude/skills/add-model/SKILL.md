@@ -37,9 +37,10 @@ git worktree add -b add-<slug> .claude/worktrees/add-<slug> origin/main
 ## 3. Run the cell
 
 ```bash
-python3 bench/run_cell.py <harness> <model-id> <harness>__<model-id with / as -->
+python3 bench/run_cell.py <harness> <model-id> <harness>__<model-id with / as -->[__YYYY-MM-DD for a rerun]
 ```
 
+- **OpenRouter runs go through the provider pin.** OpenRouter otherwise routes to the cheapest host, often an fp4 quantization. Add the vendor to `PROVIDERS_BY_VENDOR` in `bench/or_proxy.py` (use the vendor's own endpoint from `https://openrouter.ai/api/v1/models/<id>/endpoints`), start `python3 bench/or_proxy.py 8791` in the background, and run with `PACBAKE_OR_BASE_URL=http://127.0.0.1:8791`. Afterwards, count `"provider":` values in the transcript: every response should come from the pinned host.
 - The prompt is `bench/prompts/pacman.md` (sha256 `55c6d2ec…`), the fair-cell spec used by claude-fable-5, gpt-5.6-sol and gpt-6.1-sol. Older cards used the one-line prompt `build a Pac-Man game in a single html page`. Record which prompt ran in the entry note.
 - It runs up to an hour. Run it in the background and post a progress line every five minutes: elapsed time, transcript event count, and whether `pacman.html` exists in the cell yet.
 - A new harness runs `--prompt bench/prompts/canary.md` first. All four canary probes (sibling dir, real home, `~/dev`, web fetch) must fail before the real run.

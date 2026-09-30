@@ -53,7 +53,7 @@ def claude_stats(run_dir):
         "cache_write_tokens": u.get("cache_creation_input_tokens"),
         "output_tokens": u["output_tokens"],
         "thinking_tokens": (u.get("output_tokens_details") or {}).get("thinking_tokens"),
-        "cost_usd": r["total_cost_usd"],
+        "cost_usd": round(r["total_cost_usd"], 8),
     }
 
 
@@ -92,7 +92,7 @@ def grok_stats(run_dir):
         "cached_input_tokens": u.get("cache_read_input_tokens"),
         "output_tokens": u["output_tokens"],
         "thinking_tokens": u.get("reasoning_tokens"),
-        "cost_usd": ends[-1]["total_cost_usd"],
+        "cost_usd": round(ends[-1]["total_cost_usd"], 8),
     }
 
 
