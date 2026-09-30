@@ -35,9 +35,21 @@ One-time setup (repo admin):
 3. Settings → Pages → Source: **GitHub Actions**.
 4. Actions → "Deploy Pages" → Run workflow on `main`.
 
+## Adding a model
+
+In Claude Code, point at the model (name, API id, or announcement link) and ask to add it. The project skill `.claude/skills/add-model/SKILL.md` runs the whole loop: fair-cell run, entry, dev deploy, v2 scoring, analysis, then asks before promoting to `main`.
+
+The pieces, if you run them by hand:
+
+- `bench/run_cell.py` runs one harness and model in a fresh sandboxed cell with `bench/prompts/pacman.md` and writes `~/.pacbake/runs/<run_name>/`.
+- `bench/add_entry.py` reads that run's transcript for time, tokens and cost, copies the HTML to `entries/`, and upserts `entries/meta.json`.
+- `bench/playtest/run.py` is the 90 s automated play test. `bench/scoring/audit.md` is the source and maze audit brief. `bench/scoring/v2.md` is the rubric and calibration table.
+
 ## Repo layout
 
 - `index.html`, `arcade.css`, `arcade.js` — gallery UI
 - `entries/` — one HTML file per run plus `meta.json`
 - `.nojekyll` — serve static assets as-is on GitHub Pages
 - `.github/workflows/pages.yml` — deploys `main` to the site root and `dev` to `/dev/`
+- `bench/` — runner, entry publisher, play test and scoring docs (not used by the gallery)
+- `.claude/skills/add-model/` — the add-a-model playbook
