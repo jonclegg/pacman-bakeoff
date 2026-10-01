@@ -749,29 +749,30 @@
     "display_model": "z-ai/glm-5.3-flash",
     "phase": 2,
     "input_tokens": 42596,
-    "score": 88,
+    "score": 16,
     "score_notes": {
       "controls": {
-        "mark": "ok",
-        "note": ""
+        "mark": "major",
+        "note": "Pac-Man moves 134 tiles/s, 2.24 tiles a frame at 60 fps: a turn pressed 100 ms early lands at the right junction 0/205 times"
       },
       "ghosts": {
-        "mark": "ok",
-        "note": "full cycle verified"
+        "mark": "major",
+        "note": "same units bug, ghosts 112 tiles/s; you die about every 7 s, so Clyde never left the house in 8 lives"
       },
       "stuck": {
         "mark": "ok",
-        "note": ""
+        "note": "no freeze at 30\u2013240 fps"
       },
       "maze": {
         "mark": "ok",
-        "note": "0 reachable dead ends (small 19\u00d721 maze)"
+        "note": "small 19\u00d721 maze, 0 reachable dead ends, 0/168 unreachable"
       },
       "sound": {
         "mark": "minor",
-        "note": "audio context created outside a user gesture (plays in Chrome, may be blocked in Safari)"
+        "note": "waka, power, ghost, death, fruit; no siren, intro or mute; AudioContext created outside a user gesture (Safari risk)"
       }
-    }
+    },
+    "score_summary": "everything moves 24\u00d7 too fast"
   },
   {
     "slug": "qwen3.8-max",
@@ -1210,7 +1211,7 @@
       },
       "sound": {
         "mark": "minor",
-        "note": "good continuous siren, but a generic 12-note arpeggio instead of the Pac-Man intro; thin death sound; no power-pellet sound; likely silent on touch-only devices"
+        "note": "good continuous siren, but a generic 12-note arpeggio instead of the Pac-Man intro; thin death sound; frightened mode has its own siren loop; likely silent on touch-only devices"
       }
     }
   },

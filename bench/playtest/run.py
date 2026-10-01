@@ -61,7 +61,9 @@ def pick(frame):
     def valid(b):
         asp = max(b["w"], b["h"]) / max(1, min(b["w"], b["h"]))
         return (amin <= b["n"] <= amax and asp <= 2.2
-                and x0 - tile <= b["x"] <= x1 + tile and y0 - tile <= b["y"] <= y1 + tile)
+                # A tile of slack sideways for the tunnel; almost none vertically, so HUD life icons
+                # drawn just above or below the maze are never taken for Pac-Man.
+                and x0 - tile <= b["x"] <= x1 + tile and y0 + 0.25 * tile <= b["y"] <= y1 - 0.25 * tile)
 
     blobs = frame["blobs"]
     pacs = [b for b in blobs["1"] if valid(b)]
@@ -72,6 +74,47 @@ def pick(frame):
         if v:
             ghosts[name] = v[0]
     return pac, ghosts, tile
+
+
+# Tracker tiles assume a 28-column maze, so a 1-tile hop in a 19-column maze reads as 1.47.
+TELEPORT_TILES = 1.6
+
+
+def track_speed(frames, tile, bbox_w):
+    """Per-frame positions -> median speed (tiles/s), biggest single-frame jump, teleports (> TELEPORT_TILES in one frame).
+
+    Frames where 3+ tracked actors jump > 1 tile at once are resets (death, level start) and are skipped.
+    """
+    actors = ["pac"] + list(GHOSTS.values())
+    track = []
+    for fr in frames:
+        pac, ghosts, _ = pick(fr["f"])
+        pos = {"pac": pac, **{g: ghosts.get(g) for g in GHOSTS.values()}}
+        track.append((fr["t"], {a: (b["x"], b["y"]) if b else None for a, b in pos.items()}))
+    steps = []  # per frame: {actor: (tiles moved, dt)}
+    for (t0, p0), (t1, p1) in zip(track, track[1:]):
+        st = {}
+        for a in actors:
+            if p0[a] and p1[a]:
+                dx, dy = p1[a][0] - p0[a][0], p1[a][1] - p0[a][1]
+                if abs(dx) <= 0.5 * bbox_w:  # skip tunnel wraps
+                    st[a] = (math.hypot(dx, dy) / tile, (t1 - t0) / 1000)
+        steps.append(st)
+    resets = sum(1 for st in steps if sum(1 for d, _ in st.values() if d > TELEPORT_TILES) >= 3)
+    steps = [st for st in steps if sum(1 for d, _ in st.values() if d > TELEPORT_TILES) < 3]
+
+    def stats(a):
+        moves = [st[a] for st in steps if a in st]
+        moving = [(d, dt) for d, dt in moves if d > 0.02 and dt > 0]
+        speeds = sorted(d / dt for d, dt in moving)
+        span = sum(dt for _, dt in moves)
+        return {"speed_tps": round(speeds[len(speeds) // 2], 1) if speeds else 0.0,
+                # Distance over the whole window: robust to whole-tile hops and to a chomping, still sprite.
+                "avg_tps": round(sum(d for d, _ in moves) / span, 1) if span else 0.0,
+                "max_jump_tiles": round(max(d for d, _ in moving), 2) if moving else 0.0,
+                "teleports": sum(1 for d, _ in moving if d > TELEPORT_TILES),
+                "moving_frac": round(len(moving) / len(moves), 2) if moves else 0.0}
+    return {"resets": resets, "pac": stats("pac"), "ghosts": {g: stats(g) for g in GHOSTS.values()}}
 
 
 class Game:
@@ -130,6 +173,22 @@ class Game:
             await page.keyboard.up(k)
         return False
 
+    async def speed_probe(self, page, label, tile, bbox_w):
+        """Analyze every frame for 4 s while cycling held arrows, and summarise speed and teleports."""
+        task = asyncio.ensure_future(page.evaluate("(ms) => window.__speedProbe(ms)", 4000))
+        for k in ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"]:
+            if task.done():
+                break
+            await page.keyboard.down(k); await asyncio.sleep(1.0); await page.keyboard.up(k)
+        try:
+            frames = await task
+        except Exception as e:
+            return {"label": label, "err": str(e)[:80]}
+        dur = (frames[-1]["t"] - frames[0]["t"]) / 1000 if len(frames) > 1 else 0
+        r = {"label": label, "frames": len(frames), "fps": round(len(frames) / dur, 1) if dur else 0}
+        r.update(track_speed(frames, tile, bbox_w))
+        return r
+
     async def try_start(self, page):
         actions = [("Enter", lambda: page.keyboard.press("Enter")),
                    ("button", lambda: self.click_button(page)),
@@ -173,6 +232,9 @@ class Game:
         f0 = await self.analyze(page)
         _, _, tile = pick(f0)
         self.res["tile_px"] = round(tile, 1)
+        bbox_w = (f0.get("bbox") or [0, 0, 900, 0])[2] - (f0.get("bbox") or [0, 0, 900, 0])[0]
+        probes = []; probe_at = {"early": 3.0, "mid": PLAY_SECONDS * 0.5}
+        pac_jumps_gt3 = 0
         frames0 = f0.get("frames", 0); t_start = time.time()
 
         cur = None; held = None
@@ -199,6 +261,15 @@ class Game:
                 if el > mark and lab not in shots_done:
                     shots_done.add(lab)
                     await page.screenshot(path=str(SHOTS / f"{name}_{lab}.jpg"), type="jpeg", quality=70)
+            due = [lab for lab, at in probe_at.items() if el > at and lab not in {p["label"] for p in probes}]
+            if due:
+                if held:
+                    await page.keyboard.up(held); held = None
+                probes.append(await self.speed_probe(page, due[0], tile, bbox_w))
+                last_move_t = time.time(); dirs_since_move = set(); last_pos = None; prev_pac = None; cur = None
+                for st in gstat.values():
+                    st["anchor"] = None
+                continue
             f = await self.analyze(page)
             pac, ghosts, _ = pick(f)
             samples_play += 1
@@ -212,6 +283,8 @@ class Game:
                     dd = math.hypot(p[0] - prev_pac[0], p[1] - prev_pac[1])
                     if dd < 3 * tile:
                         pac_stat["path"] += dd
+                    elif dd < 0.5 * bbox_w:
+                        pac_jumps_gt3 += 1
                 prev_pac = p
                 if last_pos is None or math.hypot(p[0] - last_pos[0], p[1] - last_pos[1]) > 2.5:
                     if stuck_open:
@@ -314,6 +387,8 @@ class Game:
         r["pac_cells_visited"] = len(pac_stat["cells"])
         r["pac_path_tiles"] = round(pac_stat["path"] / tile, 1)
         r["pac_onwall_frac"] = round(pac_stat["onwall"] / max(1, pac_stat["seen"]), 3)
+        r["pac_jumps_gt3_tiles"] = pac_jumps_gt3
+        r["speed_probes"] = probes
         r["stuck_events_s"] = stuck_events
         r["static_events"] = static_events
         r["restarts"] = restarts; r["restart_fail"] = restart_fail

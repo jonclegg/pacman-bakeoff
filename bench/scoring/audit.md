@@ -23,6 +23,12 @@ Pull the runtime grid (after any init code runs), not the source literal. Using 
 
 Step the real game loop at 30, 60, 120, 144, 165 and 240 fps for 60 simulated seconds each, holding a direction scheme that changes every 0.5 s. Record per-fps: does each ghost keep moving, does Pac-Man keep moving, does any entity sit still longer than 3 s outside the house or frightened pauses. The common bug is "if within `speed` of the tile centre, snap to centre", which can land back in the window every frame. Also note if speed is in pixels per frame (2× speed at 120 Hz).
 
+## 3b. Speed and units
+
+Measure, don't read. From the running game, report Pac-Man's and each ghost's speed in tiles per second at 30, 60 and 144 fps, and the largest distance any actor moves in one frame. Arcade level 1 is about 7.6 tiles/s for Pac-Man and 7.1 for ghosts; anything outside roughly 4–12 tiles/s, or any single-frame move over 1 tile (outside the tunnel wrap), is a bug. Check that every speed constant has the same units as the variable it is added to (px vs. tiles vs. tile fraction): a `speed * TILE * dt` added to a 0–1 tile progress moves TILE× too fast.
+
+Also time the ghost-house release: when does each ghost first leave, and does every ghost leave within 30 s of level start?
+
 ## 4. Code review
 
 - **Controls:** arrows and WASD, `preventDefault` on arrows/Space (no page scroll), input buffering / cornering, instant reverse, start, pause, restart, mute, touch or swipe.

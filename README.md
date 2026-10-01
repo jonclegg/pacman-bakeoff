@@ -44,7 +44,7 @@ The pieces, if you run them by hand:
 - `bench/run_cell.py` runs one harness and model in a fresh sandboxed cell with `bench/prompts/pacman.md` and writes `~/.pacbake/runs/<run_name>/`.
 - `bench/or_proxy.py` pins OpenRouter requests to the vendor's own provider (run with `PACBAKE_OR_BASE_URL`).
 - `bench/add_entry.py` reads that run's transcript for time, tokens and cost, copies the HTML to `entries/`, and upserts `entries/meta.json`.
-- `bench/playtest/run.py` is the 90 s automated play test. `bench/scoring/audit.md` is the source and maze audit brief. `bench/scoring/v2.md` is the rubric and calibration table.
+- `bench/playtest/run.py` is the 90 s automated play test, with per-frame speed and teleport probes; `bench/playtest/screen.py` flags entries whose play-test numbers contradict their published notes. `bench/scoring/audit.md` is the source and maze audit brief. `bench/scoring/v2.md` is the rubric and calibration table.
 
 ## Repo layout
 

@@ -51,7 +51,7 @@
     if (h < 0) h += 360;
     if (mx > 150 && s > 0.6 && h >= 44 && h <= 70) return 1;
     if (mx > 150 && s > 0.6 && (h < 14 || h >= 345)) return 2;
-    if (r > 200 && b > 190 && g >= 90 && g <= 215 && r - g >= 35) return 3;
+    if (r > 200 && b > 210 && g >= 90 && g <= 215 && r - g >= 35) return 3;  // b > 210 keeps peach pellets (#ffd0c2) out
     if (mx > 150 && s > 0.5 && h >= 165 && h <= 200) return 4;
     if (mx > 150 && s > 0.55 && h >= 20 && h < 44) return 5;
     if (s > 0.45 && h >= 200 && h <= 265 && mx > 90) return 6;
@@ -124,5 +124,17 @@
     for (const k in blobs) blobs[k] = blobs[k].sort((a, b) => b.n - a.n).slice(0, 4);
     return { W, H, S, bbox: [x0 * S, y0 * S, (x1 + 1) * S, (y1 + 1) * S], blue: blue * S * S, blobs,
              scrollY: window.scrollY, frames: A.frames };
+  };
+
+  // Analyze every animation frame for `ms`, so speed and teleports can be measured per frame.
+  window.__speedProbe = function (ms) {
+    return new Promise(resolve => {
+      const out = [], t0 = performance.now();
+      (function step(now) {
+        const f = window.__analyze(false);
+        out.push({ t: now - t0, f });
+        if (now - t0 < ms) raf(step); else resolve(out);
+      })(t0);
+    });
   };
 })();
