@@ -85,8 +85,8 @@ def claude_settings(cell, run_dir, deny_home):
 
 
 ###############################################################################
-def claude_flags(model, settings_path):
-    return ["claude", "-p", "--model", model, "--effort", "high",
+def claude_flags(model, effort, settings_path):
+    return ["claude", "-p", "--model", model, "--effort", effort,
             "--settings", str(settings_path), "--permission-mode", "dontAsk",
             "--disallowedTools", "WebFetch", "WebSearch", "--strict-mcp-config",
             "--no-session-persistence", "--output-format", "stream-json", "--verbose"]
@@ -100,19 +100,19 @@ def unlock_keychain():
 
 
 ###############################################################################
-def build_claude(model, cell, run_dir):
+def build_claude(model, effort, cell, run_dir):
     unlock_keychain()
     env = base_env(REAL_HOME, cell)
     env["DISABLE_AUTOUPDATER"] = "1"
     env["CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC"] = "1"
     env["CLAUDE_CODE_TMPDIR"] = str(cell_tmp(cell))
     settings = claude_settings(cell, run_dir, REAL_HOME)
-    cmd = claude_flags(model, settings) + ["--safe-mode", "--setting-sources", "project,local"]
+    cmd = claude_flags(model, effort, settings) + ["--safe-mode", "--setting-sources", "project,local"]
     return cmd, env, True
 
 
 ###############################################################################
-def build_claude_openrouter(model, cell, run_dir):
+def build_claude_openrouter(model, effort, cell, run_dir):
     fake_home = pathlib.Path("/Users/Shared/pacbake/fakehome-claude-or")
     fake_home.mkdir(parents=True, exist_ok=True)
     env = base_env(fake_home, cell)
@@ -129,15 +129,15 @@ def build_claude_openrouter(model, cell, run_dir):
     env["CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC"] = "1"
     env["CLAUDE_CODE_TMPDIR"] = str(cell_tmp(cell))
     settings = claude_settings(cell, run_dir, REAL_HOME)
-    return claude_flags(model, settings), env, True
+    return claude_flags(model, effort, settings), env, True
 
 
 ###############################################################################
-def build_codex(model, cell, run_dir):
+def build_codex(model, effort, cell, run_dir):
     env = base_env(REAL_HOME, cell)
     env["CODEX_HOME"] = str(PACBAKE / "homes" / "codex-chatgpt")
     cmd = ["codex", "exec", "--cd", str(cell), "-m", model,
-           "-c", 'model_reasoning_effort="high"', "--ephemeral", "--json",
+           "-c", f'model_reasoning_effort="{effort}"', "--ephemeral", "--json",
            "-o", str(run_dir / "final_message.md"), "-"]
     return cmd, env, True
 
@@ -150,19 +150,19 @@ def openai_api_key():
 
 
 ###############################################################################
-def build_codex_apikey(model, cell, run_dir):
+def build_codex_apikey(model, effort, cell, run_dir):
     """API-key auth, so the published rate card prices every response the run made."""
     env = base_env(REAL_HOME, cell)
     env["CODEX_HOME"] = str(PACBAKE / "homes" / "codex-apikey")
     env["OPENAI_API_KEY"] = openai_api_key()
     cmd = ["codex", "exec", "--cd", str(cell), "-m", model,
-           "-c", 'model_reasoning_effort="high"', "--ephemeral", "--json",
+           "-c", f'model_reasoning_effort="{effort}"', "--ephemeral", "--json",
            "-o", str(run_dir / "final_message.md"), "-"]
     return cmd, env, True
 
 
 ###############################################################################
-def build_grok(model, cell, run_dir):
+def build_grok(model, effort, cell, run_dir):
     fake_home = SHARED / "fakehome-grok"
     fake_home.mkdir(parents=True, exist_ok=True)
     env = base_env(fake_home, cell)
@@ -179,7 +179,7 @@ def build_grok(model, cell, run_dir):
     env["no_proxy"] = GROK_API_HOSTS
     cmd = ["sandbox-exec", "-f", str(GROK_SEATBELT), str(GROK_BIN),
            "--prompt-file", str(cell / "PROMPT.md"), "--cwd", str(cell),
-           "-m", model, "--effort", "high", "--always-approve",
+           "-m", model, "--effort", effort, "--always-approve",
            "--disable-web-search", "--disallowed-tools", "web_search,web_fetch",
            "--max-turns", "400", "-s", str(uuid.uuid4()), "--output-format", "streaming-json"]
     return cmd, env, False
@@ -231,13 +231,14 @@ def main():
     parser.add_argument("harness", choices=sorted(BUILDERS))
     parser.add_argument("model")
     parser.add_argument("run_name")
+    parser.add_argument("--effort", default="high")
     parser.add_argument("--prompt", default=str(pathlib.Path(__file__).parent / "prompts" / "pacman.md"))
     args = parser.parse_args()
 
     run_dir = RUNS_ROOT / args.run_name
     run_dir.mkdir(parents=True, exist_ok=False)
     cell = make_cell(args.prompt, GROK_CELLS_ROOT if args.harness == "grok-build" else CELLS_ROOT)
-    cmd, env, stdin_prompt = BUILDERS[args.harness](args.model, cell, run_dir)
+    cmd, env, stdin_prompt = BUILDERS[args.harness](args.model, args.effort, cell, run_dir)
     (run_dir / "command.json").write_text(json.dumps(cmd, indent=2))
 
     started = time.time()
@@ -252,7 +253,7 @@ def main():
         "cell_uuid": cell.name,
         "harness": args.harness,
         "model_requested": args.model,
-        "effort": "high",
+        "effort": args.effort,
         "prompt_sha256": hashlib.sha256(pathlib.Path(args.prompt).read_bytes()).hexdigest(),
         "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(started)),
         "wall_seconds": round(ended - started, 1),
