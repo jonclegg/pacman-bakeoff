@@ -136,7 +136,7 @@ async function init() {
   const response = await fetch("./entries/meta.json");
   if (!response.ok) throw new Error(`meta.json: HTTP ${response.status}`);
   const entries = await response.json();
-  assertOneCardPerModel(entries);
+  assertOneCardPerModelAndEffort(entries);
 
   const harnesses = [...new Set(entries.map((entry) => entry.harness))];
   const colors = new Map(harnesses.map((harness, i) => [harness, HARNESS_COLORS[i % HARNESS_COLORS.length]]));
@@ -239,13 +239,13 @@ function displayName(entry) {
   return name;
 }
 
-function assertOneCardPerModel(entries) {
+function assertOneCardPerModelAndEffort(entries) {
   const seen = new Map();
   for (const entry of entries) {
-    const name = displayName(entry);
-    const prior = seen.get(name);
-    if (prior) throw new Error(`Duplicate model ${name}: ${prior} and ${entry.slug}`);
-    seen.set(name, entry.slug);
+    const key = `${displayName(entry)} ${entry.effort ?? "-"} effort`;
+    const prior = seen.get(key);
+    if (prior) throw new Error(`Duplicate model ${key}: ${prior} and ${entry.slug}`);
+    seen.set(key, entry.slug);
   }
 }
 
@@ -271,7 +271,7 @@ function collisionLabels(entries) {
   }
   for (const entry of entries) {
     if (labels.has(entry)) continue;
-    if ((stillTied.get(entry.display_model) ?? 0) > 1) labels.set(entry, entry.slug);
+    if ((stillTied.get(entry.display_model) ?? 0) > 1) labels.set(entry, entry.effort ? `${entry.effort} effort` : entry.slug);
   }
   return labels;
 }

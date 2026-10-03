@@ -1298,5 +1298,25 @@
         "note": "continuous siren with fright/eyes variants, full event set, mute, master bus; generic arpeggio instead of the Pac-Man intro, thin death sound"
       }
     }
+  },
+  {
+    "slug": "grok-4.7-medium",
+    "harness": "Grok Build",
+    "run": "grok-build__grok-4.7-medium",
+    "requested": "grok-4.7",
+    "actual": "grok-4.7-build",
+    "effort": "medium",
+    "duration_ms": 2302300,
+    "input_tokens": 174394,
+    "cached_input_tokens": 5287168,
+    "cache_write_tokens": null,
+    "output_tokens": 147150,
+    "thinking_tokens": 114869,
+    "tokens_total": null,
+    "cost_usd": 1.31759248,
+    "note": "Grok Build fair cell on 2026-10-03 at medium reasoning effort, 256k context window (grok-4.7's default; the catalog also offers 500k): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py --effort medium, grok 1.0.41 with web search and fetch disabled. Served model grok-4.7-build. cost_usd is Grok Build's own total_cost_usd for the run. The model ran headless Chrome from the cell to test its game; it read nothing outside the cell. The high-effort grok-4.7 card is an older run of the one-line prompt, so prompt and effort both differ between the two cards.",
+    "display_model": "grok-4.7",
+    "phase": 1,
+    "score": null
   }
 ]

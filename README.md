@@ -6,7 +6,7 @@ Models and harnesses recreate Pac-Man from one short prompt. Compare entries by 
 
 **Dev preview:** the live site URL plus `dev/` (serves the `dev` branch)
 
-Each card opens a playable HTML entry. The gallery has one card per model. Stats come from harness transcripts where available (wall time, tokens, cost estimates). A dash means that run did not record the number.
+Each card opens a playable HTML entry. The gallery has one card per model and effort; when a model was run at more than one effort, each of its cards names its effort under the title. Stats come from harness transcripts where available (wall time, tokens, cost estimates). A dash means that run did not record the number.
 
 Scores (out of 100) come from Opus 5.5's 2026-09-28 re-test of the live games on this site: a 90 s automated play test plus a source and maze audit. The rubric is Controls 20, Ghosts 25, Pac-Man stuck 20, Maze 20, Sound 15. Each entry's `score` and per-check `score_notes` live in `entries/meta.json`. The gallery sorts by score, highest first, and shows the per-check notes under a card's details.
 
