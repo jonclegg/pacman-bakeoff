@@ -1317,6 +1317,28 @@
     "note": "Grok Build fair cell on 2026-10-03 at medium reasoning effort, 256k context window (grok-4.7's default; the catalog also offers 500k): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py --effort medium, grok 1.0.41 with web search and fetch disabled. Served model grok-4.7-build. cost_usd is Grok Build's own total_cost_usd for the run. The model ran headless Chrome from the cell to test its game; it read nothing outside the cell. The high-effort grok-4.7 card is an older run of the one-line prompt, so prompt and effort both differ between the two cards.",
     "display_model": "grok-4.7",
     "phase": 1,
-    "score": null
+    "score": 88,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click, P/Esc, M, cornering; no restart key, no touch"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "arcade targeting, Elroy, eyes return; a revived ghost can be eaten again in the same power-up"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": ""
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "0 dead ends, 0/242 unreachable"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "continuous siren + full set, mute; siren keeps droning through pause, death and game over; generic intro"
+      }
+    }
   }
 ]
