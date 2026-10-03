@@ -127,6 +127,13 @@ def wall_ms(run_dir):
 
 
 ###############################################################################
+def run_effort(run_dir):
+    """run_cell.py records effort in meta.json; runs that predate it all ran at high."""
+    meta = run_dir / "meta.json"
+    return json.loads(meta.read_text()).get("effort", "high") if meta.exists() else "high"
+
+
+###############################################################################
 def price(rates, uncached, cached, cache_write, output):
     if rates is None:
         sys.exit("this transcript has no cost; pass --rates IN,CACHED,CACHE_WRITE,OUT (USD per 1M tokens)")
@@ -171,7 +178,7 @@ def main():
         "run": args.run or run_dir.name,
         "requested": requested,
         "actual": args.actual or stats.pop("actual", None) or requested,
-        "effort": "high",
+        "effort": run_effort(run_dir),
         "duration_ms": None, "input_tokens": None, "cached_input_tokens": None, "cache_write_tokens": None,
         "output_tokens": None, "thinking_tokens": None, "tokens_total": None, "cost_usd": None,
         "note": args.note,
