@@ -6,7 +6,7 @@ Usage:
       [--rates IN,CACHED,CACHE_WRITE,OUT]   # USD per 1M tokens; required when the transcript has no cost
 
 Reads <run_dir>/transcript.jsonl, copies <run_dir>/pacman.html (or index.html) to entries/<slug>.html,
-and upserts the entry into entries/meta.json. On an existing entry, score fields (and the note, unless --note) are kept.
+records its size as html_bytes, and upserts the entry into entries/meta.json. On an existing entry, score fields (and the note, unless --note) are kept.
 Fails loudly if the transcript has no usage record or the HTML is missing.
 """
 import argparse
@@ -169,7 +169,8 @@ def main():
     html = next((run_dir / n for n in ("pacman.html", "index.html") if (run_dir / n).exists()), None)
     if html is None:
         sys.exit(f"no pacman.html or index.html in {run_dir}")
-    shutil.copy(html, REPO / "entries" / f"{args.slug}.html")
+    published = REPO / "entries" / f"{args.slug}.html"
+    shutil.copy(html, published)
 
     requested = args.requested or args.display_model or args.slug
     entry = {
@@ -181,6 +182,7 @@ def main():
         "effort": run_effort(run_dir),
         "duration_ms": None, "input_tokens": None, "cached_input_tokens": None, "cache_write_tokens": None,
         "output_tokens": None, "thinking_tokens": None, "tokens_total": None, "cost_usd": None,
+        "html_bytes": published.stat().st_size,
         "note": args.note,
         "display_model": args.display_model or args.slug,
         "phase": args.phase,
