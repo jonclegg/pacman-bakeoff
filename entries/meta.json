@@ -1340,5 +1340,25 @@
         "note": "continuous siren + full set, mute; siren keeps droning through pause, death and game over; generic intro"
       }
     }
+  },
+  {
+    "slug": "grok-bot-2026-10-07",
+    "harness": "Grok Bot",
+    "run": "grok-bot-2026-10-07",
+    "requested": "grok-bot",
+    "actual": "grok-bot",
+    "effort": null,
+    "duration_ms": null,
+    "input_tokens": null,
+    "cached_input_tokens": null,
+    "cache_write_tokens": null,
+    "output_tokens": null,
+    "thinking_tokens": null,
+    "tokens_total": null,
+    "cost_usd": null,
+    "note": "in-chat build supplied by the user on 2026-10-07 (pacman.html, 24.6 KB); no transcript, so prompt, tokens, cost and duration are unknown. Not a fair-cell run. The older grok-bot card is a separate, earlier build.",
+    "display_model": "Grok Bot 10/7/2026",
+    "phase": 4,
+    "score": null
   }
 ]
