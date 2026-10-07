@@ -150,10 +150,10 @@ async function init() {
   applyFilters();
   const playing = cardFromHash();
   if (playing) showPlay(playing.entry);
-  await loadSizes();
 }
 
 function buildCard(entry, index, color, asked) {
+  if (!Number.isInteger(entry.html_bytes)) throw new Error(`${entry.slug}: no html_bytes in meta.json`);
   const name = displayName(entry);
   const el = h("article", "cab");
   el.style.setProperty("--c", color);
@@ -194,16 +194,13 @@ function buildCard(entry, index, color, asked) {
   const tags = h("div", "cab-tags");
   if (entry.phase != null) tags.append(h("span", "cab-tag", `PHASE ${entry.phase}`));
   if (entry.effort) tags.append(h("span", "cab-tag", `${entry.effort} effort`));
-  const sizeTag = h("span", "cab-tag");
-  sizeTag.hidden = true;
-  tags.append(sizeTag);
+  tags.append(h("span", "cab-tag", formatBytes(entry.html_bytes)));
 
   const details = h("details", "cab-details");
   const panel = h("div", "cab-detail-panel");
   if (scored) panel.append(scoreWhy(entry));
   panel.append(h("p", "cab-panel-head", "RUN DATA"), statList("cab-detail-list", detailRows(entry)));
   details.append(h("summary", "cab-details-toggle", "SCORE + RUN DATA"), panel);
-  const sizeValue = details.querySelector('[data-field="size"]');
 
   body.append(tags, statList("cab-stats", stripRows(entry)), details);
   el.append(screen, body);
@@ -222,12 +219,7 @@ function buildCard(entry, index, color, asked) {
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
-  const setSize = (bytes) => {
-    sizeTag.textContent = sizeValue.textContent = formatBytes(bytes);
-    sizeTag.hidden = false;
-    sizeValue.classList.remove("is-empty");
-  };
-  return { el, entry, model: name, haystack, setSize };
+  return { el, entry, model: name, haystack };
 }
 
 function displayName(entry) {
@@ -326,7 +318,7 @@ function detailRows(entry) {
     ["THINKING", show(entry.thinking_tokens, formatFull)],
     ["TOTAL", show(entry.tokens_total, formatFull)],
     ["COST", show(entry.cost_usd, formatCost)],
-    ["HTML SIZE", null, "size"],
+    ["HTML SIZE", formatBytes(entry.html_bytes)],
   ];
 }
 
@@ -388,18 +380,6 @@ function statList(className, rows) {
     list.append(cell);
   }
   return list;
-}
-
-async function loadSizes() {
-  await Promise.all(
-    cards.map(async (card) => {
-      const response = await fetch(entryUrl(card.entry), { method: "HEAD" });
-      if (!response.ok) throw new Error(`${card.entry.slug}: HTTP ${response.status}`);
-      const bytes = Number(response.headers.get("content-length"));
-      if (!Number.isFinite(bytes)) throw new Error(`${card.entry.slug}: no content-length`);
-      card.setSize(bytes);
-    })
-  );
 }
 
 function buildModelFilter() {
