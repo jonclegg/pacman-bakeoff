@@ -277,7 +277,7 @@ function collisionLabels(entries) {
 }
 
 function companyOf(model) {
-  const prefix = model.match(/^[a-z]+/)?.[0];
+  const prefix = model.toLowerCase().match(/^[a-z]+/)?.[0];
   const company = COMPANIES[prefix];
   if (!company) throw new Error(`No company mapped for model ${model}`);
   return company;
