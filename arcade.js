@@ -250,7 +250,7 @@ function assertOneCardPerModelAndEffort(entries) {
 }
 
 function shortName(name) {
-  return name.split("/").pop();
+  return name.replace(/^[\w.-]+\//, "");
 }
 
 function collisionLabels(entries) {
