@@ -3,7 +3,7 @@
 Usage:
   python3 bench/add_entry.py <run_dir> --slug SLUG --harness claude-code|claude-code-openrouter|codex|grok-build|antigravity
       [--display-model NAME] [--requested ID] [--actual ID] [--run NAME] [--note TEXT]
-      [--rates IN,CACHED,CACHE_WRITE,OUT]   # USD per 1M tokens; required when the transcript has no cost
+      [--rates IN,CACHED,CACHE_WRITE,OUT]   # USD per 1M tokens; required when the transcript has no cost or Claude Code has no price for the model
 
 Reads <run_dir>/transcript.jsonl, copies <run_dir>/pacman.html (or index.html) to entries/<slug>.html,
 records its size as html_bytes, and upserts the entry into entries/meta.json. On an existing entry, score fields (and the note, unless --note) are kept.
@@ -37,14 +37,24 @@ def events(path):
 
 
 ###############################################################################
-def claude_stats(run_dir):
-    """Claude Code stream-json: the final `result` event carries usage and total_cost_usd."""
+def claude_stats(run_dir, rates):
+    """Claude Code stream-json: the final `result` event carries usage and total_cost_usd.
+
+    Claude Code prices models it doesn't know with a placeholder (`costBasis: unknown`); those runs
+    need --rates, which then replaces total_cost_usd with the published rate card.
+    """
     results = [e for e in events(run_dir / "transcript.jsonl") if e.get("type") == "result"]
     if not results:
         sys.exit("no result event in transcript")
     r = results[-1]
     u = r["usage"]
     models = list((r.get("modelUsage") or {}).keys())
+    unknown = any(m.get("costBasis") == "unknown" for m in (r.get("modelUsage") or {}).values())
+    if unknown and rates is None:
+        sys.exit("Claude Code has no price for this model (costBasis unknown); pass --rates IN,CACHED,CACHE_WRITE,OUT")
+    cost = r["total_cost_usd"] if rates is None else price(
+        rates, u["input_tokens"], u.get("cache_read_input_tokens", 0), u.get("cache_creation_input_tokens", 0),
+        u["output_tokens"])
     return {
         "actual": models[0] if len(models) == 1 else None,
         "duration_ms": r["duration_ms"],
@@ -53,7 +63,7 @@ def claude_stats(run_dir):
         "cache_write_tokens": u.get("cache_creation_input_tokens"),
         "output_tokens": u["output_tokens"],
         "thinking_tokens": (u.get("output_tokens_details") or {}).get("thinking_tokens"),
-        "cost_usd": round(r["total_cost_usd"], 8),
+        "cost_usd": round(cost, 8),
     }
 
 
@@ -158,7 +168,7 @@ def main():
     run_dir = args.run_dir.expanduser()
 
     if args.harness.startswith("claude-code"):
-        stats = claude_stats(run_dir)
+        stats = claude_stats(run_dir, args.rates)
     elif args.harness == "codex":
         stats = codex_stats(run_dir, args.rates)
     elif args.harness == "grok-build":
