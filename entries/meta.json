@@ -1436,6 +1436,28 @@
     "note": "First-party Claude Code fair cell on 2026-10-07: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py, effort high, no web tools. Served model claude-haiku-5-5 (provider firstParty). Claude Code 2.1.292 does not know this model yet (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 5.8488192; cost_usd here is the run's usage at the published Haiku 5.5 rates for prompts up to 100,000 tokens ($0.10 input, $0.01 cache hits, $0.20 1h cache writes, $0.50 output per 1M; platform.claude.com/docs/en/about-claude/pricing and anthropic.com/claude-haiku-5-5, read 2026-10-07). All 31 requests stayed under 100k prompt tokens (largest 98,478), so the long-prompt rates never applied. Claude Code capped output at 32k tokens per response for the unrecognized model; no response hit it.",
     "display_model": "claude-haiku-5-5",
     "phase": 1,
-    "score": null
+    "score": 70,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space, P/Esc, buffered turns, instant reverse; no mute, restart key or touch"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "arcade targeting and scatter/chase waves, but eaten eyes never get home from about two thirds of the maze (they target a tile inside the house); doors let active ghosts back in, so Clyde can bounce inside a house for most of a life"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; same speed at 30\u2013240 fps"
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "top half mirrored to the bottom, so a second ghost house and 292 pellets; 0 dead ends outside the houses, 0/292 unreachable"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "waka, power pellet, eat ghost, death, level clear, 3-note start; no siren, no frightened loop, no mute or master bus"
+      }
+    }
   }
 ]
