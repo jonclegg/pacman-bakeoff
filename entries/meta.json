@@ -1340,5 +1340,48 @@
         "note": "continuous siren + full set, mute; siren keeps droning through pause, death and game over; generic intro"
       }
     }
+  },
+  {
+    "slug": "grok-bot-2026-10-07",
+    "harness": "Grok Bot",
+    "run": "grok-bot-2026-10-07",
+    "requested": "grok-bot",
+    "actual": "grok-bot",
+    "effort": null,
+    "duration_ms": null,
+    "input_tokens": null,
+    "cached_input_tokens": null,
+    "cache_write_tokens": null,
+    "output_tokens": null,
+    "thinking_tokens": null,
+    "tokens_total": null,
+    "cost_usd": null,
+    "note": "in-chat build supplied by the user on 2026-10-07 (pacman.html, 24.6 KB); no transcript, so prompt, tokens, cost and duration are unknown. Not a fair-cell run. The older grok-bot card is a separate, earlier build.",
+    "display_model": "Grok Bot 10/7/2026",
+    "phase": 4,
+    "score": 10,
+    "score_summary": "snap-to-centre bug: nothing ever moves",
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space start, no page scroll; no pause, mute, restart key, click or touch; speed per frame (2\u00d7 at 120 Hz)"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "all 4 frozen stacked on one tile above the house, 30\u2013240 fps (two snap-to-centre bugs); revived ghost re-eatable on paper"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "Pac-Man frozen at spawn from frame 1 (live: never moved, score 0)"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, 0 dead ends, 0/244 unreachable, symmetric"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "none"
+      }
+    }
   }
 ]
