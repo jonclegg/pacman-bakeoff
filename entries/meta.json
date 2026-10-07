@@ -1433,6 +1433,7 @@
     "thinking_tokens": 204531,
     "tokens_total": null,
     "cost_usd": 0.15540866,
+    "html_bytes": 18448,
     "note": "First-party Claude Code fair cell on 2026-10-07: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py, effort high, no web tools. Served model claude-haiku-5-5 (provider firstParty). Claude Code 2.1.292 does not know this model yet (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 5.8488192; cost_usd here is the run's usage at the published Haiku 5.5 rates for prompts up to 100,000 tokens ($0.10 input, $0.01 cache hits, $0.20 1h cache writes, $0.50 output per 1M; platform.claude.com/docs/en/about-claude/pricing and anthropic.com/claude-haiku-5-5, read 2026-10-07). All 31 requests stayed under 100k prompt tokens (largest 98,478), so the long-prompt rates never applied. Claude Code capped output at 32k tokens per response for the unrecognized model; no response hit it.",
     "display_model": "claude-haiku-5-5",
     "phase": 1,
