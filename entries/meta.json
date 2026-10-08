@@ -1460,5 +1460,48 @@
         "note": "waka, power pellet, eat ghost, death, level clear, 3-note start; no siren, no frightened loop, no mute or master bus"
       }
     }
+  },
+  {
+    "slug": "grok-bot-2026-10-08",
+    "harness": "Grok Bot",
+    "run": "grok-bot-2026-10-08",
+    "requested": "grok-bot",
+    "actual": "grok-bot",
+    "effort": null,
+    "duration_ms": null,
+    "input_tokens": null,
+    "cached_input_tokens": null,
+    "cache_write_tokens": null,
+    "output_tokens": null,
+    "thinking_tokens": null,
+    "tokens_total": null,
+    "cost_usd": null,
+    "note": "in-chat build supplied by the user on 2026-10-08 (pacman.html, 23.3 KB); no transcript, so prompt, tokens, cost and duration are unknown. Not a fair-cell run. The grok-bot and Grok Bot 10/7/2026 cards are separate, earlier builds.",
+    "display_model": "Grok Bot 10/8/2026",
+    "phase": 4,
+    "score": 89,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/tap/click start, P/Esc, M, swipe, buffered turns, instant reverse, auto-pause on blur; no mid-game restart, no cornering"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "4 targeting rules (no Pinky/Inky up-quirk), scatter/chase waves, timer+dot release, fright blink and 200\u2192400 chain, eyes revive in about 2.6 s and can't be re-eaten; one-stage Elroy, tunnel slowdown"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; tiles/s with fixed 1/120 s substeps, same speed at 30\u2013240 fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, 0 dead ends, 0/244 unreachable, symmetric, sealed house"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "real intro notes (flat rhythm, no bass), waka, power, eat ghost, fruit, death, extra life, mute; no siren or frightened loop, no master bus"
+      }
+    },
+    "html_bytes": 23336
   }
 ]
