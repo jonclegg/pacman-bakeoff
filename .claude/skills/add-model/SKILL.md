@@ -21,6 +21,7 @@ Paths: runner and tools in `bench/`, runs land in `~/.pacbake/runs/<run_name>/`,
 | Anthropic | `claude-code` (first party). If the org catalog remaps the id, use `claude-code-openrouter` and say so in the note | same |
 | OpenAI | `codex-apikey` (key from SSM `/somewhere/openai-api-key`, profile `jclegg`, us-east-1), so cost is the published rate card applied to real usage. Run the canary once before its first real run | `codex` |
 | xAI | `grok-build` | `grok-build` |
+| Meta (API-hosted Muse models) | `claude-code-meta`: Claude Code against Meta Model API's Anthropic-compatible `https://api.meta.ai/v1/messages`, key in `~/.pacbake/secrets/meta_model_api_key`. Its transcript has no real cost, so pass `--rates` from `dev.meta.ai/docs/pricing-rate-limits` | `claude-code-meta` |
 | Google | Antigravity (`agy`) has no sandboxed lane in `run_cell.py` yet. Ask the user before running it | `antigravity` |
 | Open weights and everyone else | `claude-code-openrouter` with the OpenRouter slug | `claude-code-openrouter` |
 
