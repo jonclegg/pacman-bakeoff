@@ -112,13 +112,14 @@ def build_claude(model, effort, cell, run_dir):
 
 
 ###############################################################################
-def build_claude_openrouter(model, effort, cell, run_dir):
-    fake_home = pathlib.Path("/Users/Shared/pacbake/fakehome-claude-or")
+def build_claude_gateway(model, effort, cell, run_dir, base_url, key_name, fake_home_name):
+    """Claude Code against a third-party Anthropic-compatible /v1/messages endpoint."""
+    fake_home = SHARED / fake_home_name
     fake_home.mkdir(parents=True, exist_ok=True)
     env = base_env(fake_home, cell)
-    key = (PACBAKE / "secrets" / "openrouter_api_key").read_text().strip()
+    key = (PACBAKE / "secrets" / key_name).read_text().strip()
     env["CLAUDE_CONFIG_DIR"] = str(fake_home / ".claude")
-    env["ANTHROPIC_BASE_URL"] = os.environ.get("PACBAKE_OR_BASE_URL", "https://openrouter.ai/api")
+    env["ANTHROPIC_BASE_URL"] = base_url
     env["ANTHROPIC_AUTH_TOKEN"] = key
     env["ANTHROPIC_API_KEY"] = ""
     env["CLAUDE_CODE_MAX_OUTPUT_TOKENS"] = "128000"
@@ -130,6 +131,19 @@ def build_claude_openrouter(model, effort, cell, run_dir):
     env["CLAUDE_CODE_TMPDIR"] = str(cell_tmp(cell))
     settings = claude_settings(cell, run_dir, REAL_HOME)
     return claude_flags(model, effort, settings), env, True
+
+
+###############################################################################
+def build_claude_openrouter(model, effort, cell, run_dir):
+    return build_claude_gateway(model, effort, cell, run_dir,
+                                os.environ.get("PACBAKE_OR_BASE_URL", "https://openrouter.ai/api"),
+                                "openrouter_api_key", "fakehome-claude-or")
+
+
+###############################################################################
+def build_claude_meta(model, effort, cell, run_dir):
+    return build_claude_gateway(model, effort, cell, run_dir, "https://api.meta.ai",
+                                "meta_model_api_key", "fakehome-claude-meta")
 
 
 ###############################################################################
@@ -188,6 +202,7 @@ def build_grok(model, effort, cell, run_dir):
 BUILDERS = {
     "claude-code": build_claude,
     "claude-code-openrouter": build_claude_openrouter,
+    "claude-code-meta": build_claude_meta,
     "codex-chatgpt": build_codex,
     "codex-apikey": build_codex_apikey,
     "grok-build": build_grok,
