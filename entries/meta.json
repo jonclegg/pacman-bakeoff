@@ -16,7 +16,7 @@
     "display_model": "grok-4.7",
     "phase": 1,
     "input_tokens": 195470,
-    "score": 96,
+    "score": 83,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -57,7 +57,7 @@
     "display_model": "grok-4.6",
     "phase": 1,
     "input_tokens": 197156,
-    "score": 91,
+    "score": 78,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -141,7 +141,7 @@
     "display_model": "gpt-6-astra",
     "phase": 1,
     "cache_write_tokens": 43054,
-    "score": 91,
+    "score": 86,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -184,7 +184,7 @@
     "display_model": "gpt-6-sol",
     "phase": 1,
     "cache_write_tokens": 38884,
-    "score": 83,
+    "score": 72,
     "score_notes": {
       "controls": {
         "mark": "ok",
@@ -350,7 +350,7 @@
     "display_model": "claude-opus-5-5",
     "phase": 1,
     "input_tokens": 22,
-    "score": 99,
+    "score": 100,
     "score_notes": {
       "controls": {
         "mark": "ok",
@@ -391,7 +391,7 @@
     "display_model": "claude-fable-5-1",
     "phase": 1,
     "input_tokens": 324,
-    "score": 96,
+    "score": 94,
     "score_notes": {
       "controls": {
         "mark": "ok",
@@ -561,7 +561,7 @@
     "note": "Codex API-key rerun on 2026-09-28 (auth_mode apikey, not ChatGPT login / not Cursor Cloud Ultra). OPENAI_API_KEY from SSM /somewhere/openai-api-key, profile jclegg. Full fair-cell PROMPT.md in an empty git cell /Users/Shared/pacbake/cells/2df14a38-5ee9-4fb1-a071-87818745152e. cost_usd 0.7199024 is from turn.completed aggregate usage (ephemeral Codex run; equals the sum of response usages) at OpenAI Standard short-context rates per 1M tokens ($4 input, $0.40 cached input, $5 cache writes, $20 output; pricing page 2026-09-28; GPT-5.6 Sol promotional pricing through at least 2026-11-21). Cache-write tokens are included in input_tokens; uncached input is input minus cached minus cache write (45). Reasoning tokens are included in output_tokens. No long-context uplift: aggregate cache_write_input_tokens=32440 and sibling gpt-6-sol API cell (higher totals, 16 responses) had 0 responses over 272000 input tokens. No regional uplift. Replaces the prior Cursor Cloud card whose Ultra dashboard had no events for bc-66adde64-\u2026",
     "display_model": "gpt-5.6-sol",
     "phase": 1,
-    "score": 92,
+    "score": 86,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -768,7 +768,7 @@
     "display_model": "z-ai/glm-5.3-flash",
     "phase": 2,
     "input_tokens": 42596,
-    "score": 90,
+    "score": 81,
     "score_notes": {
       "controls": {
         "mark": "ok",
@@ -850,7 +850,7 @@
     "display_model": "qwen/qwen3.8-flash",
     "phase": 2,
     "input_tokens": 192,
-    "score": 76,
+    "score": 63,
     "score_notes": {
       "controls": {
         "mark": "ok",
@@ -1179,7 +1179,7 @@
     "display_model": "anthropic/claude-sonnet-5.5-20260928",
     "phase": 2,
     "input_tokens": 18,
-    "score": 97,
+    "score": 93,
     "score_notes": {
       "controls": {
         "mark": "ok",
@@ -1220,7 +1220,7 @@
     "display_model": "claude-fable-5",
     "phase": 1,
     "input_tokens": 80,
-    "score": 99,
+    "score": 100,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -1263,7 +1263,7 @@
     "display_model": "gpt-6.1-sol",
     "phase": 1,
     "cache_write_tokens": 45838,
-    "score": 95,
+    "score": 91,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -1350,7 +1350,7 @@
     "note": "Grok Build fair cell on 2026-10-03 at medium reasoning effort, 256k context window (grok-4.7's default; the catalog also offers 500k): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py --effort medium, grok 1.0.41 with web search and fetch disabled. Served model grok-4.7-build. cost_usd is Grok Build's own total_cost_usd for the run. The model ran headless Chrome from the cell to test its game; it read nothing outside the cell. The high-effort grok-4.7 card is an older run of the one-line prompt, so prompt and effort both differ between the two cards.",
     "display_model": "grok-4.7",
     "phase": 1,
-    "score": 92,
+    "score": 91,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -1479,7 +1479,7 @@
     "note": "in-chat build supplied by the user on 2026-10-08 (pacman.html, 23.3 KB); no transcript, so prompt, tokens, cost and duration are unknown. Not a fair-cell run. The grok-bot and Grok Bot 10/7/2026 cards are separate, earlier builds.",
     "display_model": "Grok Bot 10/8/2026",
     "phase": 4,
-    "score": 93,
+    "score": 91,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -1523,7 +1523,7 @@
     "note": "Meta Model API Claude Code fair cell on 2026-10-12, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-meta, effort high (sent as output_config.effort \"high\"), no web tools. Claude Code 2.1.293 called Meta's Anthropic-compatible Messages endpoint (https://api.meta.ai/v1/messages) directly with a pay-as-you-go Model API key, no proxy; all 42 responses report model muse-wonder-1.0 (Standard mode). Muse Wonder Full is Muse Code subscription only and was not used. Claude Code does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 1.637515; cost_usd here is the run's usage at Meta's published muse-wonder-1.0 Standard rates ($4.00 input, $0.20 cached input, $20.00 output per 1M; no cache-write charge, and none was reported; dev.meta.ai/docs/pricing-rate-limits, read 2026-10-12). Meta's input_tokens excludes cache reads, as Anthropic's does. Claude Code assumed a 200k context window for the unknown model (Muse Wonder has 1,048,576); the transcript has no auto-compaction event. The model listed /Applications to find Chrome and screenshotted its own file with headless Chrome; one scratch Write to /tmp was denied; it read nothing else outside the cell.",
     "display_model": "Muse Wonder",
     "phase": 5,
-    "score": 93,
+    "score": 87,
     "score_notes": {
       "controls": {
         "mark": "minor",

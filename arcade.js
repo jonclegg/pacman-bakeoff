@@ -37,8 +37,9 @@ const SCORE_MARKS = {
   major: ["✗", "Major issue"],
   na: ["—", "Not testable"],
 };
-const SCORE_BY = "Scored by Opus 5.5 from reviewing the live games on this site (2026-09-28), not by the models themselves. Since 2026-10-13 (v3), minor Controls and Sound issues cost less.";
+const SCORE_BY = "Scored by Opus 5.5 from reviewing the live games on this site (2026-09-28), not by the models themselves. Since 2026-10-13 (v3), minor Controls and Sound issues cost less. v4 (also 2026-10-13) adds visual accuracy and arcade extras.";
 const SCORE_RUBRIC = `100 points: ${SCORE_CHECKS.map(([, label, points]) => `${label} ${points}`).join(" · ")}.`;
+const SCORE_V4 = "v4, for games with no major issue: minus up to 22 for looking unlike the 1980 arcade game (maze 6 · ghosts 6 · Pac-Man 4 · HUD 4 · dots 2, judged blind from screenshots), plus up to 8 for verified arcade extras (bonus fruit 3 · attract screen 2 · pixel-art 1 · level-clear flash 1 · intermission 1). Capped at 100.";
 
 const state = { query: "", models: new Set(), sort: "score", descending: true };
 const SORT_VALUE = {
@@ -359,7 +360,8 @@ function appendHowScored(head, slug) {
   tip.append(
     credit,
     h("p", "", "Method: a 90 s automated play test plus a source and maze audit of each game."),
-    h("p", "", SCORE_RUBRIC)
+    h("p", "", SCORE_RUBRIC),
+    h("p", "", SCORE_V4)
   );
   tip.hidden = true;
   button.addEventListener("click", () => {
