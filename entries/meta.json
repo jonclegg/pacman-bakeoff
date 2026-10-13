@@ -1546,5 +1546,26 @@
         "note": "continuous siren with a fright variant, waka, power, eat ghost, fruit, extra life, death, mute; siren restarts on the death frame and drones through the 1.9 s death animation, death tune only after it; flat-rhythm intro, no bass, no master bus"
       }
     }
+  },
+  {
+    "slug": "gemini-4-argon",
+    "harness": "Gemini API (proxy) / Claude Code",
+    "run": "claude-code-gemini__gemini-4-argon",
+    "requested": "gemini-4-argon",
+    "actual": "gemini-4-argon",
+    "effort": "high",
+    "duration_ms": 902084,
+    "input_tokens": 254192,
+    "cached_input_tokens": 1950012,
+    "cache_write_tokens": 0,
+    "output_tokens": 95545,
+    "thinking_tokens": 33652,
+    "tokens_total": null,
+    "cost_usd": 1.6588352,
+    "html_bytes": 80028,
+    "note": "Gemini API Claude Code fair cell on 2026-10-13, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-gemini, effort high, no web tools. Claude Code 2.1.296 called a local Anthropic-to-Gemini translation proxy (bench/gemini_proxy.py), which called Google's Gemini API (generativelanguage.googleapis.com, streamGenerateContent) directly with a paid Gemini API key. Effort high was sent as thinkingLevel \"high\" and CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000 as maxOutputTokens 128000 on all 29 requests; all 29 responses report modelVersion gemini-4-argon, finishReason STOP. Google does not stream function-call arguments, so the single Write of pacman.html was one 289 s silent generation; the proxy has no upstream idle timeout and pings Claude Code every 10 s. An earlier attempt the same day via OpenRouter (google/gemini-4-argon pinned to Google AI Studio) wrote no file because OpenRouter closes an upstream after 120 s of silence; that was an infra failure and nothing from it was published. Claude Code does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 4.634591; cost_usd here is the run's usage at Google's published Gemini 4 Argon Standard paid-tier rates in effect through 2026-11-30 ($2.00 input, $0.10 cached input, $10.00 output including thinking per 1M; implicit caching only, no cache-write charge; ai.google.dev/gemini-api/docs/pricing, read 2026-10-13). The proxy's own log of Gemini usageMetadata matches Claude Code's totals token for token (thinking 33,652 of the 95,545 output tokens). Claude Code assumed a 200k context window for the unknown model (Gemini 4 Argon has 1,048,576); the largest prompt was 117,056 tokens and there was no auto-compaction. The model listed /Applications to find Chrome and loaded its own file in headless Chrome; it read nothing else outside the cell.",
+    "display_model": "Gemini 4 Argon",
+    "phase": 3,
+    "score": null
   }
 ]

@@ -21,7 +21,7 @@ HARNESS_LABEL = {
     "claude-code": "Claude Code",
     "claude-code-openrouter": "OpenRouter / Claude Code",
     "claude-code-meta": "Meta Model API / Claude Code",
-    "claude-code-gemini": "Gemini API / Claude Code",
+    "claude-code-gemini": "Gemini API (proxy) / Claude Code",
     "codex": "Codex",
     "grok-build": "Grok Build",
     "antigravity": "Antigravity",
