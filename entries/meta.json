@@ -1503,5 +1503,48 @@
       }
     },
     "html_bytes": 23336
+  },
+  {
+    "slug": "muse-wonder",
+    "harness": "Meta Model API / Claude Code",
+    "run": "claude-code-meta__muse-wonder-1.0",
+    "requested": "muse-wonder-1.0",
+    "actual": "muse-wonder-1.0",
+    "effort": "high",
+    "duration_ms": 323864,
+    "input_tokens": 102913,
+    "cached_input_tokens": 686900,
+    "cache_write_tokens": 0,
+    "output_tokens": 31180,
+    "thinking_tokens": 9115,
+    "tokens_total": null,
+    "cost_usd": 1.172632,
+    "html_bytes": 40328,
+    "note": "Meta Model API Claude Code fair cell on 2026-10-12, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-meta, effort high (sent as output_config.effort \"high\"), no web tools. Claude Code 2.1.293 called Meta's Anthropic-compatible Messages endpoint (https://api.meta.ai/v1/messages) directly with a pay-as-you-go Model API key, no proxy; all 42 responses report model muse-wonder-1.0 (Standard mode). Muse Wonder Full is Muse Code subscription only and was not used. Claude Code does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 1.637515; cost_usd here is the run's usage at Meta's published muse-wonder-1.0 Standard rates ($4.00 input, $0.20 cached input, $20.00 output per 1M; no cache-write charge, and none was reported; dev.meta.ai/docs/pricing-rate-limits, read 2026-10-12). Meta's input_tokens excludes cache reads, as Anthropic's does. Claude Code assumed a 200k context window for the unknown model (Muse Wonder has 1,048,576); the transcript has no auto-compaction event. The model listed /Applications to find Chrome and screenshotted its own file with headless Chrome; one scratch Write to /tmp was denied; it read nothing else outside the cell.",
+    "display_model": "Muse Wonder",
+    "phase": 5,
+    "score": 89,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click start, P/Esc, M, swipe + d-pad, buffered turns, instant reverse; no cornering, no mid-game restart, the arrow that starts the game is dropped, no auto-pause on blur"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "arcade targeting incl. Pinky/Inky up-quirk, scatter/chase waves, eyes home from every tile in 1.0\u20133.7 s, revive unfrightened (no re-eat), tunnel slowdown, no freeze at 30\u2013240 fps; every revival resets the shared house-release timer, timer-only release, one-stage Elroy from L2"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; tiles/s \u00d7 dt with an exact centre step, same distance within 1% at 30\u2013240 fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, 0 dead ends, 0/244 unreachable, symmetric, door ghost-only"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "continuous siren with a fright variant, waka, power, eat ghost, fruit, extra life, death, mute; siren restarts on the death frame and drones through the 1.9 s death animation, death tune only after it; flat-rhythm intro, no bass, no master bus"
+      }
+    }
   }
 ]
