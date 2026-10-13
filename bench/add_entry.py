@@ -1,7 +1,7 @@
 """Publish one finished run as a gallery entry.
 
 Usage:
-  python3 bench/add_entry.py <run_dir> --slug SLUG --harness claude-code|claude-code-openrouter|claude-code-meta|codex|grok-build|antigravity
+  python3 bench/add_entry.py <run_dir> --slug SLUG --harness claude-code|claude-code-openrouter|claude-code-meta|claude-code-gemini|codex|grok-build|antigravity
       [--display-model NAME] [--requested ID] [--actual ID] [--run NAME] [--note TEXT]
       [--rates IN,CACHED,CACHE_WRITE,OUT]   # USD per 1M tokens; required when the transcript has no cost or Claude Code has no price for the model
 
@@ -21,6 +21,7 @@ HARNESS_LABEL = {
     "claude-code": "Claude Code",
     "claude-code-openrouter": "OpenRouter / Claude Code",
     "claude-code-meta": "Meta Model API / Claude Code",
+    "claude-code-gemini": "Gemini API / Claude Code",
     "codex": "Codex",
     "grok-build": "Grok Build",
     "antigravity": "Antigravity",
