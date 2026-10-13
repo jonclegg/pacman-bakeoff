@@ -147,6 +147,14 @@ def build_claude_meta(model, effort, cell, run_dir):
 
 
 ###############################################################################
+def build_claude_gemini(model, effort, cell, run_dir):
+    """Gemini API has no Messages endpoint; bench/gemini_proxy.py translates (default port 8792)."""
+    return build_claude_gateway(model, effort, cell, run_dir,
+                                os.environ.get("PACBAKE_GEMINI_BASE_URL", "http://127.0.0.1:8792"),
+                                "gemini_api_key", "fakehome-claude-gemini")
+
+
+###############################################################################
 def build_codex(model, effort, cell, run_dir):
     env = base_env(REAL_HOME, cell)
     env["CODEX_HOME"] = str(PACBAKE / "homes" / "codex-chatgpt")
@@ -203,6 +211,7 @@ BUILDERS = {
     "claude-code": build_claude,
     "claude-code-openrouter": build_claude_openrouter,
     "claude-code-meta": build_claude_meta,
+    "claude-code-gemini": build_claude_gemini,
     "codex-chatgpt": build_codex,
     "codex-apikey": build_codex_apikey,
     "grok-build": build_grok,
