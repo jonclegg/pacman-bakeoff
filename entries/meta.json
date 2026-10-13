@@ -16,7 +16,7 @@
     "display_model": "grok-4.7",
     "phase": 1,
     "input_tokens": 195470,
-    "score": 94,
+    "score": 96,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -57,7 +57,7 @@
     "display_model": "grok-4.6",
     "phase": 1,
     "input_tokens": 197156,
-    "score": 89,
+    "score": 91,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -141,7 +141,7 @@
     "display_model": "gpt-6-astra",
     "phase": 1,
     "cache_write_tokens": 43054,
-    "score": 87,
+    "score": 91,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -561,7 +561,7 @@
     "note": "Codex API-key rerun on 2026-09-28 (auth_mode apikey, not ChatGPT login / not Cursor Cloud Ultra). OPENAI_API_KEY from SSM /somewhere/openai-api-key, profile jclegg. Full fair-cell PROMPT.md in an empty git cell /Users/Shared/pacbake/cells/2df14a38-5ee9-4fb1-a071-87818745152e. cost_usd 0.7199024 is from turn.completed aggregate usage (ephemeral Codex run; equals the sum of response usages) at OpenAI Standard short-context rates per 1M tokens ($4 input, $0.40 cached input, $5 cache writes, $20 output; pricing page 2026-09-28; GPT-5.6 Sol promotional pricing through at least 2026-11-21). Cache-write tokens are included in input_tokens; uncached input is input minus cached minus cache write (45). Reasoning tokens are included in output_tokens. No long-context uplift: aggregate cache_write_input_tokens=32440 and sibling gpt-6-sol API cell (higher totals, 16 responses) had 0 responses over 272000 input tokens. No regional uplift. Replaces the prior Cursor Cloud card whose Ultra dashboard had no events for bc-66adde64-\u2026",
     "display_model": "gpt-5.6-sol",
     "phase": 1,
-    "score": 90,
+    "score": 92,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -768,7 +768,7 @@
     "display_model": "z-ai/glm-5.3-flash",
     "phase": 2,
     "input_tokens": 42596,
-    "score": 88,
+    "score": 90,
     "score_notes": {
       "controls": {
         "mark": "ok",
@@ -1179,7 +1179,7 @@
     "display_model": "anthropic/claude-sonnet-5.5-20260928",
     "phase": 2,
     "input_tokens": 18,
-    "score": 95,
+    "score": 97,
     "score_notes": {
       "controls": {
         "mark": "ok",
@@ -1220,7 +1220,7 @@
     "display_model": "claude-fable-5",
     "phase": 1,
     "input_tokens": 80,
-    "score": 95,
+    "score": 99,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -1263,7 +1263,7 @@
     "display_model": "gpt-6.1-sol",
     "phase": 1,
     "cache_write_tokens": 45838,
-    "score": 91,
+    "score": 95,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -1350,7 +1350,7 @@
     "note": "Grok Build fair cell on 2026-10-03 at medium reasoning effort, 256k context window (grok-4.7's default; the catalog also offers 500k): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py --effort medium, grok 1.0.41 with web search and fetch disabled. Served model grok-4.7-build. cost_usd is Grok Build's own total_cost_usd for the run. The model ran headless Chrome from the cell to test its game; it read nothing outside the cell. The high-effort grok-4.7 card is an older run of the one-line prompt, so prompt and effort both differ between the two cards.",
     "display_model": "grok-4.7",
     "phase": 1,
-    "score": 88,
+    "score": 92,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -1479,7 +1479,7 @@
     "note": "in-chat build supplied by the user on 2026-10-08 (pacman.html, 23.3 KB); no transcript, so prompt, tokens, cost and duration are unknown. Not a fair-cell run. The grok-bot and Grok Bot 10/7/2026 cards are separate, earlier builds.",
     "display_model": "Grok Bot 10/8/2026",
     "phase": 4,
-    "score": 89,
+    "score": 93,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -1523,7 +1523,7 @@
     "note": "Meta Model API Claude Code fair cell on 2026-10-12, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-meta, effort high (sent as output_config.effort \"high\"), no web tools. Claude Code 2.1.293 called Meta's Anthropic-compatible Messages endpoint (https://api.meta.ai/v1/messages) directly with a pay-as-you-go Model API key, no proxy; all 42 responses report model muse-wonder-1.0 (Standard mode). Muse Wonder Full is Muse Code subscription only and was not used. Claude Code does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 1.637515; cost_usd here is the run's usage at Meta's published muse-wonder-1.0 Standard rates ($4.00 input, $0.20 cached input, $20.00 output per 1M; no cache-write charge, and none was reported; dev.meta.ai/docs/pricing-rate-limits, read 2026-10-12). Meta's input_tokens excludes cache reads, as Anthropic's does. Claude Code assumed a 200k context window for the unknown model (Muse Wonder has 1,048,576); the transcript has no auto-compaction event. The model listed /Applications to find Chrome and screenshotted its own file with headless Chrome; one scratch Write to /tmp was denied; it read nothing else outside the cell.",
     "display_model": "Muse Wonder",
     "phase": 5,
-    "score": 89,
+    "score": 93,
     "score_notes": {
       "controls": {
         "mark": "minor",
@@ -1566,7 +1566,7 @@
     "note": "Gemini API Claude Code fair cell on 2026-10-13, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-gemini, effort high, no web tools. Claude Code 2.1.296 called a local Anthropic-to-Gemini translation proxy (bench/gemini_proxy.py), which called Google's Gemini API (generativelanguage.googleapis.com, streamGenerateContent) directly with a paid Gemini API key. Effort high was sent as thinkingLevel \"high\" and CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000 as maxOutputTokens 128000 on all 29 requests; all 29 responses report modelVersion gemini-4-argon, finishReason STOP. Google does not stream function-call arguments, so the single Write of pacman.html was one 289 s silent generation; the proxy has no upstream idle timeout and pings Claude Code every 10 s. An earlier attempt the same day via OpenRouter (google/gemini-4-argon pinned to Google AI Studio) wrote no file because OpenRouter closes an upstream after 120 s of silence; that was an infra failure and nothing from it was published. Claude Code does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 4.634591; cost_usd here is the run's usage at Google's published Gemini 4 Argon Standard paid-tier rates in effect through 2026-11-30 ($2.00 input, $0.10 cached input, $10.00 output including thinking per 1M; implicit caching only, no cache-write charge; ai.google.dev/gemini-api/docs/pricing, read 2026-10-13). The proxy's own log of Gemini usageMetadata matches Claude Code's totals token for token (thinking 33,652 of the 95,545 output tokens). Claude Code assumed a 200k context window for the unknown model (Gemini 4 Argon has 1,048,576); the largest prompt was 117,056 tokens and there was no auto-compaction. The model listed /Applications to find Chrome and loaded its own file in headless Chrome; it read nothing else outside the cell.",
     "display_model": "Gemini 4 Argon",
     "phase": 3,
-    "score": 93,
+    "score": 97,
     "score_notes": {
       "controls": {
         "mark": "minor",

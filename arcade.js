@@ -37,7 +37,7 @@ const SCORE_MARKS = {
   major: ["✗", "Major issue"],
   na: ["—", "Not testable"],
 };
-const SCORE_BY = "Scored by Opus 5.5 from reviewing the live games on this site (2026-09-28), not by the models themselves.";
+const SCORE_BY = "Scored by Opus 5.5 from reviewing the live games on this site (2026-09-28), not by the models themselves. Since 2026-10-13 (v3), minor Controls and Sound issues cost less.";
 const SCORE_RUBRIC = `100 points: ${SCORE_CHECKS.map(([, label, points]) => `${label} ${points}`).join(" · ")}.`;
 
 const state = { query: "", models: new Set(), sort: "score", descending: true };
