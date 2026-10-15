@@ -1589,5 +1589,26 @@
         "note": "real intro with a bass line, waka, rising siren, power, fright, eyes, eat ghost, fruit, extra life, death, mute; siren stops on death and pause; no master bus, so pause and mute don't stop notes already scheduled and R stacks a second intro; siren is pulsed 0.28 s tones"
       }
     }
+  },
+  {
+    "slug": "muse-spark-open",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-code-openrouter__meta--muse-spark-open",
+    "requested": "meta/muse-spark-open",
+    "actual": "meta/muse-spark-open",
+    "effort": "high",
+    "duration_ms": 105283,
+    "input_tokens": 60198,
+    "cached_input_tokens": 17024,
+    "cache_write_tokens": 0,
+    "output_tokens": 12444,
+    "thinking_tokens": 480,
+    "tokens_total": null,
+    "cost_usd": 0.1306881,
+    "html_bytes": 37047,
+    "note": "OpenRouter Claude Code fair cell on 2026-10-15, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, no web tools. Meta's Model API does not serve this open-weight model, so it ran on OpenRouter. Requests went through bench/or_proxy.py pinned to Fireworks, then Together, with fallbacks off (Nebius and BaseTen serve fp4); all 3 responses report provider Fireworks. Claude Code 2.1.300 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 0.620602; cost_usd here is the run's usage at OpenRouter's listed meta/muse-spark-open rates ($1.25 input, $0.15 cached input, $4.25 output per 1M; the same on Fireworks and Together; openrouter.ai/api/v1/models/meta/muse-spark-open/endpoints, read 2026-10-15). OpenRouter's input_tokens excludes cache reads, as Anthropic's does. The model wrote pacman.html in one Write, checked it with a node one-liner that read only that file and listed the cell, and finished in 3 turns and 105 s; it read nothing outside the cell. Separate from the muse-spark-1.3 Cursor card.",
+    "display_model": "Muse Spark Open",
+    "phase": 5,
+    "score": null
   }
 ]
