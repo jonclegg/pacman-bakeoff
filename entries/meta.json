@@ -1609,6 +1609,29 @@
     "note": "OpenRouter Claude Code fair cell on 2026-10-15, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, no web tools. Meta's Model API does not serve this open-weight model, so it ran on OpenRouter. Requests went through bench/or_proxy.py pinned to Fireworks, then Together, with fallbacks off (Nebius and BaseTen serve fp4); all 3 responses report provider Fireworks. Claude Code 2.1.300 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 0.620602; cost_usd here is the run's usage at OpenRouter's listed meta/muse-spark-open rates ($1.25 input, $0.15 cached input, $4.25 output per 1M; the same on Fireworks and Together; openrouter.ai/api/v1/models/meta/muse-spark-open/endpoints, read 2026-10-15). OpenRouter's input_tokens excludes cache reads, as Anthropic's does. The model wrote pacman.html in one Write, checked it with a node one-liner that read only that file and listed the cell, and finished in 3 turns and 105 s; it read nothing outside the cell. Separate from the muse-spark-1.3 Cursor card.",
     "display_model": "Muse Spark Open",
     "phase": 5,
-    "score": null
+    "score": 33,
+    "score_summary": "three ghosts stuck at spawn; Blinky freezes above 60 fps",
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Space/click start, P/Esc, R, buffered turns, instant reverse, no page scroll; Enter doesn't start, no mute, touch or cornering"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "four targeting rules and waves in code, but only Blinky roams and he freezes above 60 fps (snap within 0.08 tile); Pinky and Clyde spawn inside walls and stay on 2\u20133 tiles; Inky shuttles a half-tile column over walls, his eyes never revive"
+      },
+      "stuck": {
+        "mark": "minor",
+        "note": "never stuck, turns work at 30\u2013240 fps; spawns half inside a wall and vibrates up to 0.37 tile into walls"
+      },
+      "maze": {
+        "mark": "major",
+        "note": "template rows cut from 30 to 28 columns: 20 dead ends, tunnel doesn\u2019t wrap, no ghost house, right border open, 27 pellets drawn off the canvas; 367/367 reachable"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "pellet beep, power, eat ghost, death, level clear; no intro, siren, fright loop, mute or master bus"
+      }
+    }
   }
 ]
