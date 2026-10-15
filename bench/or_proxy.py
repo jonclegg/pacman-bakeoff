@@ -11,6 +11,7 @@ PROVIDERS_BY_VENDOR = {
     "moonshotai": ["moonshotai"],
     "minimax": ["minimax"],
     "qwen": ["alibaba"],
+    "meta": ["fireworks", "together"],
 }
 HOP_HEADERS = {"host", "content-length", "connection", "transfer-encoding", "accept-encoding"}
 
