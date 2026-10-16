@@ -86,6 +86,7 @@ const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const previewObserver = new IntersectionObserver(
   (records) => {
     for (const record of records) {
+      record.target.classList.toggle("is-onscreen", record.isIntersecting);
       if (record.isIntersecting) visibleScreens.set(record.target, record.intersectionRatio);
       else visibleScreens.delete(record.target);
     }
