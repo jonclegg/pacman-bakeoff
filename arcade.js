@@ -300,6 +300,7 @@ function stripRows(entry) {
 
 function playRows(entry) {
   const rows = [
+    ["RELEASED", show(entry.released, formatReleased)],
     ["TIME", show(entry.duration_ms, formatDuration)],
     ["COST", show(entry.cost_usd, formatCost)],
   ];
@@ -318,7 +319,7 @@ function stripToken(entry) {
 function detailRows(entry) {
   return [
     ["HARNESS", entry.harness],
-    ["RELEASED", show(entry.released, String)],
+    ["RELEASED", show(entry.released, formatReleased)],
     ["PHASE", show(entry.phase, String)],
     ["RUN", show(entry.run, String)],
     ["EFFORT", show(entry.effort, String)],
@@ -727,6 +728,10 @@ function formatFull(n) {
 
 function formatCost(usd) {
   return `$${usd.toFixed(2)}`;
+}
+
+function formatReleased(date) {
+  return new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
 function formatBytes(bytes) {

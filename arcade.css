@@ -1221,8 +1221,14 @@ html.is-playing body {
     display: none;
   }
 
+  .play-bar {
+    flex-wrap: wrap;
+  }
+
   .play-stats {
+    flex-basis: 100%;
     gap: 10px;
+    padding: 0 0 6px 12px;
   }
 
   .grid {
