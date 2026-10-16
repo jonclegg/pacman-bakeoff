@@ -1,4 +1,5 @@
 const MAX_LIVE = 2;
+const MOUNT_GAP_MS = 120;
 const HARNESS_COLORS = [
   "var(--blinky)",
   "var(--pinky)",
@@ -10,7 +11,9 @@ const HARNESS_COLORS = [
   "var(--dot)",
 ];
 const SVG_NS = "http://www.w3.org/2000/svg";
+const REQUIRED_FIELDS = ["slug", "harness", "display_model", "html_bytes", "released"];
 const COMPANIES = {
+  beam: "Reflection AI",
   claude: "Anthropic",
   cursor: "Cursor",
   deepseek: "DeepSeek",
@@ -79,11 +82,13 @@ let hoveredScreen = null;
 let playReturn = null;
 let scrolling = false;
 let scrollTimer = 0;
+let mountTimer = 0;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 const previewObserver = new IntersectionObserver(
   (records) => {
     for (const record of records) {
+      record.target.classList.toggle("is-onscreen", record.isIntersecting);
       if (record.isIntersecting) visibleScreens.set(record.target, record.intersectionRatio);
       else visibleScreens.delete(record.target);
     }
@@ -142,8 +147,8 @@ async function init() {
   const response = await fetch("./entries/meta.json");
   if (!response.ok) throw new Error(`meta.json: HTTP ${response.status}`);
   const entries = await response.json();
+  for (const entry of entries) assertEntry(entry);
   assertOneCardPerModelAndEffort(entries);
-  assertReleaseDates(entries);
 
   const harnesses = [...new Set(entries.map((entry) => entry.harness))];
   const colors = new Map(harnesses.map((harness, i) => [harness, HARNESS_COLORS[i % HARNESS_COLORS.length]]));
@@ -160,7 +165,6 @@ async function init() {
 }
 
 function buildCard(entry, index, color, asked) {
-  if (!Number.isInteger(entry.html_bytes)) throw new Error(`${entry.slug}: no html_bytes in meta.json`);
   const name = displayName(entry);
   const el = h("article", "cab");
   el.style.setProperty("--c", color);
@@ -248,9 +252,18 @@ function assertOneCardPerModelAndEffort(entries) {
   }
 }
 
-function assertReleaseDates(entries) {
-  for (const entry of entries) {
-    if (!("released" in entry)) throw new Error(`Missing released date for ${entry.slug}`);
+function assertEntry(entry) {
+  for (const field of REQUIRED_FIELDS) {
+    if (!(field in entry)) throw new Error(`${entry.slug}: missing ${field} in meta.json`);
+  }
+  if (!Number.isInteger(entry.html_bytes)) throw new Error(`${entry.slug}: html_bytes is not an integer`);
+  if (entry.released !== null && Number.isNaN(Date.parse(entry.released))) {
+    throw new Error(`${entry.slug}: released ${entry.released} is not a date`);
+  }
+  companyOf(displayName(entry));
+  if (entry.score == null) return;
+  for (const [key] of SCORE_CHECKS) {
+    if (!SCORE_MARKS[entry.score_notes[key].mark]) throw new Error(`${entry.slug}: bad score_notes.${key}.mark`);
   }
 }
 
@@ -621,9 +634,14 @@ function schedulePreviews() {
   for (const screen of [...mountedScreens]) {
     if (!visibleScreens.has(screen) || screen.closest(".cab").hidden) unmountPreview(screen);
   }
-  for (const screen of visibleScreens.keys()) {
-    if (screen.closest(".cab").hidden) continue;
-    mountPreview(screen);
+  // One game per pass: each mount parses and boots a whole game, and a row of them at once drops frames.
+  const waiting = [...visibleScreens.keys()]
+    .filter((screen) => !screen.closest(".cab").hidden && !mountedScreens.has(screen))
+    .sort((a, b) => live.has(b) - live.has(a));
+  if (waiting.length) mountPreview(waiting[0]);
+  clearTimeout(mountTimer);
+  if (waiting.length > 1) mountTimer = setTimeout(schedulePreviews, MOUNT_GAP_MS);
+  for (const screen of mountedScreens) {
     if (live.has(screen)) thawPreview(screen);
     else freezePreview(screen);
   }
