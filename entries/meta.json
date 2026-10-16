@@ -1693,6 +1693,29 @@
     "released": "2026-10-16",
     "display_model": "Beam 1.0",
     "phase": 2,
-    "score": null
+    "score": 11,
+    "score_summary": "ghosts sealed in the house; Pac-Man freezes while a key is held",
+    "score_notes": {
+      "controls": {
+        "mark": "major",
+        "note": "arrows, WASD, Enter/Space start and restart, P, instant reverse, no page scroll; taps never register (0/180 at 30\u2013240 fps: only held keys are read, nothing buffered) and a held key freezes Pac-Man; no mute, touch or mid-game restart"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "all 4 sealed in a 2-tile pocket: the house door opens onto a wall, so they never leave at any fps and Pac-Man can't die; four targeting rules in code (no Pinky up-quirk), one 7 s scatter then chase forever, no Elroy"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "freezes while any open direction is held at 31\u2013240 fps (snapped back to the tile centre every frame); moves only after the key is released, or at 30 fps"
+      },
+      "maze": {
+        "mark": "major",
+        "note": "21\u00d723; a full wall row and column 10 split it into 6 sealed regions: 61/263 pellets and 1/4 energizers reachable from spawn, so unwinnable; 12 dead ends; tunnel in an unreachable half"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "only the pellet and power-pellet beeps can fire in play; no intro, siren, mute or master bus"
+      }
+    }
   }
 ]
