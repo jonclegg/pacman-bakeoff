@@ -12,6 +12,7 @@ PROVIDERS_BY_VENDOR = {
     "minimax": ["minimax"],
     "qwen": ["alibaba"],
     "meta": ["fireworks", "together"],
+    "reflection": ["nebius"],
 }
 HOP_HEADERS = {"host", "content-length", "connection", "transfer-encoding", "accept-encoding"}
 
