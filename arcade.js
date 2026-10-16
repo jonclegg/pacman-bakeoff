@@ -1,4 +1,5 @@
 const MAX_LIVE = 2;
+const MOUNT_GAP_MS = 120;
 const HARNESS_COLORS = [
   "var(--blinky)",
   "var(--pinky)",
@@ -81,6 +82,7 @@ let hoveredScreen = null;
 let playReturn = null;
 let scrolling = false;
 let scrollTimer = 0;
+let mountTimer = 0;
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 const previewObserver = new IntersectionObserver(
@@ -632,9 +634,14 @@ function schedulePreviews() {
   for (const screen of [...mountedScreens]) {
     if (!visibleScreens.has(screen) || screen.closest(".cab").hidden) unmountPreview(screen);
   }
-  for (const screen of visibleScreens.keys()) {
-    if (screen.closest(".cab").hidden) continue;
-    mountPreview(screen);
+  // One game per pass: each mount parses and boots a whole game, and a row of them at once drops frames.
+  const waiting = [...visibleScreens.keys()]
+    .filter((screen) => !screen.closest(".cab").hidden && !mountedScreens.has(screen))
+    .sort((a, b) => live.has(b) - live.has(a));
+  if (waiting.length) mountPreview(waiting[0]);
+  clearTimeout(mountTimer);
+  if (waiting.length > 1) mountTimer = setTimeout(schedulePreviews, MOUNT_GAP_MS);
+  for (const screen of mountedScreens) {
     if (live.has(screen)) thawPreview(screen);
     else freezePreview(screen);
   }

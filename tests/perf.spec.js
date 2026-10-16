@@ -6,7 +6,7 @@ const BUDGET = {
   mobile: { layers: 40, animations: 15 },
 };
 const SLOW_FRAME_MS = 50;
-const MAX_SLOW_FRAME_SHARE = 0.1;
+const MAX_SLOW_FRAME_SHARE = 0.05;
 
 async function layerCount(page) {
   const cdp = await page.context().newCDPSession(page);
