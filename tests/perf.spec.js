@@ -11,10 +11,11 @@ const MAX_SLOW_FRAME_SHARE = 0.1;
 async function layerCount(page) {
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("LayerTree.enable");
-  const layers = await new Promise((resolve) => {
+  const changed = new Promise((resolve) => {
     cdp.on("LayerTree.layerTreeDidChange", (event) => event.layers && resolve(event.layers));
-    page.evaluate(() => scrollBy(0, 1));
   });
+  await page.evaluate(() => scrollBy(0, 1));
+  const layers = await changed;
   await cdp.detach();
   return layers.length;
 }
