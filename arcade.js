@@ -10,7 +10,9 @@ const HARNESS_COLORS = [
   "var(--dot)",
 ];
 const SVG_NS = "http://www.w3.org/2000/svg";
+const REQUIRED_FIELDS = ["slug", "harness", "display_model", "html_bytes", "released"];
 const COMPANIES = {
+  beam: "Reflection AI",
   claude: "Anthropic",
   cursor: "Cursor",
   deepseek: "DeepSeek",
@@ -142,8 +144,8 @@ async function init() {
   const response = await fetch("./entries/meta.json");
   if (!response.ok) throw new Error(`meta.json: HTTP ${response.status}`);
   const entries = await response.json();
+  for (const entry of entries) assertEntry(entry);
   assertOneCardPerModelAndEffort(entries);
-  assertReleaseDates(entries);
 
   const harnesses = [...new Set(entries.map((entry) => entry.harness))];
   const colors = new Map(harnesses.map((harness, i) => [harness, HARNESS_COLORS[i % HARNESS_COLORS.length]]));
@@ -160,7 +162,6 @@ async function init() {
 }
 
 function buildCard(entry, index, color, asked) {
-  if (!Number.isInteger(entry.html_bytes)) throw new Error(`${entry.slug}: no html_bytes in meta.json`);
   const name = displayName(entry);
   const el = h("article", "cab");
   el.style.setProperty("--c", color);
@@ -248,9 +249,18 @@ function assertOneCardPerModelAndEffort(entries) {
   }
 }
 
-function assertReleaseDates(entries) {
-  for (const entry of entries) {
-    if (!("released" in entry)) throw new Error(`Missing released date for ${entry.slug}`);
+function assertEntry(entry) {
+  for (const field of REQUIRED_FIELDS) {
+    if (!(field in entry)) throw new Error(`${entry.slug}: missing ${field} in meta.json`);
+  }
+  if (!Number.isInteger(entry.html_bytes)) throw new Error(`${entry.slug}: html_bytes is not an integer`);
+  if (entry.released !== null && Number.isNaN(Date.parse(entry.released))) {
+    throw new Error(`${entry.slug}: released ${entry.released} is not a date`);
+  }
+  companyOf(displayName(entry));
+  if (entry.score == null) return;
+  for (const [key] of SCORE_CHECKS) {
+    if (!SCORE_MARKS[entry.score_notes[key].mark]) throw new Error(`${entry.slug}: bad score_notes.${key}.mark`);
   }
 }
 
