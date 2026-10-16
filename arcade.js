@@ -47,6 +47,7 @@ const SORT_VALUE = {
   cost: (entry) => entry.cost_usd,
   time: (entry) => entry.duration_ms,
   tokens: (entry) => stripToken(entry).value,
+  released: (entry) => (entry.released == null ? null : Date.parse(entry.released)),
 };
 const SORT_DIR = {
   score: [
@@ -64,6 +65,10 @@ const SORT_DIR = {
   tokens: [
     ["↑ Few", "Fewest tokens first"],
     ["↓ Most", "Most tokens first"],
+  ],
+  released: [
+    ["↑ Oldest", "Oldest release first"],
+    ["↓ Newest", "Newest release first"],
   ],
 };
 const ui = {};
@@ -138,6 +143,7 @@ async function init() {
   if (!response.ok) throw new Error(`meta.json: HTTP ${response.status}`);
   const entries = await response.json();
   assertOneCardPerModelAndEffort(entries);
+  assertReleaseDates(entries);
 
   const harnesses = [...new Set(entries.map((entry) => entry.harness))];
   const colors = new Map(harnesses.map((harness, i) => [harness, HARNESS_COLORS[i % HARNESS_COLORS.length]]));
@@ -242,6 +248,12 @@ function assertOneCardPerModelAndEffort(entries) {
   }
 }
 
+function assertReleaseDates(entries) {
+  for (const entry of entries) {
+    if (!("released" in entry)) throw new Error(`Missing released date for ${entry.slug}`);
+  }
+}
+
 function shortName(name) {
   return name.replace(/^[\w.-]+\//, "");
 }
@@ -306,6 +318,7 @@ function stripToken(entry) {
 function detailRows(entry) {
   return [
     ["HARNESS", entry.harness],
+    ["RELEASED", show(entry.released, String)],
     ["PHASE", show(entry.phase, String)],
     ["RUN", show(entry.run, String)],
     ["EFFORT", show(entry.effort, String)],

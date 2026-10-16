@@ -52,9 +52,10 @@ When it ends, check `meta.json` (`status: done`, `exit_code: 0`, `pacman_html.ex
 
 ```bash
 python3 bench/add_entry.py ~/.pacbake/runs/<run_name> --slug <slug> --harness <harness> \
-  --display-model <title> --requested <model-id> [--rates IN,CACHED,CACHE_WRITE,OUT] --note "<note>"
+  --display-model <title> --requested <model-id> --released <YYYY-MM-DD> [--rates IN,CACHED,CACHE_WRITE,OUT] --note "<note>"
 ```
 
+- `--released` is the release date from step 1. It is required for a new slug and kept from the existing entry on a rerun.
 - `--rates` is required for Codex and Antigravity, whose transcripts carry no cost. Claude Code and Grok Build report their own cost.
 - The note says: harness and auth, run date, which prompt, the pricing source and date, and anything odd (model remaps, orphaned runs, fallback metadata). Match the tone of existing notes.
 - Check the printed entry: cost and duration non-null, `actual` equals the served model.

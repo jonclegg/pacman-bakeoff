@@ -10,6 +10,7 @@ records its size as html_bytes, and upserts the entry into entries/meta.json. On
 Fails loudly if the transcript has no usage record or the HTML is missing.
 """
 import argparse
+import datetime
 import json
 import pathlib
 import shutil
@@ -164,6 +165,8 @@ def main():
     ap.add_argument("--actual")
     ap.add_argument("--run")
     ap.add_argument("--note")
+    ap.add_argument("--released", type=lambda s: datetime.date.fromisoformat(s).isoformat(),
+                    help="model release date, YYYY-MM-DD; kept from the existing entry when omitted")
     ap.add_argument("--phase", type=int, default=1)
     ap.add_argument("--rates", type=lambda s: [float(x) for x in s.split(",")])
     args = ap.parse_args()
@@ -196,6 +199,7 @@ def main():
         "output_tokens": None, "thinking_tokens": None, "tokens_total": None, "cost_usd": None,
         "html_bytes": published.stat().st_size,
         "note": args.note,
+        "released": args.released,
         "display_model": args.display_model or args.slug,
         "phase": args.phase,
         "score": None,
@@ -209,8 +213,12 @@ def main():
         entry.update({k: old[k] for k in KEEP_KEYS if k in old})
         if args.note is None:
             entry["note"] = old.get("note")
+        if args.released is None:
+            entry["released"] = old["released"]
         entries[entries.index(old)] = entry
     else:
+        if args.released is None:
+            sys.exit("--released is required for a new entry")
         entries.append(entry)
     META.write_text(json.dumps(entries, indent=2) + "\n")
     print(json.dumps(entry, indent=1))
