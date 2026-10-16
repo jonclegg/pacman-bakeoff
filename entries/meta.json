@@ -1672,5 +1672,27 @@
         "note": "pellet beep, power, eat ghost, death, level clear; no intro, siren, fright loop, mute or master bus"
       }
     }
+  },
+  {
+    "slug": "beam-1.0",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-code-openrouter__reflection--beam-1.0-501b-a23b",
+    "requested": "reflection/beam-1.0-501b-a23b",
+    "actual": "reflection/beam-1.0-501b-a23b",
+    "effort": "high",
+    "duration_ms": 94881,
+    "input_tokens": 317154,
+    "cached_input_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 21063,
+    "thinking_tokens": 11880,
+    "tokens_total": null,
+    "cost_usd": 0.1003515,
+    "html_bytes": 25072,
+    "note": "OpenRouter Claude Code fair cell on 2026-10-16, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, no web tools. Reflection's open-weight Beam 1.0 (501B total, 23B active MoE; HF reflection/Beam-1.0-501B-A23B). OpenRouter lists one endpoint, Nebius at fp8, so requests went through bench/or_proxy.py pinned to Nebius with fallbacks off; all 12 responses report provider Nebius. Claude Code 2.1.300 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 2.112345; cost_usd here is the run's usage at OpenRouter's listed Nebius rates for reflection/beam-1.0-501b-a23b ($0.25 input, $1.00 output per 1M; no cache-read rate is listed and the run reported 0 cached tokens; openrouter.ai/api/v1/models/reflection/beam-1.0-501b-a23b/endpoints, read 2026-10-16). The model wrote pacman.html in one Write, made two Edits (maze rows, removed the per-level speed-up), syntax-checked it with node, and finished in 12 turns and 95 s. Outside the cell it only looked for a browser (which, and ls /Applications filtered to chrome/safari/firefox) and tried to write /tmp/pac.js, which the sandbox blocked; it read nothing else outside the cell.",
+    "released": "2026-10-16",
+    "display_model": "Beam 1.0",
+    "phase": 2,
+    "score": null
   }
 ]

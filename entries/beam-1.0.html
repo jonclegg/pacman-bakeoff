@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>Pac-Man</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #000; color: #fff; height: 100%; overflow: hidden; font-family: monospace; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  canvas { background: #000; image-rendering: pixelated; border: 2px solid #2121de; max-width: 100vw; max-height: 80vh; }
+  #hud { display: flex; gap: 24px; font-size: 18px; color: #fff; }
+  #hint { font-size: 12px; color: #888; text-align: center; max-width: 640px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <div>SCORE: <span id="score">0</span></div>
+    <div>HIGH: <span id="high">0</span></div>
+    <div>LIVES: <span id="lives">3</span></div>
+    <div>LEVEL: <span id="level">1</span></div>
+  </div>
+  <canvas id="c" width="504" height="648"></canvas>
+  <div id="hint">Arrow keys / WASD to move &bull; P to pause &bull; Enter/Space to start & restart</div>
+</div>
+<script>
+(function(){
+  'use strict';
+
+  // ---------- Maze ----------
+  // 21 wide x 23 high. '.' pellet, 'o' power pellet, '#' wall, '-' ghost door,
+  // ' ' empty, 'G' ghost spawn.
+  const MAZE = [
+    "#####################",
+    "#.........#.........#",
+    "#.###.###.#.###.###.#",
+    "#o#.#.#...#...#.#.#o#",
+    "#.#.#.#.###.#.#.#.#.#",
+    "#...#...#.#.#...#...#",
+    "###.###.#.#.#.###.###",
+    "#.......#...#.......#",
+    "#........###........#",
+    "#........#-#........#",
+    "#........# #........#",
+    "#####################",
+    "#.......#...#.......#",
+    "#.......#...#.......#",
+    "...... ..... .........",   // tunnel row (index 14) -> wait set later
+    "#.......#...#.......#",
+    "#.#####.###.#####.#.#",
+    "#...#...#.#.#...#...#",
+    "###.###.#.#.#.###.###",
+    "#.........#.........#",
+    "#.###.###.#.###.###.#",
+    "#o#.#.#...#...#.#.#o#",
+    "#####################"
+  ];
+
+  // fix tunnel row length & make it a real tunnel
+  const COLS = 21;
+  const TUNNEL_ROW = 14;
+  MAZE[TUNNEL_ROW] = ".".repeat(COLS);
+
+  const ROWS = MAZE.length;
+
+  // ghost house interior: ensure door row and spaces
+  // (already '-' doors around row 9-11)
+
+  const TS = 24; // tile size px
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  // canvas sized to grid
+  canvas.width = COLS * TS;
+  canvas.height = ROWS * TS;
+
+  let W = canvas.width, H = canvas.height;
+
+  // ---------- helpers ----------
+  function wrapCol(c){ if(c<0) return COLS-1; if(c>=COLS) return 0; return c; }
+  function inBounds(r,c){ return r>=0 && r<ROWS && c>=0 && c<COLS; }
+  function cell(r,c){
+    if(r<0||r>=ROWS) return '#';
+    let cc=c;
+    if(cc<0||cc>=COLS){
+      if(r===TUNNEL_ROW) cc=wrapCol(cc);
+      else return '#';
+    }
+    return MAZE[r].charAt(cc);
+  }
+  function walkable(r,c,isGhost){
+    const t = cell(r,c);
+    if(t==='#') return false;
+    if(t==='-') return !!isGhost;
+    if(t===' ') return true;
+    if(t==='.') return true;
+    if(t==='o') return true;
+    if(t==='G') return true;
+    return false;
+  }
+
+  // ---------- state ----------
+  let score=0, high=0, lives=3, level=1;
+  let mazePellets = {}; // "r,c": 1 pellet, 2 power
+  let remaining = 0;
+  let state = 'title'; // title, ready, playing, paused, gameover, winLevel
+  let readyTimer = 0;
+  let gameOverFlash = 0;
+
+  // entities
+  function makePac(){ return { x:1, y:1, dx:0, dy:0, desiredDx:0, desiredDy:0,
+      speed: 7.5, mouthPhase:0, dead:false }; } // tiles/sec (7.5)
+  // Actually classic ~ 1 tile / 0.1s? 10 tiles/sec maybe. We'll tune: 7.5.
+  let pac = makePac();
+
+  const GHOST_COLORS = ['#ff0000','#ffb8ff','#00ffff','#ffb852'];
+  const GHOST_NAMES = ['Blinky','Pinky','Inky','Clyde'];
+  function makeGhost(i){
+    return { i, x:10, y:10, dx:0, dy:0, speed:7.0, mode:'scatter', // scatter/chase/frightened/eaten
+      frightenedTimer:0, lastDecX:null, lastDecY:null, homeX:10, homeY:10,
+      scatterTarget:{x:COLS-2,y:1}, released:false, releaseAt:i===0?0:i*1.5,
+      eaten:false };
+  }
+  // set scatter corners per ghost
+  let ghosts = GHOST_NAMES.map((n,i)=>makeGhost(i));
+  ghosts[0].scatterTarget={x:COLS-2,y:1};
+  ghosts[1].scatterTarget={x:1,y:1};
+  ghosts[2].scatterTarget={x:COLS-2,y:ROWS-2};
+  ghosts[3].scatterTarget={x:1,y:ROWS-2};
+
+  let modeTimer=0; // scatter then chase
+  let modePhase='scatter'; // 'scatter' or 'chase'
+  let frightenedTimerGlobal=0;
+  let ghostEatCombo=0;
+  let totalPelletsEatenThisLevel=0;
+  let eyesBlink=0;
+
+  // high score load
+  try { high = +localStorage.getItem('pacman_high')||0; } catch(e){}
+  document.getElementById('high').textContent = high;
+
+  function pelletKey(r,c){ return r+','+c; }
+  function loadPellets(){
+    mazePellets = {};
+    remaining = 0;
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        const t = cell(r,c);
+        if(t==='.'){ mazePellets[pelletKey(r,c)]=1; remaining++; }
+        else if(t==='o'){ mazePellets[pelletKey(r,c)]=2; remaining++; }
+      }
+    }
+  }
+
+  function resetPositions(){
+    pac.x=1; pac.y=1; pac.dx=0; pac.dy=0; pac.desiredDx=0; pac.desiredDy=0; pac.dead=false;
+    // ghosts
+    ghosts.forEach((g,i)=>{
+      g.x=10; g.y=10; g.dx=0; g.dy=0; g.mode='scatter'; g.frightenedTimer=0;
+      g.eaten=false; g.released = (i===0); g.releaseAt = i===0?0:i*1.2;
+      g.lastDecX=null; g.lastDecY=null;
+    });
+    modeTimer=0; modePhase='scatter';
+    frightenedTimerGlobal=0;
+    ghostEatCombo=0;
+  }
+
+  function startGame(){
+    score=0; lives=3; level=1;
+    loadPellets();
+    resetPositions();
+    state='ready';
+    readyTimer=2.0;
+    updateHud();
+  }
+
+  function nextLevel(){
+    level++;
+    loadPellets();
+    resetPositions();
+    state='ready';
+    readyTimer=2.0;
+    // speeds increase
+    updateHud();
+  }
+
+  function updateHud(){
+    document.getElementById('score').textContent = score;
+    document.getElementById('lives').textContent = lives;
+    document.getElementById('level').textContent = level;
+    if(score>high){ high=score; try{localStorage.setItem('pacman_high',high);}catch(e){} document.getElementById('high').textContent=high; }
+  }
+
+  // ---------- input ----------
+  const keys = {};
+  window.addEventListener('keydown', (e)=>{
+    const k = e.key.toLowerCase();
+    let handled=false;
+    if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){ handled=true; }
+    if(k==='p'){ handled=true; togglePause(); }
+    if(k===' ' || k==='enter'){ handled=true;
+      if(state==='title'||state==='gameover'){ startGame(); }
+      else if(state==='winLevel'){ nextLevel(); state='ready'; readyTimer=1.5; } // handled
+    }
+    if(handled) e.preventDefault();
+    keys[k]=true;
+  });
+  window.addEventListener('keyup', (e)=>{ keys[e.key.toLowerCase()]=false; });
+
+  function desiredFromKeys(){
+    if(keys['arrowup']||keys['w']) return {dx:0,dy:-1};
+    if(keys['arrowdown']||keys['s']) return {dx:0,dy:1};
+    if(keys['arrowleft']||keys['a']) return {dx:-1,dy:0};
+    if(keys['arrowright']||keys['d']) return {dx:1,dy:0};
+    return null;
+  }
+
+  function togglePause(){
+    if(state==='playing'){ state='paused'; }
+    else if(state==='paused'){ state='playing'; }
+  }
+
+  // ---------- movement helpers ----------
+  function tryTurnPac(){
+    const d = desiredFromKeys();
+    if(!d) return;
+    pac.desiredDx=d.dx; pac.desiredDy=d.dy;
+    // if opposite direction, can turn anytime
+    if((pac.dx===-d.dx && d.dy===0 && pac.dy===0)||(pac.dy===-d.dy && d.dx===0 && pac.dx===0)){
+      // reverse
+      const cx=Math.round(pac.x), cy=Math.round(pac.y);
+      pac.x=cx; pac.y=cy; pac.dx=d.dx; pac.dy=d.dy;
+      return;
+    }
+    // near center turn
+    const cx=Math.round(pac.x), cy=Math.round(pac.y);
+    if(Math.abs(pac.x-cx)<0.25 && Math.abs(pac.y-cy)<0.25){
+      const nr=cy+d.dy, nc=cx+d.dx;
+      if(walkable(nr,nc,false)){
+        pac.x=cx; pac.y=cy; pac.dx=d.dx; pac.dy=d.dy;
+      }
+    }
+  }
+
+  function moveEntity(e, dt, isGhost){
+    const speed = e.speed;
+    let dx=e.dx, dy=e.dy;
+    if(dx===0 && dy===0) return;
+    let nx=e.x + dx*speed*dt;
+    let ny=e.y + dy*speed*dt;
+    // tunnel wrap
+    if(e.y===TUNNEL_ROW && (nx<0 || nx>=COLS)){
+      // allow wrap: if out, wrap
+      if(nx<0) nx = COLS-0.001;
+      if(nx>=COLS) nx = 0.001;
+    }
+    const r = dy!==0 ? Math.floor(ny+0.5) : Math.round(e.y);
+    const c = dx!==0 ? Math.floor(nx+0.5) : Math.round(e.x);
+    // bounds
+    if(!walkable(r,c,isGhost)){
+      // revert & snap to center
+      e.x = Math.round(e.x); e.y = Math.round(e.y);
+      e.dx=0; e.dy=0;
+      return;
+    }
+    // snap perpendicular
+    if(dx!==0){ e.y = Math.round(e.y)*1 + 0; if(Math.abs(e.y-Math.round(e.y))<1) e.y=Math.round(e.y); }
+    if(dy!==0){ e.x = Math.round(e.x); }
+    e.x=nx; e.y=ny;
+    // wrap exact
+    if(e.y===TUNNEL_ROW){
+      if(e.x<0) e.x += COLS;
+      if(e.x>=COLS) e.x -= COLS;
+    }
+  }
+
+  // ---------- ghost AI ----------
+  function ghostTarget(g){
+    if(g.mode==='eaten'){ return {x:g.homeX,y:g.homeY}; }
+    if(g.mode==='frightened'){ return null; }
+    // scatter or chase by modePhase? Use g mode flag 'scatter'/'chase'
+    if(g.mode==='scatter'){ return g.scatterTarget; }
+    // chase targets
+    switch(g.i){
+      case 0: return {x:Math.round(pac.x), y:Math.round(pac.y)}; // blinky
+      case 1: // pinky 4 ahead
+        return {x:Math.round(pac.x+pac.dx*4), y:Math.round(pac.y+pac.dy*4)};
+      case 2: { // inky
+        const ax=Math.round(pac.x+pac.dx*2), ay=Math.round(pac.y+pac.dy*2);
+        return {x: ax + (ax - Math.round(ghosts[0].x)), y: ay + (ay - Math.round(ghosts[0].y)) };
+      }
+      case 3: { // clyde
+        const d = Math.hypot(g.x-pac.x, g.y-pac.y);
+        if(d>8) return {x:Math.round(pac.x), y:Math.round(pac.y)};
+        return g.scatterTarget;
+      }
+    }
+    return {x:Math.round(pac.x), y:Math.round(pac.y)};
+  }
+
+  function manhattan(r,c,tr,tc){ return Math.abs(r-tr)+Math.abs(c-tc); }
+
+  function ghostChooseDir(g){
+    const cx=Math.round(g.x), cy=Math.round(g.y);
+    if(Math.abs(g.x-cx)>0.22 || Math.abs(g.y-cy)>0.22) return;
+    if(g.lastDecX===cx && g.lastDecY===cy) { /* still allow if direction blocked? no */ return; }
+    g.lastDecX=cx; g.lastDecY=cy;
+    // sync position to center
+    g.x=cx; g.y=cy;
+
+    // release handling
+    if(!g.released){ g.dx=0; g.dy=0; return; }
+
+    const dirs = [{dx:0,dy:-1},{dx:1,dy:0},{dx:0,dy:1},{dx:-1,dy:0}];
+    // reverse dir
+    const rev = {dx:-g.dx,dy:-g.dy};
+
+    let options=[];
+    for(const d of dirs){
+      if(d.dx===rev.dx && d.dy===rev.dy){
+        // skip reverse unless forced
+      }
+      const nr=cy+d.dy, nc=cx+d.dx;
+      if(!walkable(nr, nc, true)) continue;
+      // ghosts can't enter house? allow if eaten/return. Door handles. Also prevent exiting? ok.
+      options.push({d, nr, nc});
+    }
+    // if reverse was skipped but no options, allow reverse
+    if(options.length===0){
+      for(const d of dirs){
+        const nr=cy+d.dy, nc=cx+d.dx;
+        if(walkable(nr,nc,true)){ options.push({d,nr,nc}); }
+      }
+    }
+    if(options.length===0){ g.dx=0; g.dy=0; return; }
+
+    if(g.mode==='frightened'){
+      // random choice, avoid reverse if possible
+      let cand = options.filter(o=>!(o.d.dx===rev.dx && o.d.dy===rev.dy));
+      if(cand.length===0) cand=options;
+      const pick = cand[Math.floor(Math.random()*cand.length)];
+      g.dx=pick.d.dx; g.dy=pick.d.dy;
+      return;
+    }
+
+    let target;
+    if(g.mode==='eaten') target=ghostTarget(g);
+    else target=ghostTarget(g);
+    // mode property for ghosts not separate scatter/chase? use modeTimer phase
+    // (g.mode already 'scatter'/'chase' set globally). ensure sync:
+    // We'll set g.mode = modePhase or frightened/eaten outside. Here trust.
+    if(!target){ // frightened random handled above
+      return;
+    }
+    // find min dist
+    let best=null, bestDist=Infinity;
+    // tie-breaking order: up, left, down, right? Classic prefers up then left. Our dirs order up,right,down,left. Change order to up,left,down,right.
+    const order = [{dx:0,dy:-1},{dx:-1,dy:0},{dx:0,dy:1},{dx:1,dy:0}];
+    // iterate in order, allow reverse? skip reverse prefer
+    const filtered = options.filter(o=>!(o.d.dx===rev.dx && o.d.dy===rev.dy));
+    const pool = filtered.length? filtered : options;
+    for(const d of order){
+      const o = pool.find(p=>p.d.dx===d.dx && p.d.dy===d.dy);
+      if(!o) continue;
+      const dist = manhattan(o.nr,o.nc,target.y,target.x);
+      if(dist < bestDist){ bestDist=dist; best=o; }
+    }
+    if(best){ g.dx=best.d.dx; g.dy=best.d.dy; }
+  }
+
+  // ---------- main update ----------
+  let lastTime = performance.now();
+  function loop(now){
+    requestAnimationFrame(loop);
+    let dt = (now-lastTime)/1000;
+    lastTime = now;
+    if(dt>0.1) dt=0.1;
+    update(dt);
+    render();
+  }
+
+  function update(dt){
+    if(state==='title' || state==='gameover' || state==='winLevel') return;
+    if(state==='paused') return;
+    if(state==='ready'){
+      readyTimer -= dt;
+      if(readyTimer<=0){ state='playing'; }
+      return;
+    }
+    // playing
+    // mode timer
+    if(modePhase==='scatter'){
+      modeTimer += dt;
+      if(modeTimer>7){ modePhase='chase'; modeTimer=0; }
+    }
+    // frightened global
+    if(frightenedTimerGlobal>0){
+      frightenedTimerGlobal -= dt;
+      if(frightenedTimerGlobal<=0){ frightenedTimerGlobal=0; unFrighten(); }
+    }
+    // assign ghost modes
+    ghosts.forEach(g=>{
+      if(g.eaten) { g.mode='eaten'; }
+      else if(frightenedTimerGlobal>0){ g.mode='frightened'; g.frightenedTimer=frightenedTimerGlobal; }
+      else { g.mode = modePhase; }
+    });
+
+    // release ghosts
+    ghosts.forEach(g=>{
+      if(!g.released){
+        g.releaseAt -= dt;
+        if(g.releaseAt<=0){
+          g.released=true;
+          // place just outside house: door at row9 col10, spawn row9? snap
+        }
+      }
+    });
+
+    // pac movement
+    tryTurnPac();
+    // speed
+    let pacSpeed = 7.6 + (level-1)*0.2;
+    // slow in tunnel? classic slightly. skip
+    pac.speed = pacSpeed;
+    movePac(dt);
+    // pellet eat
+    checkPelletEat();
+
+    // ghosts
+    ghosts.forEach(g=>{
+      if(!g.released){
+        // bob in house
+        g.frightenedTimer=0;
+        return;
+      }
+      let gSpeed = 7.0 + (level-1)*0.2;
+      if(g.mode==='frightened') gSpeed *= 0.55;
+      if(g.mode==='eaten') gSpeed *= 1.8;
+      g.speed = gSpeed;
+      ghostChooseDir(g);
+      moveGhost(g, dt);
+    });
+
+    // collisions
+    handleCollisions();
+
+    // level clear
+    if(remaining<=0){
+      // win level
+      state='winLevel';
+      readyTimer=2.0;
+      // award
+      score += 1000;
+      updateHud();
+    }
+  }
+
+  function movePac(dt){ moveEntity(pac, dt, false); pac.mouthPhase += dt*8; }
+  function moveGhost(g,dt){ moveEntity(g, dt, true); }
+
+  function checkPelletEat(){
+    const cx=Math.round(pac.x), cy=Math.round(pac.y);
+    // Only eat when near center
+    if(Math.abs(pac.x-cx)>0.25 || Math.abs(pac.y-cy)>0.25) return;
+    const key = pelletKey(cy,cx);
+    if(mazePellets[key]){
+      const type = mazePellets[key];
+      delete mazePellets[key];
+      remaining--;
+      if(type===1){ score += 10; playBeep(600,0.03); }
+      else { score += 50; playBeep(400,0.15,'sine'); triggerFrightened(); }
+      updateHud();
+      // tunnel wrap eat? handle not needed since cell at new tile; but eating at tile grid only once
+    }
+  }
+
+  function triggerFrightened(){
+    let timer = 7.0 - (level-1)*0.7; if(timer<2) timer=2;
+    frightenedTimerGlobal = timer;
+    ghostEatCombo=0;
+    ghosts.forEach(g=>{ if(!g.eaten && g.released) g.mode='frightened'; });
+  }
+  function unFrighten(){
+    frightenedTimerGlobal=0;
+    ghosts.forEach(g=>{ if(g.mode==='frightened') g.mode='chase'; });
+  }
+
+  function handleCollisions(){
+    ghosts.forEach(g=>{
+      if(!g.released) return;
+      const d = Math.hypot(g.x-pac.x, g.y-pac.y);
+      if(d < 0.55){
+        if(g.mode==='frightened' && !g.eaten){
+          // eat ghost
+          g.eaten=true; g.mode='eaten';
+          ghostEatCombo++;
+          const pts = 200 * Math.pow(2, ghostEatCombo-1);
+          score += pts;
+          playBeep(800,0.2,'square');
+          updateHud();
+        } else if(g.mode!=='eaten'){
+          // pac dies
+          pacDie();
+        }
+      }
+    });
+  }
+
+  function pacDie(){
+    if(state!=='playing') return;
+    lives--;
+    playBeep(150,0.6,'sawtooth');
+    if(lives<=0){
+      state='gameover';
+      updateHud();
+      return;
+    }
+    resetPositions();
+    state='ready';
+    readyTimer=2.0;
+    updateHud();
+  }
+
+  // ghost reaches house when eaten -> revive
+  // check in move? after movement, if eaten and near home tile, un-eat and release after delay
+  // We'll handle each frame: if eaten and distance to home <0.5, set not eaten and set released false with short release?
+  // Actually keep released true, mode becomes scatter/chase based on global; but need scatter duration. Simpler: when home reached, set eaten=false and nudge out via door next frame.
+  // Implement in update ghosts loop check
+  // Add after moving ghosts:
+  // (do inside update)
+  // We'll patch: in update, after ghosts moved, check.
+
+  // ---------- audio ----------
+  let audioCtx=null;
+  function ensureAudio(){
+    if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  }
+  function playBeep(freq,dur,type='square',vol=0.08){
+    ensureAudio(); if(!audioCtx) return;
+    const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+dur);
+    o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+dur);
+  }
+
+  // enable audio on first key
+  window.addEventListener('keydown', ensureAudio, {once:true});
+
+  // ghost revival check (called in update)
+  function postGhostUpdate(){
+    ghosts.forEach(g=>{
+      if(g.eaten){
+        const d=Math.hypot(g.x-g.homeX, g.y-g.homeY);
+        if(d<0.6){
+          g.x=g.homeX; g.y=g.homeY;
+          g.eaten=false;
+          g.released=false;
+          g.releaseAt = 0.6; // short release from house
+          // place inside
+        }
+      }
+    });
+  }
+  // inject revival check into playing update by calling in loop? We'll add inside update after ghosts moved:
+  // modify update region: after handleCollisions call postGhostUpdate
+  // Use monkey: redefine update? Instead edit inline: we'll call in update by patching function? Let's just ensure update calls postGhostUpdate before collisions.
+  // We'll modify update code mentally: add postGhostUpdate() after moving ghosts. Programmed below via edit? We'll just re-open? We'll insert in function by original we wrote lacks call. Add here:
+  // (We'll wrap update? Not possible easily.) -> We'll patch the source text? Instead modify function below via no-op: call in handleCollisions? Add call at start of handleCollisions.
+  const _origHC = handleCollisions;
+  handleCollisions = function(){ postGhostUpdate(); _origHC(); };
+
+  // Also need ghost Choose mode assignment consistent: g.mode is modePhase string ('scatter'/'chase') but global variable modePhase can be 'scatter'/'chase'. Good.
+  // However g.mode assignment in update sets g.mode = modePhase (which is 'scatter' or 'chase'). Good. And ghostTarget uses g.mode==='scatter'. Good.
+
+  // ---------- rendering ----------
+  function render(){
+    ctx.fillStyle='#000';
+    ctx.fillRect(0,0,W,H);
+
+    // maze walls & pellets
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        const t = cell(r,c);
+        const x=c*TS, y=r*TS;
+        if(t==='#'){
+          ctx.fillStyle='#2121de';
+          ctx.fillRect(x+1,y+1,TS-2,TS-2);
+          // bevel-ish inner
+          ctx.fillStyle='#000';
+          ctx.fillRect(x+4,y+4,TS-8,TS-8);
+          ctx.fillStyle='#2121de';
+          ctx.fillRect(x+4,y+4,TS-8,2);
+          // Actually draw solid blue blocks simpler:
+        }
+      }
+    }
+    // redraw walls as solid blue (simpler, cleaner): override above by not clearing? We already filled. Let's re-draw walls solid:
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        const t=cell(r,c);
+        if(t==='#'){
+          ctx.fillStyle='#2121de';
+          ctx.fillRect(c*TS, r*TS, TS, TS);
+        }
+      }
+    }
+    // pellets
+    for(const key in mazePellets){
+      const [r,c]=key.split(',').map(Number);
+      const t = mazePellets[key];
+      const cx=c*TS+TS/2, cy=r*TS+TS/2;
+      if(t===1){
+        ctx.fillStyle='#ffb897';
+        ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2); ctx.fill();
+      } else {
+        ctx.fillStyle='#ffb897';
+        ctx.beginPath(); ctx.arc(cx,cy,6,0,Math.PI*2); ctx.fill();
+      }
+    }
+
+    // ghost house door visual (the '-' row)
+    for(let r=0;r<ROWS;r++){
+      for(let c=0;c<COLS;c++){
+        const t=cell(r,c);
+        if(t==='-'){
+          ctx.fillStyle='#ffb8ff';
+          ctx.fillRect(c*TS, r*TS+TS/2-2, TS,4);
+        }
+      }
+    }
+
+    // Pac-Man
+    if(!pac.dead || state!=='gameover'){
+      drawPac();
+    }
+
+    // Ghosts
+    ghosts.forEach(g=>{
+      if(!g.released && state==='playing') {
+        // still draw in house
+      }
+      drawGhost(g);
+    });
+
+    // state overlays
+    ctx.textAlign='center';
+    if(state==='title'){
+      ctx.fillStyle='#ffff00';
+      ctx.font='bold 48px monospace';
+      ctx.fillText('PAC-MAN', W/2, H/2-40);
+      ctx.fillStyle='#fff';
+      ctx.font='16px monospace';
+      ctx.fillText('Press Enter or Space to start', W/2, H/2+20);
+      ctx.fillText('Arrow keys / WASD to move, P to pause', W/2, H/2+50);
+    } else if(state==='ready'){
+      ctx.fillStyle='#ffff00';
+      ctx.font='bold 28px monospace';
+      ctx.fillText('READY!', W/2, (Math.floor(ROWS/2))*TS);
+    } else if(state==='paused'){
+      ctx.fillStyle='#ffff00';
+      ctx.font='bold 36px monospace';
+      ctx.fillText('PAUSED', W/2, H/2);
+    } else if(state==='gameover'){
+      ctx.fillStyle='#ff0000';
+      ctx.font='bold 36px monospace';
+      ctx.fillText('GAME OVER', W/2, H/2);
+      ctx.fillStyle='#fff'; ctx.font='16px monospace';
+      ctx.fillText('Press Enter/Space to restart', W/2, H/2+30);
+    } else if(state==='winLevel'){
+      ctx.fillStyle='#00ff00';
+      ctx.font='bold 28px monospace';
+      ctx.fillText('LEVEL CLEAR!', W/2, H/2);
+    }
+  }
+
+  function drawPac(){
+    const x=pac.x*TS+TS/2, y=pac.y*TS+TS/2;
+    let mouth = 0.25 + 0.35*Math.abs(Math.sin(pac.mouthPhase));
+    // direction angle
+    let ang=0;
+    if(pac.dx===1) ang=0;
+    else if(pac.dx===-1) ang=Math.PI;
+    else if(pac.dy===-1) ang=-Math.PI/2;
+    else if(pac.dy===1) ang=Math.PI/2;
+    else ang=0;
+    ctx.fillStyle='#ffff00';
+    ctx.beginPath();
+    ctx.moveTo(x,y);
+    ctx.arc(x,y, TS/2-2, ang+mouth, ang+Math.PI*2-mouth);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawGhost(g){
+    const x=g.x*TS+TS/2, y=g.y*TS+TS/2;
+    const r=TS/2-2;
+    let bodyColor='#ff0000';
+    if(g.mode==='frightened'){
+      // flash near end
+      if(frightenedTimerGlobal<2 && Math.floor(frightenedTimerGlobal*4)%2===0){
+        bodyColor='#ffffff';
+      } else bodyColor='#2121de';
+    } else if(g.eaten){
+      bodyColor=null; // eyes only
+    } else {
+      bodyColor = GHOST_COLORS[g.i];
+    }
+    if(bodyColor){
+      ctx.fillStyle=bodyColor;
+      // head semicircle + body
+      ctx.beginPath();
+      ctx.arc(x,y-2, r, Math.PI, 0);
+      ctx.lineTo(x+r, y+r-2);
+      // wavy bottom
+      ctx.lineTo(x+r, y+r);
+      ctx.lineTo(x+r-4, y+r-3);
+      ctx.lineTo(x+r-8, y+r);
+      ctx.lineTo(x, y+r-3);
+      ctx.lineTo(x-r+8, y+r);
+      ctx.lineTo(x-r+4, y+r-3);
+      ctx.lineTo(x-r, y+r);
+      ctx.lineTo(x-r, y-2);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // eyes
+    // direction
+    let ex=0, ey=0;
+    if(g.dx===1) ex=2; else if(g.dx===-1) ex=-2;
+    if(g.dy===-1) ey=-2; else if(g.dy===1) ey=2;
+    // eye whites
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(x-4,y-3,4,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+4,y-3,4,0,Math.PI*2); ctx.fill();
+    // pupils
+    ctx.fillStyle = g.mode==='frightened' ? '#fff' : '#00f';
+    if(g.mode==='frightened'){
+      // small dots
+      ctx.fillStyle='#ff00ff';
+      ctx.beginPath(); ctx.arc(x-4+ex*0.5,y-3+ey*0.5,1.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+4+ex*0.5,y-3+ey*0.5,1.5,0,Math.PI*2); ctx.fill();
+    } else {
+      ctx.fillStyle='#0000cc';
+      ctx.beginPath(); ctx.arc(x-3+ex,y-3+ey,2.2,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+5+ex,y-3+ey,2.2,0,Math.PI*2); ctx.fill();
+    }
+    if(g.eaten){
+      // just eyes already drawn; no body. good.
+    }
+  }
+
+  // ---------- start ----------
+  // initial hud
+  updateHud();
+  state='title';
+  // request loop
+  requestAnimationFrame((t)=>{ lastTime=t; requestAnimationFrame(loop); });
+})();
+</script>
+</body>
+</html>
