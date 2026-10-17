@@ -813,7 +813,8 @@ function showPlay(entry) {
   const src = entryUrl(entry);
   if (ui.playFrame?.dataset.src !== src) {
     mountPlayFrame(src, `${name} game`);
-    gtag("event", "play_entry", { entry_slug: entry.slug, entry_name: name });
+    // Wooten Labs' tracker (wooten-labs.com/w.js), added to this page when it is published there.
+    window.wl?.track("play_entry", { entry_slug: entry.slug, entry_name: name });
   }
   for (const screen of [...mountedScreens]) unmountPreview(screen);
   ui.playBack.focus();
