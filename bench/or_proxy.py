@@ -13,6 +13,7 @@ PROVIDERS_BY_VENDOR = {
     "qwen": ["alibaba"],
     "meta": ["fireworks", "together"],
     "reflection": ["nebius"],
+    "inception": ["inception"],
 }
 HOP_HEADERS = {"host", "content-length", "connection", "transfer-encoding", "accept-encoding"}
 
