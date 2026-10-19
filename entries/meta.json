@@ -1805,5 +1805,49 @@
         "note": "master gain, continuous siren with a fright variant that stops on pause, death and game over, full effect set; no intro tune; M doesn't mute the siren"
       }
     }
+  },
+  {
+    "slug": "mercury-3",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-code-openrouter__inception--mercury-3",
+    "requested": "inception/mercury-3",
+    "actual": "inception/mercury-3",
+    "effort": "high",
+    "duration_ms": 564459,
+    "input_tokens": 5875190,
+    "cached_input_tokens": 936450,
+    "cache_write_tokens": 0,
+    "output_tokens": 122259,
+    "thinking_tokens": 116406,
+    "tokens_total": null,
+    "cost_usd": 0.63967415,
+    "html_bytes": 36211,
+    "note": "OpenRouter Claude Code fair cell on 2026-10-19, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, no web tools. Inception Mercury 3, a diffusion LLM, on OpenRouter inception/mercury-3 (canonical inception/mercury-3-20261019; Inception is the only provider). Requests went through bench/or_proxy.py with a new inception pin (Inception only; fallbacks off); OpenRouter lists the endpoint's quantization as unknown, and all 58 responses report provider Inception. Claude Code sends --effort high as output_config.effort high (the listing's default reasoning_effort is medium); a probe on the same listing (3 calls per setting) was too noisy to show whether OpenRouter maps it onto the model's reasoning effort. Claude Code 2.1.303 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 32.90. cost_usd prices the result event's usage (5,875,190 input, 936,450 cache read, 122,259 output) at OpenRouter's listed Inception rates of $0.10 input, $0.01 cache read and $0.35 output per 1M (openrouter.ai/api/v1/models/inception/mercury-3/endpoints, read 2026-10-19). The OpenRouter key's usage moved $0.650 over the run window; the $0.010 above the rate math matches effort-probe calls aborted just before the run that billed late. The model wrote pacman.html with Write about 3 minutes in and spent the rest of its 58 turns (42 Bash, 9 Edit, 5 Read) checking the maze grid and playing it in node with its own canvas stub. It kept those scripts in Claude Code's sandbox TMPDIR (/tmp/claude-501) and read nothing outside the cell.",
+    "released": "2026-10-19",
+    "display_model": "Mercury 3",
+    "phase": 2,
+    "score": 50,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click start, P/Esc, M, key-repeat filter, instant reverse, auto-pause on blur, no page scroll; no input buffering (a tap turns only within about 0.1 tile of a junction); restart takes two Enters, no mid-game restart, no touch steering"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "four targeting rules, scatter/chase waves, fright chain, no re-eat; Blinky spawns facing a wall and is frozen above the house every life until the first power pellet (live: static 44 s); eaten eyes never steer and get home from only 16% of starts; reversals can freeze a ghost in a corner; active ghosts wander back into the house; no Elroy"
+      },
+      "stuck": {
+        "mark": "minor",
+        "note": "never stuck; same speed at 30\u2013240 fps (fixed 1/60 s step); but every sprite is drawn half a tile up-left of its real position, so Pac-Man looks inside a wall 40% of the time"
+      },
+      "maze": {
+        "mark": "major",
+        "note": "28\u00d730, symmetric, 0/222 unreachable, a bot clears level 1; 4 dead ends and two empty side rooms; the drawn walls don't match the grid (only 14% of real wall edges drawn, 256 of 556 strokes across corridors), so the screen shows a lattice"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master gain, continuous siren with a fright variant that stops on pause, death and game over, full effect set, mute; generic 4-note arpeggio instead of the Pac-Man intro; no eyes sound"
+      }
+    }
   }
 ]

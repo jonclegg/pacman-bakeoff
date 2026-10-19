@@ -22,6 +22,7 @@ const COMPANIES = {
   gpt: "OpenAI",
   grok: "xAI",
   kimi: "Moonshot AI",
+  mercury: "Inception",
   minimax: "MiniMax",
   muse: "Meta",
   qwen: "Alibaba",
