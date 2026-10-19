@@ -1717,5 +1717,49 @@
         "note": "only the pellet and power-pellet beeps can fire in play; no intro, siren, mute or master bus"
       }
     }
+  },
+  {
+    "slug": "deepseek-v4.1-flash-1017",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-code-openrouter__deepseek--deepseek-v4.1-flash-1017",
+    "requested": "deepseek/deepseek-v4.1-flash-1017",
+    "actual": "deepseek/deepseek-v4.1-flash-1017",
+    "effort": "high",
+    "duration_ms": 1208221,
+    "input_tokens": 6929303,
+    "cached_input_tokens": 1465280,
+    "cache_write_tokens": 0,
+    "output_tokens": 133703,
+    "thinking_tokens": 87603,
+    "tokens_total": null,
+    "cost_usd": 2.2578195,
+    "html_bytes": 54222,
+    "note": "OpenRouter Claude Code fair cell on 2026-10-19, two days after release: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, no web tools. DeepSeek's Oct 17 2026 open-weight checkpoint (HF deepseek-ai/DeepSeek-V4.1-Flash-1017; canonical deepseek/deepseek-v4.1-flash-20261017), a separate card from the Sep 10 deepseek-v4.1-flash. Requests went through bench/or_proxy.py with the existing deepseek pin (Fireworks, then Together; fallbacks off); OpenRouter lists both without a quantization (not fp4), and all 86 responses report provider Fireworks. Claude Code 2.1.303 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 38.986. cost_usd is Claude Code's modelUsage totals (6,930,735 input, 1,630,700 cache-read, 140,679 output, including its small auxiliary calls) at OpenRouter's listed Fireworks rates ($0.30 input, $0.006 cache read, $1.20 output per 1M; openrouter.ai/api/v1/models/deepseek/deepseek-v4.1-flash-1017/endpoints, read 2026-10-19). It matches the OpenRouter key's usage delta for the run ($2.2579 less a $0.00007 smoke call) to the cent; the token fields are the result event's main-loop usage. The model wrote pacman.html in one Bash heredoc, then spent 92 turns (64 Bash, 24 Read) patching it with Python string replaces, rendering screenshots through a node canvas recorder and PIL (headless Chrome and a Swift WebKit helper failed in the sandbox), and running node logic tests and a bot playthrough; it deleted its test files before finishing. Outside the cell it only probed /Applications for a browser; it read nothing else outside the cell.",
+    "released": "2026-10-17",
+    "display_model": "DeepSeek V4.1 Flash 1017",
+    "phase": 2,
+    "score": 82,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click/arrow start, P/Esc, M, buffered turns, instant reverse, auto-pause on blur; no cornering, no mid-game restart, no touch steering; no key-repeat filter on start, so a held arrow restarts the game the moment GAME OVER appears"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "four targeting rules (no Pinky/Inky up-quirk), scatter/chase waves, eyes home from every tile in \u22643.75 s, speed-only Elroy, tunnel slowdown, no freeze at 30\u2013240 fps; a revived ghost leaves the house still frightened and can be eaten again in the same power-up"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; px/s \u00d7 dt with exact edge steps, same speed at 30\u2013240 fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731 plus 4 extra dots, 0 dead ends, 0/248 unreachable, symmetric"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master bus, continuous siren with a fright variant that stops on pause, death and game over, full set, mute; generic 7-note arpeggio instead of the Pac-Man intro, replayed at every READY"
+      }
+    }
   }
 ]
