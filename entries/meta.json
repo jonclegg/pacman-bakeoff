@@ -1761,5 +1761,49 @@
         "note": "master bus, continuous siren with a fright variant that stops on pause, death and game over, full set, mute; generic 7-note arpeggio instead of the Pac-Man intro, replayed at every READY"
       }
     }
+  },
+  {
+    "slug": "minimax-m3.1-flash",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-code-openrouter__minimax--minimax-m3.1-flash-free",
+    "requested": "minimax/minimax-m3.1-flash:free",
+    "actual": "minimax/minimax-m3.1-flash:free",
+    "effort": "high",
+    "duration_ms": 1912197,
+    "input_tokens": 151124,
+    "cached_input_tokens": 17616938,
+    "cache_write_tokens": 0,
+    "output_tokens": 230016,
+    "thinking_tokens": 156675,
+    "tokens_total": null,
+    "cost_usd": 0.0,
+    "html_bytes": 40830,
+    "note": "OpenRouter Claude Code fair cell on 2026-10-19, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, no web tools. MiniMax M3.1 Flash on OpenRouter's free listing minimax/minimax-m3.1-flash:free (canonical minimax/minimax-m3.1-flash-20261019, the only listing at run time), a separate card from minimax-m3. Requests went through bench/or_proxy.py with the existing minimax pin (MiniMax only; fallbacks off); OpenRouter lists the endpoint's quantization as unknown, and all 172 responses report provider Minimax. Claude Code sends --effort high as output_config.effort high; a probe on the same listing showed OpenRouter honours it (effort low roughly halved thinking tokens against high and the listing's max default). Claude Code 2.1.303 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 15.544. cost_usd is 0: the free listing is $0 input and $0 output (openrouter.ai/api/v1/models/minimax/minimax-m3.1-flash:free/endpoints, read 2026-10-19), and the smoke and probe calls through the same pin all returned cost 0. The OpenRouter key's usage moved $0.004 during the run, the same drift it showed with no cell running; the token fields are the result event's main-loop usage. The model wrote pacman.html with Write and then spent 175 turns (122 Bash, 33 Edit, 16 Read) patching it and testing it in node with its own canvas stub, PNG renderer and bot playthroughs (headless Chrome failed in the sandbox). Claude Code's sandbox pointed TMPDIR at /tmp/claude-501, where it kept those scripts; it listed that directory once (directory names only) and probed /Applications for a browser, and read nothing else outside the cell.",
+    "released": "2026-10-19",
+    "display_model": "MiniMax M3.1 Flash",
+    "phase": 2,
+    "score": 73,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Space/Enter/arrow start, P/Esc, M, swipe, buffered turns, instant reverse, key-repeat filter, auto-pause on blur; no cornering, no mid-game restart, a tap doesn't start; the arrow that starts the game and arrows during READY are dropped"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "four targeting rules, scatter/chase waves, eyes home from every tile, no re-eat, no freeze at 30\u2013240 fps; Inky and Clyde spend 65\u2013100% of their time out of the house bouncing in a dead-end stub above the house; a revived Blinky stays home while dots are eaten; no Elroy"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; fixed 1/120 s step, same speed at 30\u2013240 fps; a bot clears level 1"
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "28\u00d731, symmetric, 0/224 unreachable; non-classic middle band with no ring road round the house and 2 dead ends at (10,11) and (17,11)"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master gain, continuous siren with a fright variant that stops on pause, death and game over, full effect set; no intro tune; M doesn't mute the siren"
+      }
+    }
   }
 ]
