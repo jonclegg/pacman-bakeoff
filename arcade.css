@@ -575,15 +575,14 @@ a {
   color: var(--pac);
 }
 
-.sort-keys,
-.sort-dir {
+.sort-keys {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.sort-dir .chip {
-  --c: var(--mint);
+.chip-dir {
+  margin-left: -2px;
 }
 
 .chip {
@@ -608,7 +607,7 @@ a {
   box-shadow: 0 0 12px color-mix(in srgb, var(--c) 45%, transparent);
 }
 
-.chip[aria-checked="true"] {
+.chip[aria-pressed="true"] {
   color: #000;
   background: var(--c);
   border-color: var(--c);
