@@ -23,15 +23,21 @@ test("every sort option is offered", async ({ page }) => {
   expect(keys.sort()).toEqual(Object.keys(SORT_VALUE).sort());
 });
 
+// The direction each sort chip starts in when first picked: the most useful end first.
+const DESCENDING_FIRST = { score: true, cost: false, time: false, tokens: false, released: true };
+
 for (const [key, valueOf] of Object.entries(SORT_VALUE)) {
-  test(`sort by ${key} orders the cards both ways`, async ({ page }) => {
+  test(`sort by ${key} starts at its most useful end and a second click reverses it`, async ({ page }) => {
     await gallery.openGallery(page);
+    const chip = page.locator(`[data-sort="${key}"]`);
+    const first = DESCENDING_FIRST[key] ? "desc" : "asc";
     const orders = {};
-    for (const order of ["desc", "asc"]) {
-      await page.click(`[data-sort="${key}"]`);
-      await page.click(`[data-order="${order}"]`);
-      await expect(page.locator(`[data-sort="${key}"]`)).toHaveAttribute("aria-checked", "true");
-      await expect(page.locator(`[data-order="${order}"]`)).toHaveAttribute("aria-checked", "true");
+    for (const order of [first, first === "desc" ? "asc" : "desc"]) {
+      // Score is the sort on load, so only a reversal needs a click on it.
+      if (key !== "score" || order !== first) await chip.click();
+      await expect(chip).toHaveAttribute("aria-pressed", "true");
+      await expect(chip.locator(".chip-dir")).toContainText(order === "desc" ? "↓" : "↑");
+      await expect(page.locator('[data-sort][aria-pressed="true"]')).toHaveCount(1);
 
       const slugs = await gallery.shownSlugs(page);
       expect([...slugs].sort()).toEqual(gallery.META.map((entry) => entry.slug).sort());
