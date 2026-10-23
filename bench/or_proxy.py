@@ -16,14 +16,19 @@ PROVIDERS_BY_VENDOR = {
     "inception": ["inception"],
     "recursive": ["recursive"],
 }
+# Endpoint tags, for models whose pinned provider also serves a pricier priority tier under the same id.
+PROVIDERS_BY_MODEL = {
+    "moonshotai/kimi-k3.1-pro": ["moonshotai/mxfp4"],
+}
 HOP_HEADERS = {"host", "content-length", "connection", "transfer-encoding", "accept-encoding"}
 
 
 ###############################################################################
 def pin_provider(body):
     payload = json.loads(body)
-    vendor = payload["model"].split("/")[0]
-    payload["provider"] = {"order": PROVIDERS_BY_VENDOR[vendor], "allow_fallbacks": False}
+    model = payload["model"]
+    order = PROVIDERS_BY_MODEL[model] if model in PROVIDERS_BY_MODEL else PROVIDERS_BY_VENDOR[model.split("/")[0]]
+    payload["provider"] = {"order": order, "allow_fallbacks": False}
     return json.dumps(payload).encode()
 
 
@@ -42,6 +47,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         upstream = http.client.HTTPSConnection(UPSTREAM_HOST, timeout=600)
         upstream.request(self.command, UPSTREAM_PREFIX + self.path, body=body, headers=headers)
         resp = upstream.getresponse()
+        sys.stderr.write("%s %s %s\n" % (resp.status, self.path, resp.getheader("x-generation-id")))
         self.send_response(resp.status)
         for k, v in resp.getheaders():
             if k.lower() not in HOP_HEADERS:
