@@ -1893,5 +1893,49 @@
         "note": "five tone functions, but audioCtx is never created, so nothing ever plays (0 oscillator starts live)"
       }
     }
+  },
+  {
+    "slug": "kimi-k3.1-pro",
+    "harness": "OpenRouter / Claude Code (Cursor cloud VM)",
+    "run": "claude-code-openrouter__moonshotai--kimi-k3.1-pro",
+    "requested": "moonshotai/kimi-k3.1-pro",
+    "actual": "moonshotai/kimi-k3.1-pro",
+    "effort": "high",
+    "duration_ms": 689066,
+    "input_tokens": 52140,
+    "cached_input_tokens": 729344,
+    "cache_write_tokens": 0,
+    "output_tokens": 42703,
+    "thinking_tokens": 21997,
+    "tokens_total": null,
+    "cost_usd": 0.6771788,
+    "html_bytes": 40604,
+    "note": "OpenRouter Claude Code fair cell on 2026-10-23, release day, run in a Cursor cloud VM (Ubuntu 24.04, Claude Code's bubblewrap sandbox, node in the sandbox PATH and a writable sandbox TMPDIR, as for recursive-flint): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, Claude Code 2.1.303, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, no web tools; all four canary probes failed in this VM before the run. Moonshot AI Kimi K3.1 Pro on OpenRouter moonshotai/kimi-k3.1-pro (canonical moonshotai/kimi-k3.1-pro-20261023), a thinking-only model: every request carried Claude Code's thinking type adaptive with output_config effort high, and every response had thinking on (21,997 thinking tokens). Moonshot AI serves two endpoints under this id, standard (mxfp4, $2/$10) and a priority highspeed tier ($4/$20), so bench/or_proxy.py got a new per-model pin to the standard endpoint's tag moonshotai/mxfp4 (fallbacks off); all 17 responses report provider Moonshot AI from that one endpoint. The run ended cleanly (exit 0, 17 turns: 1 Write, 5 Edit, 10 Bash). Claude Code 2.1.303 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 1.69. cost_usd prices the result event's usage (52,140 input, 729,344 cache read, 42,703 output) at OpenRouter's listed Moonshot AI standard rates of $2 input, $0.20 cache read and $10 output per 1M (openrouter.ai/api/v1/models/moonshotai/kimi-k3.1-pro/endpoints, read 2026-10-23), and equals the sum of total_cost over the run's 17 OpenRouter generation records ($0.677179, each id logged by the proxy). The key's usage moved $0.706 over the run window; the $0.029 above the generation total is smoke-test and canary calls that billed late. The model checked its maze grid and played the game in node with its own canvas stub (movement, buffered turns, frightened mode, eyes, death, a full level clear, level progression, fruit). It tried headless Chrome three times, which the sandbox blocked (socket() not permitted), and read nothing outside the cell.",
+    "released": "2026-10-23",
+    "display_model": "Kimi K3.1 Pro",
+    "phase": 2,
+    "score": 93,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click start, P/Esc, M, buffered turns, instant reverse, auto-pause on blur, no page scroll; after a mouse start the focused Start button turns Space/Enter into a mid-game restart; buffered turns never expire, no cornering, no swipe"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "four arcade targeting rules incl. Pinky/Inky up-quirk, 7/20/7/20/5/20/5 waves, Elroy, tunnel slowdown, eyes home from 640/640 starts in \u22642.7 s, no re-eat, no freeze at 30\u2013240 fps; house dot counters reset every life, so Clyde spends 18\u201363% of play in the house"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; fixed 1/120 s step, 7.64 tiles/s at 30\u2013240 fps; a bot clears 244/244 at every fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, identical to the arcade layout, symmetric, 0 dead ends, 0/244 unreachable, door closed to Pac-Man"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master bus, continuous siren rising with progress plus a fright variant, silent in READY, pause, death and game over; full one-shot set, mute; real intro notes but 21 of about 31, flat rhythm, no bass; no eyes sound; siren keeps playing in a hidden tab"
+      }
+    }
   }
 ]
