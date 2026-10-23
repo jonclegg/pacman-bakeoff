@@ -1914,6 +1914,28 @@
     "released": "2026-10-23",
     "display_model": "Kimi K3.1 Pro",
     "phase": 2,
-    "score": null
+    "score": 93,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click start, P/Esc, M, buffered turns, instant reverse, auto-pause on blur, no page scroll; after a mouse start the focused Start button turns Space/Enter into a mid-game restart; buffered turns never expire, no cornering, no swipe"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "four arcade targeting rules incl. Pinky/Inky up-quirk, 7/20/7/20/5/20/5 waves, Elroy, tunnel slowdown, eyes home from 640/640 starts in \u22642.7 s, no re-eat, no freeze at 30\u2013240 fps; house dot counters reset every life, so Clyde spends 18\u201363% of play in the house"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; fixed 1/120 s step, 7.64 tiles/s at 30\u2013240 fps; a bot clears 244/244 at every fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, identical to the arcade layout, symmetric, 0 dead ends, 0/244 unreachable, door closed to Pac-Man"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master bus, continuous siren rising with progress plus a fright variant, silent in READY, pause, death and game over; full one-shot set, mute; real intro notes but 21 of about 31, flat rhythm, no bass; no eyes sound; siren keeps playing in a hidden tab"
+      }
+    }
   }
 ]
