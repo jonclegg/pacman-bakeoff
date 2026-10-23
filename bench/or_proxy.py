@@ -14,6 +14,7 @@ PROVIDERS_BY_VENDOR = {
     "meta": ["fireworks", "together"],
     "reflection": ["nebius"],
     "inception": ["inception"],
+    "recursive": ["recursive"],
 }
 HOP_HEADERS = {"host", "content-length", "connection", "transfer-encoding", "accept-encoding"}
 

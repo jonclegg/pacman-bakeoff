@@ -75,6 +75,9 @@ def claude_settings(cell, run_dir, deny_home):
             "filesystem": {
                 "denyRead": [f"{deny_home}/", "/Users/Shared/pacbake/"],
                 "allowRead": [str(cell), str(cell_tmp(cell))],
+                # Linux bubblewrap re-binds allowRead paths read-only after the writable TMPDIR bind,
+                # which made Claude Code's TMPDIR (inside cell_tmp) read-only. macOS Seatbelt has no mount order.
+                "allowWrite": [str(cell_tmp(cell))],
             },
             "network": {"allowedDomains": []},
         },

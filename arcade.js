@@ -26,6 +26,7 @@ const COMPANIES = {
   minimax: "MiniMax",
   muse: "Meta",
   qwen: "Alibaba",
+  recursive: "Recursive",
 };
 const byName = (a, b) => a.localeCompare(b, "en", { numeric: true, sensitivity: "base" });
 const SCORE_CHECKS = [
@@ -53,6 +54,8 @@ const SORT_VALUE = {
   tokens: (entry) => stripToken(entry).value,
   released: (entry) => (entry.released == null ? null : Date.parse(entry.released)),
 };
+// The direction a sort key starts in when first picked: the most useful end first.
+const SORT_DESCENDING_FIRST = { score: true, cost: false, time: false, tokens: false, released: true };
 const SORT_DIR = {
   score: [
     ["↑ Low", "Lowest score first"],
@@ -130,9 +133,7 @@ async function init() {
   ui.count = document.querySelector("[data-count]");
   ui.gameOver = document.querySelector(".game-over");
   ui.sortKeys = document.querySelector(".sort-keys");
-  ui.sortDir = document.querySelector(".sort-dir");
   ui.sortKeyButtons = [...ui.sortKeys.querySelectorAll("[data-sort]")];
-  ui.sortDirButtons = [...ui.sortDir.querySelectorAll("[data-order]")];
   ui.play = document.querySelector(".play");
   ui.playBack = document.querySelector(".play-back");
   ui.playName = document.querySelector(".play-name");
@@ -476,13 +477,15 @@ function bindEvents() {
     if (!ui.models.contains(event.target)) setModelsOpen(false);
   });
 
-  bindRadioGroup(ui.sortKeys, ui.sortKeyButtons, (button) => {
-    state.sort = button.dataset.sort;
-    applyFilters();
-  });
-
-  bindRadioGroup(ui.sortDir, ui.sortDirButtons, (button) => {
-    state.descending = button.dataset.order === "desc";
+  ui.sortKeys.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-sort]");
+    if (!button) return;
+    const key = button.dataset.sort;
+    if (key === state.sort) state.descending = !state.descending;
+    else {
+      state.sort = key;
+      state.descending = SORT_DESCENDING_FIRST[key];
+    }
     applyFilters();
   });
 
@@ -571,42 +574,16 @@ function compareMetric(a, b, direction) {
 }
 
 function syncSort() {
-  for (const button of ui.sortKeyButtons) markRadio(button, button.dataset.sort === state.sort);
-  const labels = SORT_DIR[state.sort];
-  for (const button of ui.sortDirButtons) {
-    const descending = button.dataset.order === "desc";
-    const [text, name] = labels[descending ? 1 : 0];
-    button.textContent = text;
-    button.setAttribute("aria-label", name);
-    markRadio(button, descending === state.descending);
+  for (const button of ui.sortKeyButtons) {
+    const key = button.dataset.sort;
+    const active = key === state.sort;
+    const descending = active ? state.descending : SORT_DESCENDING_FIRST[key];
+    const [direction, name] = SORT_DIR[key][descending ? 1 : 0];
+    button.replaceChildren(button.dataset.label);
+    if (active) button.append(h("span", "chip-dir", direction));
+    button.setAttribute("aria-pressed", String(active));
+    button.setAttribute("aria-label", active ? `${button.dataset.label}: ${name}. Press again to reverse.` : `Sort by ${button.dataset.label.toLowerCase()}: ${name}`);
   }
-  ui.sortDir.hidden = false;
-}
-
-function markRadio(button, selected) {
-  button.setAttribute("aria-checked", String(selected));
-  button.tabIndex = selected ? 0 : -1;
-}
-
-function bindRadioGroup(group, buttons, onChoose) {
-  group.addEventListener("click", (event) => {
-    const button = event.target.closest("button");
-    if (!button || !buttons.includes(button)) return;
-    onChoose(button);
-  });
-
-  group.addEventListener("keydown", (event) => {
-    let delta = 0;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") delta = 1;
-    if (event.key === "ArrowLeft" || event.key === "ArrowUp") delta = -1;
-    if (!delta) return;
-    const index = buttons.indexOf(document.activeElement);
-    if (index < 0) return;
-    event.preventDefault();
-    const button = buttons[(index + delta + buttons.length) % buttons.length];
-    onChoose(button);
-    button.focus();
-  });
 }
 
 function holdPreview(screen) {
