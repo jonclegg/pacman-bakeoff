@@ -1870,6 +1870,28 @@
     "released": "2026-10-21",
     "display_model": "Recursive Flint",
     "phase": 2,
-    "score": null
+    "score": 10,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, buffered turns, instant reverse, P/Esc pause with no PAUSED text; Enter-only start that nothing on screen mentions; no preventDefault, Space, mid-game restart, mute or touch"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "all four leave the house on frame 2 with no release rule; the mode never leaves scatter, so chase never runs; no energizers, so frightened mode and eyes never happen; Inky and Clyde circle back inside the house 100% of the time; ghosts swap tiles straight through Pac-Man"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "never frozen, but every entity moves one whole tile per frame (60 tiles/s at 60 fps, 240 at 240 fps), so with no input Pac-Man dies on frame 18 and GAME OVER comes about 6 s after Enter; the tunnel walks him off the grid for good"
+      },
+      "maze": {
+        "mark": "major",
+        "note": "28\u00d731 perimeter ring plus rows 1\u20132 and the tunnel row round solid wall blocks; 172 dots, 0 energizers, 0/172 unreachable; 2 dead ends at (25,18) and (2,20); house open to Pac-Man; dots never refill, so levels 2+ are empty"
+      },
+      "sound": {
+        "mark": "major",
+        "note": "five tone functions, but audioCtx is never created, so nothing ever plays (0 oscillator starts live)"
+      }
+    }
   }
 ]
