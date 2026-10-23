@@ -26,6 +26,7 @@ const COMPANIES = {
   minimax: "MiniMax",
   muse: "Meta",
   qwen: "Alibaba",
+  recursive: "Recursive",
 };
 const byName = (a, b) => a.localeCompare(b, "en", { numeric: true, sensitivity: "base" });
 const SCORE_CHECKS = [

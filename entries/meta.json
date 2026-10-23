@@ -1849,5 +1849,27 @@
         "note": "master gain, continuous siren with a fright variant that stops on pause, death and game over, full effect set, mute; generic 4-note arpeggio instead of the Pac-Man intro; no eyes sound"
       }
     }
+  },
+  {
+    "slug": "recursive-flint",
+    "harness": "OpenRouter / Claude Code (Cursor cloud VM)",
+    "run": "claude-code-openrouter__recursive--flint-v1.0-free__2026-10-23",
+    "requested": "recursive/flint-v1.0:free",
+    "actual": "recursive/flint-v1.0:free",
+    "effort": "high",
+    "duration_ms": 989724,
+    "input_tokens": 1741542,
+    "cached_input_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 112276,
+    "thinking_tokens": 78404,
+    "tokens_total": null,
+    "cost_usd": 0.0,
+    "html_bytes": 17961,
+    "note": "OpenRouter Claude Code fair cell on 2026-10-23, run in a Cursor cloud VM (Ubuntu 24.04, Claude Code's bubblewrap sandbox) instead of the Mac, because Claude Code on the Mac was logged out: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, Claude Code 2.1.303, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, no web tools; all four canary probes failed in this VM before the run. Recursive Flint (open-weight MoE, about 2.5B active of 40B parameters) on OpenRouter's free listing recursive/flint-v1.0:free (canonical recursive/flint-v1.0-20261021, the only listing). Requests went through bench/or_proxy.py with a new recursive pin (Recursive only; fallbacks off); OpenRouter lists the endpoint as bf16, and all 19 responses report provider Recursive. This is the second cell of the day. The first (17:09 UTC) ran before two Linux gaps in the harness were fixed: node was missing from the sandbox PATH (the Mac has it in /opt/homebrew/bin), and bubblewrap mounted the sandbox TMPDIR read-only. It is void, and it ended the same way. The run did not end cleanly: after 22 turns (4 Write, 7 Edit, 5 Read, 5 Bash) Claude Code exited 1 on 'API Error: 400 Inference request failed'. Reproduced afterwards with direct requests: Recursive rejects any request whose real input plus Claude Code's max_tokens of 128,000 passes the 262,144-token context, and OpenRouter's pre-check lets code-heavy requests through, so the cell ends once its context passes about 134k tokens. pacman.html is the file as of the model's last successful Edit, with nothing changed by hand. Claude Code 2.1.303 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 11.51. cost_usd is 0: the free listing is $0 input and $0 output (openrouter.ai/api/v1/models/recursive/flint-v1.0:free/endpoints, read 2026-10-23), there is no paid listing to give a list-price equivalent, and the OpenRouter key's usage did not move over either cell. The model's own testing was a node syntax check and a 31x28 maze-size check. It tried to write one scratch file to /tmp (read-only in the sandbox) and read nothing outside the cell.",
+    "released": "2026-10-21",
+    "display_model": "Recursive Flint",
+    "phase": 2,
+    "score": null
   }
 ]
