@@ -1937,5 +1937,49 @@
         "note": "master bus, continuous siren rising with progress plus a fright variant, silent in READY, pause, death and game over; full one-shot set, mute; real intro notes but 21 of about 31, flat rhythm, no bass; no eyes sound; siren keeps playing in a hidden tab"
       }
     }
+  },
+  {
+    "slug": "gpt-6.1-terra",
+    "harness": "Codex",
+    "run": "gpt-6.1-terra-api",
+    "requested": "gpt-6.1-terra",
+    "actual": "gpt-6.1-terra",
+    "effort": "high",
+    "duration_ms": 325000,
+    "input_tokens": 272880,
+    "cached_input_tokens": 237061,
+    "cache_write_tokens": 35786,
+    "output_tokens": 26871,
+    "thinking_tokens": 8327,
+    "tokens_total": 299751,
+    "cost_usd": 0.19097355,
+    "html_bytes": 33943,
+    "note": "Codex API-key fair cell run on 2026-10-26 (API-key auth, not ChatGPT login), metered at OpenAI Standard rates. Fair-cell PROMPT.md in an empty git cell (dd56119e-7733-4507-a264-c66adfeb717e). codex exec --ephemeral --json, model gpt-6.1-terra, reasoning effort high, web_search disabled, no --sandbox and no --search. Codex CLI logged that local model metadata for gpt-6.1-terra was missing and used fallback metadata (same warning as gpt-6.1-sol); the exec model flag was gpt-6.1-terra. cost_usd 0.19097355 is the turn.completed aggregate usage at OpenAI Standard short-context rates per 1M tokens (pricing page and model page fetched 2026-10-26: $1 input, $0.05 cached input, $1.25 cache writes (30-minute retention), $5 output). Cache-write tokens are included in input_tokens; uncached input is input minus cached minus cache write (33). Reasoning tokens are included in output_tokens. Ephemeral mode did not persist per-response usage; the whole-turn aggregate is 272880 input tokens, so no single request crossed the 272000 long-context threshold. No regional uplift.",
+    "released": "2026-10-26",
+    "display_model": "gpt-6.1-terra",
+    "phase": 1,
+    "score": 85,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/arrow start, P/Esc, M, d-pad on touch screens, buffered turns, instant reverse, auto-pause on blur, no page scroll; no cornering, swipe or restart key; after a mouse start the focused button turns Space or Enter into a restart; no key-repeat filter on arrows, so a held arrow restarts at GAME OVER"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "four targeting rules (no Pinky/Inky up-quirk), 7/20/7/20/5/20/5 waves with reversals, timer-only house release (1.2/5/9 s, reset every life), BFS eyes always get home, revive unfrightened (no re-eat), tunnel slowdown, no Elroy; fixed 1/120 s step, no freeze"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; exact tile-edge stepping on a fixed 120 Hz step, same speed at any fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, identical to the arcade layout, 0 dead ends, 0/244 unreachable, ghost-only door"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "waka, power, eat ghost, death, fruit, extra life, level clear, mute; generic 3-note start jingle instead of the Pac-Man intro; no siren or frightened loop; no master bus"
+      }
+    }
   }
 ]
