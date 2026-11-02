@@ -15,6 +15,7 @@ PROVIDERS_BY_VENDOR = {
     "reflection": ["nebius"],
     "inception": ["inception"],
     "recursive": ["recursive"],
+    "mistralai": ["mistral", "mistral/zdr", "mistral/eu"],
 }
 # Endpoint tags, for models whose pinned provider also serves a pricier priority tier under the same id.
 PROVIDERS_BY_MODEL = {
