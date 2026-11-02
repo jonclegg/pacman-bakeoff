@@ -1852,7 +1852,7 @@
   },
   {
     "slug": "recursive-flint",
-    "harness": "OpenRouter / Claude Code (Cursor cloud VM)",
+    "harness": "OpenRouter / Claude Code",
     "run": "claude-code-openrouter__recursive--flint-v1.0-free__2026-10-23",
     "requested": "recursive/flint-v1.0:free",
     "actual": "recursive/flint-v1.0:free",
@@ -1896,7 +1896,7 @@
   },
   {
     "slug": "kimi-k3.1-pro",
-    "harness": "OpenRouter / Claude Code (Cursor cloud VM)",
+    "harness": "OpenRouter / Claude Code",
     "run": "claude-code-openrouter__moonshotai--kimi-k3.1-pro",
     "requested": "moonshotai/kimi-k3.1-pro",
     "actual": "moonshotai/kimi-k3.1-pro",
@@ -1984,7 +1984,7 @@
   },
   {
     "slug": "claude-opus-5-5-medium",
-    "harness": "OpenRouter / Claude Code (Cursor cloud VM)",
+    "harness": "OpenRouter / Claude Code",
     "run": "claude-code-openrouter__anthropic--claude-opus-5.5",
     "requested": "anthropic/claude-opus-5.5",
     "actual": "anthropic/claude-opus-5.5",
@@ -2028,7 +2028,7 @@
   },
   {
     "slug": "mistral-large-4",
-    "harness": "OpenRouter / Claude Code (Cursor cloud VM)",
+    "harness": "OpenRouter / Claude Code",
     "run": "claude-code-openrouter__mistralai--mistral-large-4-0",
     "requested": "mistralai/mistral-large-4-0",
     "actual": "mistralai/mistral-large-4-0",
