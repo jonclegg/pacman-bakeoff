@@ -1984,47 +1984,25 @@
   },
   {
     "slug": "claude-opus-5-5-medium",
-    "harness": "Cursor cloud agent",
-    "run": "cursor-cloud__claude-opus-5-5-medium",
-    "requested": "claude-opus-5-5",
-    "actual": null,
+    "harness": "OpenRouter / Claude Code (Cursor cloud VM)",
+    "run": "claude-code-openrouter__anthropic--claude-opus-5.5",
+    "requested": "anthropic/claude-opus-5.5",
+    "actual": "anthropic/claude-opus-5.5",
     "effort": "medium",
-    "duration_ms": 1002000,
-    "input_tokens": null,
-    "cached_input_tokens": null,
-    "cache_write_tokens": null,
-    "output_tokens": null,
-    "thinking_tokens": null,
+    "duration_ms": 961535,
+    "input_tokens": 50,
+    "cached_input_tokens": 2787722,
+    "cache_write_tokens": 150415,
+    "output_tokens": 104292,
+    "thinking_tokens": 63506,
     "tokens_total": null,
-    "cost_usd": null,
-    "html_bytes": 39699,
-    "note": "Cursor cloud agent run, not Claude Code: the agent itself (claude-opus-5-5, effort medium, as configured in Cursor) built the game single-shot on 2026-11-02 from the full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty git cell on the Cursor cloud VM. This is not a bench/run_cell.py sandbox: the repo was checked out on the same VM. Before the game was written the agent had read only the prompt, bench/run_cell.py and the add-model skill, whose scoring step names the v4 extras (fruit, attract screen, level-clear flash, intermission); it opened no entry, scoring doc or meta.json until the file was final, and used no web tools. It tested in headless Chrome from the cell with its own CDP script. Wall time 1002 s from cell creation to the final file, on the agent's own clock. Cursor doesn't expose per-run tokens or cost, so tokens and cost_usd are null, and the served model id isn't recorded, so actual is blank. The high-effort claude-opus-5-5 card is a Claude Code run of the same prompt, so harness and effort both differ between the two cards.",
+    "cost_usd": 3.3956594,
+    "html_bytes": 45796,
+    "note": "OpenRouter Claude Code fair cell on 2026-11-02, run in a Cursor cloud VM (Ubuntu 24.04, Claude Code's bubblewrap sandbox, node in the sandbox PATH and a writable sandbox TMPDIR, as for recursive-flint, kimi-k3.1-pro and mistral-large-4). It replaces the 2026-11-01 (2026-11-02 UTC) Cursor cloud agent run of this card, which had no cost or token data; that run's game and scores were discarded and played no part in this cell or its scoring. Full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, Claude Code 2.1.303, effort medium, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, 60-minute cap, no web tools, with the repo checkout locked during the cell; all four canary probes failed in this VM before the run, and a plain completion and a forced tool call went through the proxy first. Anthropic Claude Opus 5.5 on OpenRouter anthropic/claude-opus-5.5 (canonical anthropic/claude-opus-5.5-20260921), pinned by bench/or_proxy.py to Anthropic's own endpoint (fallbacks off); all 25 responses came from Anthropic on one endpoint at standard speed, not the anthropic/fast tier. Every request carried thinking adaptive with output_config.effort medium and max_tokens 128000. The run ended cleanly in 16.0 min (exit 0, 32 turns: 1 Write, 4 Edit, 14 Bash, 12 Read of its own rendered frames), with 63,506 thinking tokens. Claude Code 2.1.303 maps this id to claude-opus-5 and reported $4.94 at Opus 5 rates. cost_usd prices the result event's usage (50 input, 2,787,722 cache read, 150,415 cache write, 104,292 output) at OpenRouter's listed Opus 5.5 rates of $4 input, $0.20 cache read, $5 cache write (5 min) and $20 output per 1M (openrouter.ai/api/v1/models/anthropic/claude-opus-5.5/endpoints, read 2026-11-02). It equals both the OpenRouter key's usage delta over the run window ($3.3957) and the sum of the run's 25 generation records. Headless Chrome would not start in the sandbox, so the model played the game in node with a bot (6 levels cleared) and checked still frames rendered with its own canvas stand-in, and read nothing outside the cell.",
     "released": "2026-09-22",
     "display_model": "claude-opus-5-5",
     "phase": 1,
-    "score": 99,
-    "score_notes": {
-      "controls": {
-        "mark": "minor",
-        "note": "arrows, WASD, Enter/Space/click/tap start, P/Esc, M, swipe, cornering, instant reverse, auto-pause on blur; no key-repeat filter (held Space restarts at GAME OVER, held P flickers pause), no mid-game restart"
-      },
-      "ghosts": {
-        "mark": "ok",
-        "note": "arcade targeting incl. Pinky/Inky up-quirk, 7/20/7/20/5/20/5 waves, dot + global counters + 4 s timer, eyes home from 1,200/1,200 starts in \u22643.3 s, no re-eat, Elroy, tunnel slowdown"
-      },
-      "stuck": {
-        "mark": "ok",
-        "note": "fixed 60 Hz step, no freeze at 30\u2013240 fps"
-      },
-      "maze": {
-        "mark": "ok",
-        "note": "classic 28\u00d731, 0 dead ends, 0/244 unreachable, symmetric"
-      },
-      "sound": {
-        "mark": "ok",
-        "note": "full intro with a bass line, continuous siren rising in 5 steps, fright and eyes loops, death, fruit, extra life, intermission tune, master bus, context suspended on pause"
-      }
-    }
+    "score": null
   },
   {
     "slug": "mistral-large-4",
