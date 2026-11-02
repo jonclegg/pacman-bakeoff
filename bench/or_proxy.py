@@ -16,6 +16,7 @@ PROVIDERS_BY_VENDOR = {
     "inception": ["inception"],
     "recursive": ["recursive"],
     "mistralai": ["mistral", "mistral/zdr", "mistral/eu"],
+    "anthropic": ["anthropic"],
 }
 # Endpoint tags, for models whose pinned provider also serves a pricier priority tier under the same id.
 PROVIDERS_BY_MODEL = {
@@ -30,6 +31,8 @@ def pin_provider(body):
     model = payload["model"]
     order = PROVIDERS_BY_MODEL[model] if model in PROVIDERS_BY_MODEL else PROVIDERS_BY_VENDOR[model.split("/")[0]]
     payload["provider"] = {"order": order, "allow_fallbacks": False}
+    sys.stderr.write("REQ %s thinking=%s output_config=%s max_tokens=%s\n" % (
+        model, json.dumps(payload.get("thinking")), json.dumps(payload.get("output_config")), payload.get("max_tokens")))
     return json.dumps(payload).encode()
 
 
