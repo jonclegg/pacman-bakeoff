@@ -2002,7 +2002,29 @@
     "released": "2026-09-22",
     "display_model": "claude-opus-5-5",
     "phase": 1,
-    "score": null
+    "score": 100,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click/tap start, P/Esc, M, swipe, buffered turns with 3.9 px pre-turn cornering, instant reverse, auto-pause on blur, no page scroll; no key-repeat filter (held P or M toggles on every repeat, held Space restarts 1 s into GAME OVER), turns pressed while paused are dropped, no mid-game restart"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "arcade targeting incl. Pinky/Inky up-quirk and no-up zones, 7/20/7/20/5/20/5 waves with reversals, reset per life and level, dot counters 0/30/60 + 4 s idle timer + 7/17/32 global counter after a death, eyes home from 1,200/1,200 starts in \u22643.17 s, no re-eat, 200\u20131600 chain, Elroy 20/10, tunnel slowdown"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; fixed 60 Hz step, 7.56 tiles/s at 30\u2013240 fps; a bot clears level 1 at 30\u2013240 fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, identical to the arcade layout, 0 dead ends, 0/244 unreachable, ghost-only door, symmetric"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "full arcade intro with a bass line, alternating waka, continuous siren rising in 5 stages, fright and eyes loops, eat ghost, death, extra life, fruit, master gain, context created in a gesture and suspended on pause; the intermission is silent"
+      }
+    }
   },
   {
     "slug": "mistral-large-4",
