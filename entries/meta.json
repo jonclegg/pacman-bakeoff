@@ -1983,6 +1983,50 @@
     }
   },
   {
+    "slug": "claude-opus-5-5-medium",
+    "harness": "Cursor cloud agent",
+    "run": "cursor-cloud__claude-opus-5-5-medium",
+    "requested": "claude-opus-5-5",
+    "actual": null,
+    "effort": "medium",
+    "duration_ms": 1002000,
+    "input_tokens": null,
+    "cached_input_tokens": null,
+    "cache_write_tokens": null,
+    "output_tokens": null,
+    "thinking_tokens": null,
+    "tokens_total": null,
+    "cost_usd": null,
+    "html_bytes": 39699,
+    "note": "Cursor cloud agent run, not Claude Code: the agent itself (claude-opus-5-5, effort medium, as configured in Cursor) built the game single-shot on 2026-11-02 from the full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty git cell on the Cursor cloud VM. This is not a bench/run_cell.py sandbox: the repo was checked out on the same VM. Before the game was written the agent had read only the prompt, bench/run_cell.py and the add-model skill, whose scoring step names the v4 extras (fruit, attract screen, level-clear flash, intermission); it opened no entry, scoring doc or meta.json until the file was final, and used no web tools. It tested in headless Chrome from the cell with its own CDP script. Wall time 1002 s from cell creation to the final file, on the agent's own clock. Cursor doesn't expose per-run tokens or cost, so tokens and cost_usd are null, and the served model id isn't recorded, so actual is blank. The high-effort claude-opus-5-5 card is a Claude Code run of the same prompt, so harness and effort both differ between the two cards.",
+    "released": "2026-09-22",
+    "display_model": "claude-opus-5-5",
+    "phase": 1,
+    "score": 99,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click/tap start, P/Esc, M, swipe, cornering, instant reverse, auto-pause on blur; no key-repeat filter (held Space restarts at GAME OVER, held P flickers pause), no mid-game restart"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "arcade targeting incl. Pinky/Inky up-quirk, 7/20/7/20/5/20/5 waves, dot + global counters + 4 s timer, eyes home from 1,200/1,200 starts in \u22643.3 s, no re-eat, Elroy, tunnel slowdown"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "fixed 60 Hz step, no freeze at 30\u2013240 fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, 0 dead ends, 0/244 unreachable, symmetric"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "full intro with a bass line, continuous siren rising in 5 steps, fright and eyes loops, death, fruit, extra life, intermission tune, master bus, context suspended on pause"
+      }
+    }
+  },
+  {
     "slug": "mistral-large-4",
     "harness": "OpenRouter / Claude Code (Cursor cloud VM)",
     "run": "claude-code-openrouter__mistralai--mistral-large-4-0",
