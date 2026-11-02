@@ -2002,6 +2002,28 @@
     "released": "2026-10-06",
     "display_model": "Mistral Large 4",
     "phase": 2,
-    "score": null
+    "score": 85,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, any key or click to start, P/Esc, M, buffered turns, instant reverse, 0.18-tile late-turn window, auto-pause on hidden tab, no page scroll; no touch or swipe steering, no mid-game restart; no key-repeat filter, so a held arrow restarts at GAME OVER"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "Blinky, Pinky (with up-quirk) and Clyde target as in the arcade, Inky has no up-quirk; the wave timer is never reset, so after the first 7 s scatter the ghosts chase for the rest of the life; timer-only house release, no Elroy; ghosts in or leaving the house ignore an energizer; eyes home from 1,200/1,200 starts in \u22643.85 s, revive unfrightened (no re-eat), 200\u20131600 chain; no freeze at 30\u2013240 fps"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; tiles/s \u00d7 dt, 7.0\u20137.2 tiles/s at 30\u2013240 fps; a bot clears level 1 at 60\u2013240 fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, identical to the arcade layout, 0 dead ends, 0/244 unreachable, ghost-only door, symmetric"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master gain, context created in a gesture, continuous siren rising with progress (wobbles in fright), waka, power, eat ghost, death, extra life, mute; generic 9-note arpeggio instead of the Pac-Man intro, no bass; no eyes or level-clear sound; pause doesn't stop notes already scheduled"
+      }
+    }
   }
 ]
