@@ -2002,6 +2002,28 @@
     "released": "2026-09-22",
     "display_model": "claude-opus-5-5",
     "phase": 1,
-    "score": null
+    "score": 99,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click/tap start, P/Esc, M, swipe, cornering, instant reverse, auto-pause on blur; no key-repeat filter (held Space restarts at GAME OVER, held P flickers pause), no mid-game restart"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "arcade targeting incl. Pinky/Inky up-quirk, 7/20/7/20/5/20/5 waves, dot + global counters + 4 s timer, eyes home from 1,200/1,200 starts in \u22643.3 s, no re-eat, Elroy, tunnel slowdown"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "fixed 60 Hz step, no freeze at 30\u2013240 fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, 0 dead ends, 0/244 unreachable, symmetric"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "full intro with a bass line, continuous siren rising in 5 steps, fright and eyes loops, death, fruit, extra life, intermission tune, master bus, context suspended on pause"
+      }
+    }
   }
 ]
