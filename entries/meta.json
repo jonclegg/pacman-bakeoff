@@ -2025,5 +2025,49 @@
         "note": "full intro with a bass line, continuous siren rising in 5 steps, fright and eyes loops, death, fruit, extra life, intermission tune, master bus, context suspended on pause"
       }
     }
+  },
+  {
+    "slug": "mistral-large-4",
+    "harness": "OpenRouter / Claude Code (Cursor cloud VM)",
+    "run": "claude-code-openrouter__mistralai--mistral-large-4-0",
+    "requested": "mistralai/mistral-large-4-0",
+    "actual": "mistralai/mistral-large-4-0",
+    "effort": "high",
+    "duration_ms": 566044,
+    "input_tokens": 129903,
+    "cached_input_tokens": 2568960,
+    "cache_write_tokens": 0,
+    "output_tokens": 90784,
+    "thinking_tokens": 60670,
+    "tokens_total": null,
+    "cost_usd": 0.4614057,
+    "html_bytes": 29693,
+    "note": "OpenRouter Claude Code fair cell on 2026-11-02, run in a Cursor cloud VM (Ubuntu 24.04, Claude Code's bubblewrap sandbox, node in the sandbox PATH and a writable sandbox TMPDIR, as for recursive-flint and kimi-k3.1-pro): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, Claude Code 2.1.303, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, 60-minute cap, no web tools; all four canary probes failed in this VM before the run, and a plain completion and a forced tool call went through the proxy first. Mistral AI Mistral Large 4 on OpenRouter mistralai/mistral-large-4-0 (canonical mistralai/mistral-large-4-0-20261006), pinned by bench/or_proxy.py to Mistral's own endpoints (mistral, mistral/zdr, mistral/eu; fallbacks off); all 30 responses report provider Mistral from one endpoint. A 2026-10-07 attempt hit the 60-minute cap in thinking-only loops without writing pacman.html and is not published. This run ended cleanly in 9.4 min (exit 0, 30 turns: 3 Write, 6 Edit, 20 Bash, 1 call to a nonexistent lowercase bash tool), with 60,670 thinking tokens. Claude Code 2.1.303 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 4.20. cost_usd prices the result event's usage (129,903 input, 2,568,960 cache read, 90,784 output) at OpenRouter's listed Mistral rates of $0.70 input, $0.07 cache read and $2.10 output per 1M (openrouter.ai/api/v1/models/mistralai/mistral-large-4-0/endpoints, read 2026-11-02; mistral/eu lists $0.77/$2.31 but served nothing). It equals the OpenRouter key's usage delta over the run window ($0.4852) less the canary's $0.0238, which billed late into that window; 29 of the 30 generation records sum to $0.4536 and the 30th returned 408. The model tried headless Chrome, which the sandbox blocked (no unix sockets), then played the game in node with its own DOM and canvas stub, fixing a title-screen arrow-key bug and a Pac-Man oscillation bug it found that way, and read nothing outside the cell.",
+    "released": "2026-10-06",
+    "display_model": "Mistral Large 4",
+    "phase": 2,
+    "score": 85,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, any key or click to start, P/Esc, M, buffered turns, instant reverse, 0.18-tile late-turn window, auto-pause on hidden tab, no page scroll; no touch or swipe steering, no mid-game restart; no key-repeat filter, so a held arrow restarts at GAME OVER"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "Blinky, Pinky (with up-quirk) and Clyde target as in the arcade, Inky has no up-quirk; the wave timer is never reset, so after the first 7 s scatter the ghosts chase for the rest of the life; timer-only house release, no Elroy; ghosts in or leaving the house ignore an energizer; eyes home from 1,200/1,200 starts in \u22643.85 s, revive unfrightened (no re-eat), 200\u20131600 chain; no freeze at 30\u2013240 fps"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; tiles/s \u00d7 dt, 7.0\u20137.2 tiles/s at 30\u2013240 fps; a bot clears level 1 at 60\u2013240 fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, identical to the arcade layout, 0 dead ends, 0/244 unreachable, ghost-only door, symmetric"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master gain, context created in a gesture, continuous siren rising with progress (wobbles in fright), waka, power, eat ghost, death, extra life, mute; generic 9-note arpeggio instead of the Pac-Man intro, no bass; no eyes or level-clear sound; pause doesn't stop notes already scheduled"
+      }
+    }
   }
 ]

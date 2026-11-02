@@ -24,6 +24,7 @@ const COMPANIES = {
   kimi: "Moonshot AI",
   mercury: "Inception",
   minimax: "MiniMax",
+  mistral: "Mistral AI",
   muse: "Meta",
   qwen: "Alibaba",
   recursive: "Recursive",
