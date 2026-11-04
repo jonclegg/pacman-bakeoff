@@ -2069,5 +2069,49 @@
         "note": "master gain, context created in a gesture, continuous siren rising with progress (wobbles in fright), waka, power, eat ghost, death, extra life, mute; generic 9-note arpeggio instead of the Pac-Man intro, no bass; no eyes or level-clear sound; pause doesn't stop notes already scheduled"
       }
     }
+  },
+  {
+    "slug": "tencent-hy4",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-code-openrouter__tencent--hy4",
+    "requested": "tencent/hy4",
+    "actual": "tencent/hy4",
+    "effort": "high",
+    "duration_ms": 1389800,
+    "input_tokens": 183927,
+    "cached_input_tokens": 1944896,
+    "cache_write_tokens": 0,
+    "output_tokens": 148551,
+    "thinking_tokens": 126314,
+    "tokens_total": null,
+    "cost_usd": 0.3033034,
+    "html_bytes": 36212,
+    "note": "OpenRouter Claude Code fair cell on 2026-11-04, release day, run in a Cursor cloud VM (Ubuntu 24.04, Claude Code's bubblewrap sandbox, node in the sandbox PATH and a writable sandbox TMPDIR, as for recursive-flint, kimi-k3.1-pro, mistral-large-4 and claude-opus-5-5-medium): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, Claude Code 2.1.303, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, 60-minute cap, no web tools, with the repo checkout locked during the cell; all four canary probes failed in this VM before the run, and a plain completion and a forced tool call went through the proxy first. Tencent Hy4 on OpenRouter tencent/hy4 (canonical tencent/hy4-20261104, 1M context; not hy4-preview or hy3), pinned by bench/or_proxy.py to Tencent, the only endpoint (fp4, 65,536 max completion; fallbacks off); all 16 responses came from Tencent on that endpoint. Every request carried thinking adaptive with output_config.effort high and max_tokens 128000. The run ended cleanly in 23.2 min (1389.8 s wall clock, exit 0, 16 turns: 1 Write, 12 Bash, 2 Read of its own rendered maze, one of them denied on its TMPDIR path), with 126,314 thinking tokens; the first turn alone was 10.7 min of thinking. Claude Code 2.1.303 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 5.61. cost_usd prices the result event's usage (183,927 input, 1,944,896 cache read, 148,551 output) at OpenRouter's listed Tencent rates of $0.417 input, $0.021 cache read and $1.2505 output per 1M (openrouter.ai/api/v1/models/tencent/hy4/endpoints, read 2026-11-04), and equals the sum of total_cost over the run's 16 OpenRouter generation records ($0.303303, each id logged by the proxy). The key's usage moved $0.3230 over the run window; the $0.0197 above the generation total is smoke-test and canary calls that billed late. The model checked its maze with a flood fill, tried headless Chrome, which the sandbox blocked (no unix sockets), then ran the game for 4,000 frames in node with its own DOM and canvas stub and viewed a PNG of the maze it rasterized itself, and read nothing outside the cell.",
+    "released": "2026-11-04",
+    "display_model": "Tencent Hy4",
+    "phase": 2,
+    "score": 82,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Space/Enter/click/tap start, P/Esc, M, swipe, buffered turns, instant reverse, no page scroll; no cornering, no mid-game restart, arrows don't start; no key-repeat filter, so holding Space through the last death skips GAME OVER and a held P flickers pause; arrows still reverse Pac-Man while paused"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "four targeting rules (no Pinky/Inky up-quirk), 7/20/7/20/5 waves then chase, reset per life and level; timer-only house release (2/5/8 s, reset every life); eyes home from 1,024/1,024 starts in \u22647.0 s; a revived ghost comes back still frightened and can be eaten again in the same power-up; one ghost speed for chase, fright, eyes and tunnel, no Elroy; no freeze at 30\u2013240 fps"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; tiles/s \u00d7 dt, 6.25\u20136.29 tiles/s at 30\u2013240 fps; a bot clears level 1 at every fps"
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "28\u00d731 with the arcade's passability, 0 dead ends, 0/242 unreachable, ghost-only door, symmetric; two tunnel-row dots missing, and the cells above and below the tunnel are void, so the tunnel has no walls drawn"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "context created in a gesture, waka, continuous siren rising with progress, power, eat ghost, death, fruit, extra life, level clear, mute; no intro tune, no frightened loop or eyes sound, no master gain; the siren keeps playing while paused"
+      }
+    }
   }
 ]
