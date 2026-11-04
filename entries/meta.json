@@ -2090,6 +2090,28 @@
     "released": "2026-11-04",
     "display_model": "Tencent Hy4",
     "phase": 2,
-    "score": null
+    "score": 82,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Space/Enter/click/tap start, P/Esc, M, swipe, buffered turns, instant reverse, no page scroll; no cornering, no mid-game restart, arrows don't start; no key-repeat filter, so holding Space through the last death skips GAME OVER and a held P flickers pause; arrows still reverse Pac-Man while paused"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "four targeting rules (no Pinky/Inky up-quirk), 7/20/7/20/5 waves then chase, reset per life and level; timer-only house release (2/5/8 s, reset every life); eyes home from 1,024/1,024 starts in \u22647.0 s; a revived ghost comes back still frightened and can be eaten again in the same power-up; one ghost speed for chase, fright, eyes and tunnel, no Elroy; no freeze at 30\u2013240 fps"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; tiles/s \u00d7 dt, 6.25\u20136.29 tiles/s at 30\u2013240 fps; a bot clears level 1 at every fps"
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "28\u00d731 with the arcade's passability, 0 dead ends, 0/242 unreachable, ghost-only door, symmetric; two tunnel-row dots missing, and the cells above and below the tunnel are void, so the tunnel has no walls drawn"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "context created in a gesture, waka, continuous siren rising with progress, power, eat ghost, death, fruit, extra life, level clear, mute; no intro tune, no frightened loop or eyes sound, no master gain; the siren keeps playing while paused"
+      }
+    }
   }
 ]
