@@ -17,6 +17,7 @@ PROVIDERS_BY_VENDOR = {
     "recursive": ["recursive"],
     "mistralai": ["mistral", "mistral/zdr", "mistral/eu"],
     "anthropic": ["anthropic"],
+    "tencent": ["tencent"],
 }
 # Endpoint tags, for models whose pinned provider also serves a pricier priority tier under the same id.
 PROVIDERS_BY_MODEL = {

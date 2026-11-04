@@ -28,6 +28,7 @@ const COMPANIES = {
   muse: "Meta",
   qwen: "Alibaba",
   recursive: "Recursive",
+  tencent: "Tencent",
 };
 const byName = (a, b) => a.localeCompare(b, "en", { numeric: true, sensitivity: "base" });
 const SCORE_CHECKS = [
