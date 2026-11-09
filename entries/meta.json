@@ -2134,6 +2134,29 @@
     "released": "2026-11-09",
     "display_model": "claude-fable-5-2",
     "phase": 1,
-    "score": null
+    "score": 77,
+    "score_summary": "not Pac-Man: the model declined to clone it and built an original maze chase",
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click/tap start, P/Esc, M, swipe, buffered turns with a 0.42-tile pre-turn and a 0.30-tile late turn, instant reverse, key-repeat filter on start, pause and mute, auto-pause on blur, no page scroll; a turn begun more than 0.40 tile early glides past the corner pellet and leaves it behind (17\u201337 of 60 buffered turns at 30\u2013240 fps; 3 of 8 live); no mid-game restart, turns pressed while paused are dropped, a blur during the death or clear animation doesn't pause"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "four distinct rules on a re-themed cast (spiders): direct, 4 ahead (no up-quirk), 2 \u00d7 player \u2212 hunter (pivot on the player's tile), and a warden that chases within 5 tiles and otherwise guards the power pellet nearest the player; 7/20/7/20/5/20/5 waves with reversals, reset per life and level; dot counters 0/0/30/60 (8/18 after a death) + 4 s idle timer; eyes home from 582/582 starts in \u22641.68 s, revive unfrightened (no re-eat), 200\u20131600 chain, Elroy 20/10 (not suspended after a death), tunnel slowdown, no freeze at 30\u2013240 fps (1/120 s substeps); a ghost leaving the house can't touch the player"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; tiles/s \u00d7 dt in substeps of at most 1/120 s, 7.52 tiles/s at 30\u2013240 fps; a bot clears level 1 at 30, 60, 120, 144 and 240 fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "its own 27\u00d727 layout, not the arcade maze; 259 pellets (255 + 4), 0 dead ends, 0/259 unreachable, ghost-only door, wrapping tunnel, symmetric"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master gain, context created in a gesture and suspended on pause; original 12-note intro with a 4-note bass line (not the Pac-Man tune), pellet blips that climb and fall, power pellet, eat ghost, death, extra life, bonus, level clear, game over, mute; no continuous siren (sparse cricket chirps that quicken as pellets run out), the frightened loop is pulsed 90 ms beeps, no eyes sound"
+      }
+    }
   }
 ]
