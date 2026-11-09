@@ -16,6 +16,8 @@ Scores (out of 100) come from Opus 5.5's 2026-09-28 re-test of the live games on
 
 `claude-sonnet-5-5` is an OpenRouter Claude Code run. The card title is `claude-sonnet-5.5`. Requested `anthropic/claude-sonnet-5.5`; OpenRouter served `anthropic/claude-sonnet-5.5-20260928`, which stays under Run data. It is not the first-party `claude-sonnet-5` card.
 
+`claude-fable-5-2` is not a Pac-Man clone. In its first-party Claude Code fair cell the model declined to recreate the game's name, characters, maze and look, and built an original maze chase with the same mechanics instead (Glimmer Grove: a firefly, four spiders and a hedge maze). The card is that game, unedited. It scores well on the mechanics checks and takes the full v4 visual deduction, since nothing on screen is drawn as the arcade game.
+
 ## Dev preview
 
 `.github/workflows/pages.yml` deploys GitHub Pages on every push to `main` or `dev`. Each deploy publishes `main` at the site root and `dev` under `/dev/`, so the preview never replaces production.
