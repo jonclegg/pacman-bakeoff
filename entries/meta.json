@@ -2113,5 +2113,27 @@
         "note": "context created in a gesture, waka, continuous siren rising with progress, power, eat ghost, death, fruit, extra life, level clear, mute; no intro tune, no frightened loop or eyes sound, no master gain; the siren keeps playing while paused"
       }
     }
+  },
+  {
+    "slug": "claude-fable-5-2",
+    "harness": "Claude Code",
+    "run": "claude-code__claude-fable-5-2",
+    "requested": "claude-fable-5-2",
+    "actual": "claude-fable-5-2",
+    "effort": "high",
+    "duration_ms": 1185547,
+    "input_tokens": 42,
+    "cached_input_tokens": 2486695,
+    "cache_write_tokens": 141688,
+    "output_tokens": 110649,
+    "thinking_tokens": 69382,
+    "tokens_total": null,
+    "cost_usd": 7.190643,
+    "html_bytes": 50396,
+    "note": "First-party Claude Code fair cell on release day, 2026-11-09, run in a Claude Code cloud session container (Ubuntu 24.04, Claude Code's bubblewrap sandbox, node and a writable sandbox TMPDIR, with the repo checkouts and the home directory locked during the cell). Full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code, Claude Code 2.1.321, effort high, 60-minute cap, no web tools; all four canary probes failed in this container before the run. The model declined to recreate Pac-Man: its first message says it can't build a recreation of the game's name, characters, maze and look, so it built an original maze chase with the same mechanics, Glimmer Grove (a firefly, four spiders, pollen motes and moonblossoms on its own 27\u00d727 hedge maze), delivered as pacman.html. The card is that game, unedited. All 46 responses came from claude-fable-5-2, first party, standard speed. The run ended cleanly in 19.8 min (exit 0, 25 turns: 1 Write, 14 Bash, 9 Read of its own screenshots) after an 11-minute first think, with 69,382 thinking tokens. cost_usd is Claude Code's total_cost_usd at list rates; it equals the result event's usage (42 input, 2,486,695 cache read, 141,688 one-hour cache write, 110,649 output) at $8 input, $0.20 cache read, $16 one-hour cache write and $40 output per 1M (anthropic.com/claude/fable, read 2026-11-09, lists $8 / $40 and $0.20 cache reads). The model tested in the container's pre-installed headless Chromium (12 levels by autopilot, real key events) and read nothing outside the cell.",
+    "released": "2026-11-09",
+    "display_model": "claude-fable-5-2",
+    "phase": 1,
+    "score": null
   }
 ]
