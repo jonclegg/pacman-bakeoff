@@ -2158,5 +2158,49 @@
         "note": "master gain, context created in a gesture and suspended on pause; original 12-note intro with a 4-note bass line (not the Pac-Man tune), pellet blips that climb and fall, power pellet, eat ghost, death, extra life, bonus, level clear, game over, mute; no continuous siren (sparse cricket chirps that quicken as pellets run out), the frightened loop is pulsed 90 ms beeps, no eyes sound"
       }
     }
+  },
+  {
+    "slug": "gemini-4-carbon",
+    "harness": "Gemini API (proxy) / Claude Code",
+    "run": "claude-code-gemini__gemini-4-carbon",
+    "requested": "gemini-4-carbon",
+    "actual": "gemini-4-carbon",
+    "effort": "high",
+    "duration_ms": 1269728,
+    "input_tokens": 170294,
+    "cached_input_tokens": 1136913,
+    "cache_write_tokens": 0,
+    "output_tokens": 110032,
+    "thinking_tokens": 55432,
+    "tokens_total": null,
+    "cost_usd": 1.5545993,
+    "html_bytes": 89663,
+    "note": "Gemini API Claude Code fair cell on 2026-11-11, the day after GA (2026-11-10): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-gemini, effort high, no web tools. Claude Code 2.1.316 called the local Anthropic-to-Gemini translation proxy (bench/gemini_proxy.py), which called Google's Gemini API (generativelanguage.googleapis.com, streamGenerateContent) directly with a paid Gemini API key; every Claude Code model slot was gemini-4-carbon. Effort high was sent as thinkingLevel \"high\" and CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000 as maxOutputTokens 128000 on all 22 requests; all 22 responses report modelVersion gemini-4-carbon with HTTP 200 (20 finishReason STOP, 2 thought-only turns with no finishReason, after which Claude Code carried on). The single Write of pacman.html was one 320 s silent generation (34,309 output + 4,472 thinking tokens). Claude Code does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 4.1707265; cost_usd here is the run's usage at Google's published Gemini 4 Carbon Standard paid-tier intro rates in effect through 2026-11-30 ($2.00 input, $0.10 cached input, $10.00 output including thinking per 1M; $4/$0.20/$20 from 2026-12-01; implicit caching only, no cache-write charge; ai.google.dev/gemini-api/docs/pricing, read 2026-11-11). The proxy's own log of Gemini usageMetadata matches Claude Code's totals token for token (170,294 uncached + 1,136,913 cached input, 110,032 output of which 55,432 thinking). thinking_tokens is Gemini's thoughtsTokenCount because Claude Code reported 0. Claude Code assumed a 200k context window for the unknown model (Gemini 4 Carbon has 1,048,576); the largest prompt was 113,477 tokens and there was no auto-compaction. The Mac's lid was closed at 16:27:30 CT, about 44 s before the run ended; the last three requests ran in DarkWake and the wall time includes at most about 11 s of sleep. The model listed /Applications to find Chrome and tested its own file; it read nothing else outside the cell.",
+    "released": "2026-11-10",
+    "display_model": "Gemini 4 Carbon",
+    "phase": 3,
+    "score": 98,
+    "score_notes": {
+      "controls": {
+        "mark": "ok",
+        "note": "arrows, WASD, Enter/Space/arrow/tap start, P/Esc, M, R, swipe, key-repeat filter, 0.34 s tap buffer + held-key stack, 0.44-tile pre-turn, instant reverse, auto-pause on blur, no page scroll"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "arcade targeting incl. Pinky/Inky up-quirk and no-up tiles, 7/20/7/20/5/20/5 waves, dot counters 0/30/60 + 4 s timer + 7/17/32 after a death, fright 200\u20131600 with flashes, eyes home from 732/732 and 1,288/1,288 starts in \u22643.7 s, no re-eat, Elroy 20/10, tunnel slowdown"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; fixed 60 Hz step, 0 freezes at 30\u2013240 fps, a bot clears level 1 at every fps (18/18 runs) and a soak reached level 6"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, 0 dead ends, 0/244 unreachable, symmetric, door shut to Pac-Man, tunnel the only exit"
+      },
+      "sound": {
+        "mark": "ok",
+        "note": "arcade intro with a bass line, alternating waka, continuous 5-tier siren, fright hum, eyes trill, eat ghost, fruit, extra life, death, master gain, mute; siren stops on pause and death; one-shots already playing finish through a pause"
+      }
+    }
   }
 ]
