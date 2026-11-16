@@ -2202,5 +2202,49 @@
         "note": "arcade intro with a bass line, alternating waka, continuous 5-tier siren, fright hum, eyes trill, eat ghost, fruit, extra life, death, master gain, mute; siren stops on pause and death; one-shots already playing finish through a pause"
       }
     }
+  },
+  {
+    "slug": "qwen4-max",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-code-openrouter__qwen--qwen4-max",
+    "requested": "qwen/qwen4-max",
+    "actual": "qwen/qwen4-max-20261115",
+    "effort": "high",
+    "duration_ms": 1403011,
+    "input_tokens": 2578117,
+    "cached_input_tokens": 278194,
+    "cache_write_tokens": 32032,
+    "output_tokens": 82495,
+    "thinking_tokens": 47478,
+    "tokens_total": null,
+    "cost_usd": 4.31932755,
+    "html_bytes": 38668,
+    "note": "OpenRouter Claude Code fair cell on 2026-11-15, release day: full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, no web tools. Claude Code 2.1.316 on OpenRouter qwen/qwen4-max; requests went through bench/or_proxy.py with the existing qwen pin (Alibaba only; fallbacks off). All 34 requests returned HTTP 200 from provider Alibaba, and OpenRouter's generation records give the served model as qwen/qwen4-max-20261115 for every one; every Claude Code model slot was qwen/qwen4-max and the proxy saw no other model. Claude Code sent --effort high as thinking adaptive plus output_config.effort high with max_tokens 128000. Claude Code 2.1.316 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 15.29. cost_usd prices the result event's usage (2,578,117 uncached input, 278,194 cache read, 32,032 cache write, 82,495 output of which 47,478 thinking) at OpenRouter's listed Alibaba rates of $1.50 input, $0.075 cache read, $1.875 cache write and $4.50 output per 1M (openrouter.ai/api/v1/models/qwen/qwen4-max/endpoints, read 2026-11-15); the 34 OpenRouter generation records sum to the same $4.319 to the cent. The key's own usage delta over the run window is not used, because the outer driver's audit and judge calls bill the same key. The model wrote pacman.html with Write about 13 minutes in, after a 70k-character first plan, and spent the rest of its 43 turns (15 Bash, 14 Edit, 10 Read, 3 Write) testing the game in node and looking at its own rendered frames. It listed /Applications to find Chrome, kept scratch files in the cell and deleted them at the end, and read nothing else outside the cell.",
+    "released": "2026-11-15",
+    "display_model": "Qwen4-Max",
+    "phase": 2,
+    "score": 75,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click start, P/Esc, M, buffered turns, 5 px pre-turn, instant reverse, auto-pause on hidden tab, no page scroll; no key-repeat filter (held P or M toggles on every repeat, held Enter skips GAME OVER), no mid-game restart, no touch steering"
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "arcade targeting incl. Pinky/Inky up-quirk and no-up tiles, 7/20/7/20/5/20/5 waves, dot counters + 4 s timer + global counter, fright 200\u20131600 with flashes, no re-eat, Elroy 20/10, tunnel slowdown, no freeze at 30\u2013240 fps; eaten Inky and Clyde never revive: their eyes reach the house and jitter 3 px there until the next death or level (0/1,374 starts), so the life goes on with two ghosts"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; fixed 60 Hz step, 7.4\u20137.6 tiles/s at 30\u2013240 fps, a bot clears level 1 at every fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, 0/868 cells differ from the arcade, 0 dead ends, 0/244 unreachable, symmetric, door shut to Pac-Man; drawn walls match the grid (144 stray 6\u00d76 px squares inside wall blocks, never in a corridor)"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master gain, context created in a gesture, arcade intro (no bass), alternating waka, continuous siren with fright and eyes variants that stops on pause and death, power, eat ghost, fruit, extra life, death, mute; the intro runs ~1.5 s past READY into play; the siren pitch doesn't rise as dots go; no level-clear or game-over sound"
+      }
+    }
   }
 ]
