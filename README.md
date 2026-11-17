@@ -4,7 +4,7 @@ Models and harnesses recreate Pac-Man from one short prompt. Compare entries by 
 
 **Live site:** [https://wooten-labs.com/pacman-bench/](https://wooten-labs.com/pacman-bench/) (also at [https://jonclegg.github.io/pacman-bakeoff/](https://jonclegg.github.io/pacman-bakeoff/))
 
-**Dev preview:** the live site URL plus `dev/` (serves the `dev` branch)
+**Dev preview:** [https://jonclegg.github.io/pacman-bakeoff/dev/](https://jonclegg.github.io/pacman-bakeoff/dev/) (serves the `dev` branch; GitHub Pages only)
 
 Each card opens a playable HTML entry. The gallery has one card per model and effort; when a model was run at more than one effort, each of its cards names its effort under the title. Stats come from harness transcripts where available (wall time, tokens, cost estimates). A dash means that run did not record the number.
 
@@ -43,6 +43,8 @@ Every push to `main` also uploads the gallery to [wooten-labs.com/pacman-bench/]
 
 ## Adding a model
 
+Agents (Claude Code, Grok bot, others): start with `AGENTS.md`.
+
 In Claude Code, point at the model (name, API id, or announcement link) and ask to add it. The project skill `.claude/skills/add-model/SKILL.md` runs the whole loop: fair-cell run, entry, dev deploy, v2 scoring, analysis, then asks before promoting to `main`.
 
 The pieces, if you run them by hand:
@@ -54,6 +56,7 @@ The pieces, if you run them by hand:
 
 ## Repo layout
 
+- `AGENTS.md` — notes for any agent: what to do when a new model appears, and where the site is published
 - `index.html`, `arcade.css`, `arcade.js` — gallery UI
 - `entries/` — one HTML file per run plus `meta.json`
 - `.nojekyll` — serve static assets as-is on GitHub Pages
