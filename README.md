@@ -4,7 +4,7 @@ Models and harnesses recreate Pac-Man from one short prompt. Compare entries by 
 
 **Live site:** [https://wooten-labs.com/pacman-bench/](https://wooten-labs.com/pacman-bench/) (also at [https://jonclegg.github.io/pacman-bakeoff/](https://jonclegg.github.io/pacman-bakeoff/))
 
-**Dev preview:** the live site URL plus `dev/` (serves the `dev` branch)
+**Dev preview:** [https://jonclegg.github.io/pacman-bakeoff/dev/](https://jonclegg.github.io/pacman-bakeoff/dev/) (serves the `dev` branch; GitHub Pages only)
 
 Each card opens a playable HTML entry. The gallery has one card per model and effort; when a model was run at more than one effort, each of its cards names its effort under the title. Stats come from harness transcripts where available (wall time, tokens, cost estimates). A dash means that run did not record the number.
 
@@ -57,7 +57,6 @@ The pieces, if you run them by hand:
 ## Repo layout
 
 - `AGENTS.md` — notes for any agent: what to do when a new model appears, and where the site is published
-
 - `index.html`, `arcade.css`, `arcade.js` — gallery UI
 - `entries/` — one HTML file per run plus `meta.json`
 - `.nojekyll` — serve static assets as-is on GitHub Pages
