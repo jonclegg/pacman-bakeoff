@@ -3,7 +3,7 @@
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
 
-## 2026-11-17: agent notes for new models (PR #TBD)
+## 2026-11-17: agent notes for new models (PR #62)
 
 - **What changed:** nothing on the site. New `AGENTS.md` tells any agent (including the Grok bot) what to do when it spots a new model: check `entries/meta.json`, ask Jon, then follow the add-model playbook to `/dev/`. It also lists where production is published. The add-model playbook now checks wooten-labs.com after a merge.
 - **Operator:** nothing to do.
