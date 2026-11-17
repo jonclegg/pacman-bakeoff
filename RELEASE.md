@@ -5,7 +5,7 @@ Newest first. Each entry: date, PR, what changed for gallery visitors, what an o
 ## 2026-11-17: deploy main to wooten-labs.com/pacman-bench/ (PR #61)
 
 - **What changed:** every merge to `main` now also updates [wooten-labs.com/pacman-bench/](https://wooten-labs.com/pacman-bench/), so it no longer falls behind GitHub Pages. Visitors see the same gallery on both.
-- **Operator:** nothing to do after merge. One-time setup is done: IAM role `GitHubActions-PacmanBench` in AWS account 423173602168 (trusts only `repo:jonclegg/pacman-bakeoff:ref:refs/heads/main`; may write under `pacman-bench/` in `wooten-labs-site-423173602168` and invalidate CloudFront `E3NNL0QRWXIH24`). No GitHub secrets.
+- **Operator:** nothing to do after merge. One-time setup is done: IAM role `GitHubActions-PacmanBench` in AWS account 423173602168 (trusts only `repo:jonclegg@5744185/pacman-bakeoff@1391736701:ref:refs/heads/main`, the repo's ID-based token subject; may write under `pacman-bench/` in `wooten-labs-site-423173602168` and invalidate CloudFront `E3NNL0QRWXIH24`). No GitHub secrets.
 - **Cost:** about 2 MB of S3 PUTs and one CloudFront invalidation path per deploy: well under a cent each (the first 1,000 invalidation paths a month are free).
 
 ## 2026-11-17: add gpt-6.2-astra (92) and gpt-6.2-sol (87) (PR #60)

@@ -39,7 +39,7 @@ One-time setup (repo admin):
 
 ## wooten-labs.com
 
-Every push to `main` also uploads the gallery to [wooten-labs.com/pacman-bench/](https://wooten-labs.com/pacman-bench/): the `wooten-labs` job in `.github/workflows/pages.yml` adds the site's `/w.js` analytics tag to `index.html`, syncs `index.html`, `arcade.css`, `arcade.js` and `entries/` to `s3://wooten-labs-site-423173602168/pacman-bench/` (deleting files no longer in `main`), and clears that path in CloudFront distribution `E3NNL0QRWXIH24`. It signs in to AWS (account 423173602168) as the IAM role `GitHubActions-PacmanBench`, which only this repo's `main` branch can assume and which can only write under `pacman-bench/` and clear that distribution's cache. The `dev` preview stays on GitHub Pages only.
+Every push to `main` also uploads the gallery to [wooten-labs.com/pacman-bench/](https://wooten-labs.com/pacman-bench/): `.github/workflows/wooten-labs.yml` runs the tests, then adds the site's `/w.js` analytics tag to `index.html`, syncs `index.html`, `arcade.css`, `arcade.js` and `entries/` to `s3://wooten-labs-site-423173602168/pacman-bench/` (deleting files no longer in `main`), and clears that path in CloudFront distribution `E3NNL0QRWXIH24`. It signs in to AWS (account 423173602168) as the IAM role `GitHubActions-PacmanBench`, which only this repo's `main` branch can assume (the repo sends GitHub's ID-based token subject, so the trust policy names `repo:jonclegg@5744185/pacman-bakeoff@1391736701:ref:refs/heads/main`) and which can only write under `pacman-bench/` and clear that distribution's cache. The `dev` preview stays on GitHub Pages only.
 
 ## Adding a model
 
@@ -57,6 +57,7 @@ The pieces, if you run them by hand:
 - `index.html`, `arcade.css`, `arcade.js` — gallery UI
 - `entries/` — one HTML file per run plus `meta.json`
 - `.nojekyll` — serve static assets as-is on GitHub Pages
-- `.github/workflows/pages.yml` — deploys `main` to the site root and `dev` to `/dev/` on GitHub Pages, and `main` to wooten-labs.com/pacman-bench/
+- `.github/workflows/pages.yml` — deploys `main` to the site root and `dev` to `/dev/` on GitHub Pages
+- `.github/workflows/wooten-labs.yml` — deploys `main` to wooten-labs.com/pacman-bench/
 - `bench/` — runner, entry publisher, play test and scoring docs (not used by the gallery)
 - `.claude/skills/add-model/` — the add-a-model playbook
