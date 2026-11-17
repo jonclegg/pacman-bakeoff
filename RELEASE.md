@@ -2,7 +2,7 @@
 
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
-## 2026-11-17: add gpt-6.2-astra (92) and gpt-6.2-sol (87)
+## 2026-11-17: add gpt-6.2-astra (92) and gpt-6.2-sol (87) (PR #60)
 
 - **What changed:** two new cards, `gpt-6.2-astra` (GPT-6.2 Astra, 92 on v4, 9th of 54) and `gpt-6.2-sol` (GPT-6.2 Sol, 87, 13th of 54, level with muse-wonder), both released 2026-11-17. Scoring docs v2/v3/v4 gain their rows, a v2 paragraph each and a v4 Later additions bullet each; ranks below them move down.
 - **Operator:** nothing to do. The cards are static (`entries/gpt-6.2-astra.html`, `entries/gpt-6.2-sol.html` plus their `entries/meta.json` records).
