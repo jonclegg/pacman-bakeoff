@@ -2246,5 +2246,93 @@
         "note": "master gain, context created in a gesture, arcade intro (no bass), alternating waka, continuous siren with fright and eyes variants that stops on pause and death, power, eat ghost, fruit, extra life, death, mute; the intro runs ~1.5 s past READY into play; the siren pitch doesn't rise as dots go; no level-clear or game-over sound"
       }
     }
+  },
+  {
+    "slug": "gpt-6.2-astra",
+    "harness": "Codex",
+    "run": "codex-apikey__gpt-6.2-astra",
+    "requested": "gpt-6.2-astra",
+    "actual": "gpt-6.2-astra",
+    "effort": "high",
+    "duration_ms": 395800,
+    "input_tokens": 393804,
+    "cached_input_tokens": 308649,
+    "cache_write_tokens": 35735,
+    "output_tokens": 29091,
+    "thinking_tokens": 7842,
+    "tokens_total": 422895,
+    "cost_usd": 2.0398096,
+    "html_bytes": 44880,
+    "note": "Codex API-key fair cell run on 2026-11-17, release day (API-key auth, not ChatGPT login), metered at OpenAI Standard rates. Fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty git cell (767bc04b-d767-4af2-a2bb-29e0910861b1). Codex CLI 0.159.2, codex exec --ephemeral --json, model gpt-6.2-astra, reasoning effort high, web_search disabled, no --sandbox and no --search. Codex logged that local model metadata for gpt-6.2-astra was missing and used fallback metadata (same warning as gpt-6.1-sol and gpt-6.1-terra); the exec model flag was gpt-6.2-astra and no other model id appears in the transcript. cost_usd 2.0398096 is the turn.completed aggregate usage at OpenAI Standard short-context rates per 1M tokens (developers.openai.com/api/docs/pricing, read 2026-11-17: $8 input, $0.40 cached input, $10 cache writes (30-minute retention), $40 output). Cache-write tokens are included in input_tokens; uncached input is input minus cached minus cache write (49420). Reasoning tokens are included in output_tokens. Ephemeral mode did not persist per-response usage, and the whole-turn aggregate is 393804 input tokens, above the 272000 long-context threshold. No single request came near it: the turn made at least 12 requests (11 tool calls and the final answer), each request's input contains the one before it, so the first was at most about 32800 tokens and the last at most about 67000 (the first plus all 29091 output tokens plus about 4900 tokens of tool output). Long-context rates were not applied. No regional uplift. The model wrote pacman.html with apply_patch in three steps, tested it in node, then tried to look at it in headless Chrome, osascript and a clang-built WebKit view; all three failed inside the cell and it read nothing else outside the cell.",
+    "released": "2026-11-17",
+    "display_model": "GPT-6.2 Astra",
+    "phase": 1,
+    "score": 92,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click start, P/Esc/Space pause, M mute, swipe + d-pad with touch-action none, key-repeat filter, no page scroll, buffered turns, instant reverse, 0.22-tile late-turn snap, auto-pause on blur; no pre-turn cornering, no mid-game restart, turns pressed while paused are dropped, Enter on a mouse-focused Sound button toggles mute"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "four targeting rules (no Pinky/Inky up-quirk), 7/20/7/20/5/20/5 waves with reversals, fright 200\u20131600 with flashes, eyes home from every start in \u22642.8 s, no re-eat, speed-only Elroy, tunnel slowdown, no freeze at 30\u2013240 fps (fixed 1/120 s step); timer-only house release (0/0.85/5.8/13.5 s) restarted every life, so Clyde never leaves in a life lost before 13.5 s (25 of 112 random-bot lives saw him out)"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; 8.55 tiles/s at 30\u2013240 fps on a fixed step, 0 frames on a wall tile, a bot clears level 1 at every fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, 0/868 cells differ from the arcade, 0 dead ends, 0/244 unreachable, symmetric, door shut to Pac-Man; drawn walls match the grid"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master gain, context created in the start gesture, alternating waka, one continuous siren that rises with progress plus fright and eyes variants, power, eat ghost, death, fruit, extra life, level clear, mute; siren off on pause, death and blur; intro is the first 6 arcade notes then a generic C\u2013E\u2013G (3 bass notes, 1.45 s); fruit, extra life and level clear share one jingle; no game-over sound"
+      }
+    }
+  },
+  {
+    "slug": "gpt-6.2-sol",
+    "harness": "Codex",
+    "run": "codex-apikey__gpt-6.2-sol",
+    "requested": "gpt-6.2-sol",
+    "actual": "gpt-6.2-sol",
+    "effort": "high",
+    "duration_ms": 376600,
+    "input_tokens": 198850,
+    "cached_input_tokens": 134917,
+    "cache_write_tokens": 39223,
+    "output_tokens": 32961,
+    "thinking_tokens": 5970,
+    "tokens_total": 231811,
+    "cost_usd": 0.4905792,
+    "html_bytes": 50821,
+    "note": "Codex API-key fair cell run on 2026-11-17, release day (API-key auth, not ChatGPT login), metered at OpenAI Standard rates. Fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty git cell (a0a4d9bd-6d63-4a42-93fd-f7124ea459b2). Codex CLI 0.159.2, codex exec --ephemeral --json, model gpt-6.2-sol, reasoning effort high, web_search disabled, no --sandbox and no --search. Codex logged that local model metadata for gpt-6.2-sol was missing and used fallback metadata (same warning as gpt-6.1-sol and gpt-6.1-terra); the exec model flag was gpt-6.2-sol and no other model id appears in the transcript. cost_usd 0.4905792 is the turn.completed aggregate usage at OpenAI Standard short-context rates per 1M tokens (developers.openai.com/api/docs/pricing, read 2026-11-17: $2 input, $0.10 cached input, $2.50 cache writes (30-minute retention), $10 output). Cache-write tokens are included in input_tokens; uncached input is input minus cached minus cache write (24710). Reasoning tokens are included in output_tokens. Ephemeral mode did not persist per-response usage; the whole-turn aggregate is 198850 input tokens, so no single request crossed the 272000 long-context threshold. No regional uplift. The model wrote pacman.html with apply_patch, edited it once, and tested it in node in four runs; it read nothing outside the cell.",
+    "released": "2026-11-17",
+    "display_model": "GPT-6.2 Sol",
+    "phase": 1,
+    "score": 87,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/arrow/click start, P/Esc/Space pause, M mute, key-repeat filter, no page scroll, buffered turns, instant reverse, 0.17-tile late-turn snap, swipe with touch-action none, auto-pause on a hidden tab; no pre-turn cornering, no mid-game restart, turns pressed while paused are dropped, a tap can't start; after a mouse click on SOUND, Space and Enter toggle the sound instead of pausing"
+      },
+      "ghosts": {
+        "mark": "ok",
+        "note": "arcade targeting incl. Pinky/Inky up-quirk and the 4 no-up tiles, 7/20/7/20/5/20/5 waves with reversals, dot counters 1/24/56 + 3.8 s idle timer + 7/17/32 global counter after a death, fright 200\u20131600 with flashes, eyes home from 5,120/5,120 starts in \u22643.2 s, no re-eat, Elroy at 32/12 dots, tunnel slowdown, no freeze at 30\u2013240 fps (fixed 1/120 s step)"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; 7.4\u20137.9 tiles/s at 30\u2013240 fps on a fixed step, 0 frames on a wall tile, a bot clears level 1 at every fps"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, 0/868 cells differ from the arcade, 0 dead ends, 0/244 unreachable, symmetric, door shut to Pac-Man; drawn walls match the grid"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "master gain, context created in the first key or click, alternating waka, power, eat ghost, death, fruit, extra life, level clear, mute; pause and mute fade the bus to 0; no continuous siren: 0.18 s beeps every ~0.2 s rising 120\u2192220 Hz with progress (pulsed fright variant); intro is the first 5 arcade notes then a scale run (7-note bass, 1.4 s); no eyes or game-over sound"
+      }
+    }
   }
 ]
