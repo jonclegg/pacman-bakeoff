@@ -43,6 +43,8 @@ Every push to `main` also uploads the gallery to [wooten-labs.com/pacman-bench/]
 
 ## Adding a model
 
+Agents (Claude Code, Grok bot, others): start with `AGENTS.md`.
+
 In Claude Code, point at the model (name, API id, or announcement link) and ask to add it. The project skill `.claude/skills/add-model/SKILL.md` runs the whole loop: fair-cell run, entry, dev deploy, v2 scoring, analysis, then asks before promoting to `main`.
 
 The pieces, if you run them by hand:
@@ -53,6 +55,8 @@ The pieces, if you run them by hand:
 - `bench/playtest/run.py` is the 90 s automated play test. `bench/scoring/audit.md` is the source and maze audit brief. `bench/scoring/v2.md` is the rubric and calibration table. `bench/scoring/v3.md` is the minor Controls/Sound adjustment applied on top of it, and `bench/scoring/v4.md` is the visual-accuracy and arcade-extras layer on top of that. `bench/playtest/screenshots.py` takes the screenshots for the v4 visual check.
 
 ## Repo layout
+
+- `AGENTS.md` — notes for any agent: what to do when a new model appears, and where the site is published
 
 - `index.html`, `arcade.css`, `arcade.js` — gallery UI
 - `entries/` — one HTML file per run plus `meta.json`
