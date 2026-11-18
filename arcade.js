@@ -532,6 +532,8 @@ function bindEvents() {
   ui.playBack.addEventListener("click", requestClosePlay);
   ui.detailsToggle.addEventListener("click", openDetails);
   ui.details.querySelector(".details-close").addEventListener("click", () => ui.details.close());
+  // Browsers restore focus unreliably here (WebKit leaves it on the hidden close button).
+  ui.details.addEventListener("close", () => ui.detailsToggle.focus());
   // A click on the dialog itself, not its box, is a click on the backdrop.
   ui.details.addEventListener("click", (event) => {
     if (event.target === ui.details) ui.details.close();
@@ -817,6 +819,8 @@ function syncPlayFromHash() {
 }
 
 function showPlay(entry) {
+  // Back/forward can switch games under an open dialog; never show the old game's details.
+  if (ui.details.open) ui.details.close();
   const name = displayName(entry);
   ui.playName.textContent = name;
   ui.playName.title = name;
