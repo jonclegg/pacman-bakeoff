@@ -2334,5 +2334,49 @@
         "note": "master gain, context created in the first key or click, alternating waka, power, eat ghost, death, fruit, extra life, level clear, mute; pause and mute fade the bus to 0; no continuous siren: 0.18 s beeps every ~0.2 s rising 120\u2192220 Hz with progress (pulsed fright variant); intro is the first 5 arcade notes then a scale run (7-note bass, 1.4 s); no eyes or game-over sound"
       }
     }
+  },
+  {
+    "slug": "tencent-hy4-flash",
+    "harness": "OpenRouter / Claude Code",
+    "run": "claude-code-openrouter__tencent--hy4-flash",
+    "requested": "tencent/hy4-flash",
+    "actual": "tencent/hy4-flash",
+    "effort": "high",
+    "duration_ms": 437200,
+    "input_tokens": 95948,
+    "cached_input_tokens": 1699840,
+    "cache_write_tokens": 0,
+    "output_tokens": 67173,
+    "thinking_tokens": 46928,
+    "tokens_total": null,
+    "cost_usd": 0.01534575,
+    "html_bytes": 31143,
+    "note": "OpenRouter Claude Code fair cell on 2026-11-18, two days after the 2026-11-16 release, run in a Cursor cloud VM (Ubuntu 24.04, Claude Code's bubblewrap sandbox, node in the sandbox PATH and a writable sandbox TMPDIR, as for tencent-hy4, recursive-flint, kimi-k3.1-pro, mistral-large-4 and claude-opus-5-5-medium): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, Claude Code 2.1.303, effort high, CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000, 60-minute cap, no web tools, with the repo checkout locked during the cell; all four canary probes failed in this VM before the run, and a plain completion and a forced tool call went through the proxy first. Tencent Hy4 Flash on OpenRouter tencent/hy4-flash (canonical tencent/hy4-flash-20261116, 1M context, 65,536 max completion; not tencent/hy4 or hy4-preview), pinned by bench/or_proxy.py to Tencent, the only endpoint (fp8; fallbacks off); all 25 responses came from Tencent on that endpoint. Every request carried thinking adaptive with output_config.effort high and max_tokens 128000. The run ended cleanly in 7.3 min (437.2 s wall clock, exit 0, 25 turns: 1 Write, 5 Edit, 14 Bash, 4 Read), with 46,928 thinking tokens. Claude Code 2.1.303 does not know this model (claude-code:unrecognized_model, costBasis unknown) and reported a placeholder total_cost_usd of 3.01. cost_usd prices the result event's usage (95,948 input, 1,699,840 cache read, 67,173 output) at OpenRouter's listed Tencent rates of $0.035 input, $0.0015 cache read and $0.1405 output per 1M (openrouter.ai/api/v1/models/tencent/hy4-flash/endpoints, read 2026-11-18), and equals the sum of total_cost over the run's 25 OpenRouter generation records ($0.015346, each id logged by the proxy). The key's usage moved $0.0247 over the run window; the amount above the generation total is smoke-test and canary calls that billed late. The Cursor-injected OPENROUTER_API_KEY returned 401 User not found, so the cell used the working key from the Mac ~/.pacbake/secrets/openrouter_api_key (same store prior Cursor-VM cards used). The model wrote pacman.html and read nothing outside the cell.",
+    "released": "2026-11-16",
+    "display_model": "Tencent Hy4 Flash",
+    "phase": 2,
+    "score": 76,
+    "score_notes": {
+      "controls": {
+        "mark": "minor",
+        "note": "arrows, WASD, any key/click/tap start (arrows start), P/Esc/Space pause, M, swipe with touch-action:none, buffered turns, 0.20-tile pre-turn cornering, instant reverse, auto-pause on blur, preventDefault on arrows/WASD/Space (no page scroll); no mid-game restart, no key-repeat filter (held P/M flicker; a held key restarts as soon as GAME OVER appears)"
+      },
+      "ghosts": {
+        "mark": "minor",
+        "note": "four targeting rules with Pinky up-quirk (Inky has none), 7/20/7/20/5/20/5/\u221e waves with reversals, house release timer OR dot gates (0/0.7/4/8 s and 0/0/40/85), eyes BFS home from all corridor tiles in \u22643.0 s, 200\u20131600 chain, fright blink; a revived ghost leaves the house still frightened and can be eaten again in the same power-up; no Elroy, no tunnel slowdown; no freeze at 30\u2013240 fps (tiles/s \u00d7 dt)"
+      },
+      "stuck": {
+        "mark": "ok",
+        "note": "never; tiles/s \u00d7 dt, ~5.3\u20135.5 tiles/s at 30\u2013240 fps; live playtest: 0 stuck events, pac_path_tiles 289, audio running"
+      },
+      "maze": {
+        "mark": "minor",
+        "note": "28\u00d732 (not classic 28\u00d731), 249 pellets (4 energizers), 0/249 unreachable, left/right symmetric, ghost-only door, row-14 tunnel wraps; 4 reachable dead ends at (12,23), (15,23), (10,24), (17,24); sealed pocket (13,24)/(14,24) and side void bands beside the tunnel"
+      },
+      "sound": {
+        "mark": "minor",
+        "note": "context created in a key/click gesture, mute, waka, power, eat ghost, death, fruit spawn blip, extra life, level clear, 2-note start beep; no Pac-Man intro, no continuous siren, no frightened or eyes loop, no master gain"
+      }
+    }
   }
 ]

@@ -2,6 +2,11 @@
 
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
+## 2026-11-18: add tencent-hy4-flash (76) (PR #64)
+
+- **What changed:** a new card, `tencent-hy4-flash` (Tencent Hy4 Flash, released 2026-11-16), scored 76 on v4 (25th of 55). Scoring docs v2/v3/v4 gain its rows and a findings row; ranks below it move down one.
+- **Operator:** nothing to do. The card is static (`entries/tencent-hy4-flash.html` plus its `entries/meta.json` record).
+- **Cost:** the fair cell cost $0.015 at OpenRouter's listed Tencent rates (generation total; key usage moved $0.025 including smoke/canary). Scoring (audit, playtest, two blind visual judges, bonus probe) used the same OpenRouter key through Claude Code / Cursor agents (anthropic/claude-opus-5.5 class).
 
 ## 2026-11-17: DETAILS on the play screen (PR #63)
 
