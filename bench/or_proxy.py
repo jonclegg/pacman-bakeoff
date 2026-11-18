@@ -18,6 +18,7 @@ PROVIDERS_BY_VENDOR = {
     "mistralai": ["mistral", "mistral/zdr", "mistral/eu"],
     "anthropic": ["anthropic"],
     "tencent": ["tencent"],
+    "google": ["Google"],
 }
 # Endpoint tags, for models whose pinned provider also serves a pricier priority tier under the same id.
 PROVIDERS_BY_MODEL = {
