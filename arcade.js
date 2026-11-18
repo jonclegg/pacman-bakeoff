@@ -140,6 +140,12 @@ async function init() {
   ui.playBack = document.querySelector(".play-back");
   ui.playName = document.querySelector(".play-name");
   ui.playStats = document.querySelector(".play-stats");
+  ui.detailsToggle = document.querySelector(".play-details-toggle");
+  ui.details = document.querySelector(".details");
+  ui.detailsName = document.querySelector(".details-name");
+  ui.detailsHarness = document.querySelector(".details-harness");
+  ui.detailsBody = document.querySelector(".details-body");
+  ui.playEntry = null;
   ui.playFrame = null;
   ui.gallery = [
     document.querySelector(".skip-link"),
@@ -213,7 +219,7 @@ function buildCard(entry, index, color, asked) {
 
   const details = h("details", "cab-details");
   const panel = h("div", "cab-detail-panel");
-  if (scored) panel.append(scoreWhy(entry));
+  if (scored) panel.append(scoreWhy(entry, "card"));
   panel.append(h("p", "cab-panel-head", "RUN DATA"), statList("cab-detail-list", detailRows(entry)));
   details.append(h("summary", "cab-details-toggle", "SCORE + RUN DATA"), panel);
 
@@ -317,7 +323,6 @@ function stripRows(entry) {
 
 function playRows(entry) {
   const rows = [
-    ["RELEASED", show(entry.released, formatReleased)],
     ["TIME", show(entry.duration_ms, formatDuration)],
     ["COST", show(entry.cost_usd, formatCost)],
   ];
@@ -354,13 +359,13 @@ function detailRows(entry) {
   ];
 }
 
-function scoreWhy(entry) {
+function scoreWhy(entry, scope) {
   const section = h("section", "cab-why");
   const head = h("div", "cab-why-head");
   const title = h("p", "cab-panel-head", `SCORE ${entry.score}/100`);
   if (entry.score_summary) title.append(h("span", "cab-why-summary", entry.score_summary));
   head.append(title);
-  appendHowScored(head, entry.slug);
+  appendHowScored(head, `how-${scope}-${entry.slug}`);
   const list = h("ul", "cab-checks");
   for (const [key, label, points] of SCORE_CHECKS) {
     const { mark, note } = entry.score_notes[key];
@@ -378,12 +383,12 @@ function scoreWhy(entry) {
   return section;
 }
 
-function appendHowScored(head, slug) {
+function appendHowScored(head, tipId) {
   const button = h("button", "how-scored-toggle", "How scored?");
   button.type = "button";
   button.setAttribute("aria-expanded", "false");
   const tip = h("div", "how-scored-tip");
-  tip.id = `how-${slug}`;
+  tip.id = tipId;
   button.setAttribute("aria-controls", tip.id);
   const [before, after] = SCORE_BY.split("Opus 5.5");
   const credit = h("p");
@@ -401,6 +406,31 @@ function appendHowScored(head, slug) {
     button.setAttribute("aria-expanded", String(open));
   });
   head.append(button, tip);
+}
+
+function detailsContent(entry) {
+  const content = h("div", "details-content");
+  const score = h("div", "details-score");
+  if (entry.score != null) score.append(scoreWhy(entry, "play"));
+  else score.append(h("p", "cab-panel-head", "NOT SCORED YET"));
+  const run = h("div", "details-run");
+  run.append(h("p", "cab-panel-head", "RUN DATA"), statList("cab-detail-list", detailRows(entry)));
+  content.append(score, run);
+  if (entry.note) {
+    const notes = h("div", "details-notes");
+    notes.append(h("p", "cab-panel-head", "RUN NOTES"), h("p", "", entry.note));
+    content.append(notes);
+  }
+  return content;
+}
+
+function openDetails() {
+  const entry = ui.playEntry;
+  ui.detailsName.textContent = displayName(entry);
+  ui.detailsHarness.textContent = entry.harness;
+  ui.detailsBody.replaceChildren(detailsContent(entry));
+  ui.details.showModal();
+  ui.details.querySelector(".details-close").focus();
 }
 
 function statList(className, rows) {
@@ -500,11 +530,20 @@ function bindEvents() {
   });
 
   ui.playBack.addEventListener("click", requestClosePlay);
+  ui.detailsToggle.addEventListener("click", openDetails);
+  ui.details.querySelector(".details-close").addEventListener("click", () => ui.details.close());
+  // Browsers restore focus unreliably here (WebKit leaves it on the hidden close button).
+  ui.details.addEventListener("close", () => ui.detailsToggle.focus());
+  // A click on the dialog itself, not its box, is a click on the backdrop.
+  ui.details.addEventListener("click", (event) => {
+    if (event.target === ui.details) ui.details.close();
+  });
 
   addEventListener("popstate", syncPlayFromHash);
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !ui.play.hidden) {
+    // Escape in the details dialog closes only the dialog (the browser does that).
+    if (event.key === "Escape" && !ui.play.hidden && !ui.details.open) {
       event.preventDefault();
       requestClosePlay();
       return;
@@ -780,10 +819,15 @@ function syncPlayFromHash() {
 }
 
 function showPlay(entry) {
+  // Back/forward can switch games under an open dialog; never show the old game's details.
+  if (ui.details.open) ui.details.close();
   const name = displayName(entry);
   ui.playName.textContent = name;
   ui.playName.title = name;
+  ui.playEntry = entry;
   const stats = statList("play-stats", playRows(entry));
+  stats.title = "Score and run details";
+  stats.addEventListener("click", openDetails);
   ui.playStats.replaceWith(stats);
   ui.playStats = stats;
   if (ui.play.hidden) ui.scrollY = window.scrollY;
@@ -815,6 +859,7 @@ function mountPlayFrame(src, title) {
 }
 
 function closePlaySurface() {
+  if (ui.details.open) ui.details.close();
   ui.play.hidden = true;
   document.documentElement.classList.remove("is-playing");
   for (const el of ui.gallery) el.inert = false;

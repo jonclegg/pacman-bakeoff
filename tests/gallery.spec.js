@@ -130,3 +130,54 @@ test("a #slug link opens that game directly", async ({ page }) => {
     .poll(() => page.locator(".play-frame").evaluate((frame) => frame.contentWindow.location.pathname))
     .toContain(`/entries/${entry.slug}.html`);
 });
+
+test("DETAILS on the play screen opens the run details and Escape closes only them", async ({ page }) => {
+  const entry = gallery.META.find((item) => item.score != null && item.note);
+  await gallery.openGallery(page, `#${entry.slug}`);
+  await expect(page.locator(".play")).toBeVisible();
+
+  await page.click(".play-details-toggle");
+  const details = page.locator(".details");
+  await expect(details).toBeVisible();
+  await expect(details.locator(".details-harness")).toHaveText(entry.harness);
+  await expect(details.locator(".cab-why .cab-panel-head")).toContainText(`SCORE ${entry.score}/100`);
+  await expect(details.locator(".cab-detail-list")).toContainText(entry.harness);
+  await expect(details.locator(".details-notes")).toContainText(entry.note.slice(0, 40));
+
+  await page.keyboard.press("Escape");
+  await expect(details).toBeHidden();
+  await expect(page.locator(".play")).toBeVisible();
+  await expect(page.locator(".play-details-toggle")).toBeFocused();
+
+  await page.click(".play-stats");
+  await expect(details).toBeVisible();
+  await page.click(".details-close");
+  await expect(details).toBeHidden();
+
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".play")).toBeHidden();
+});
+
+test("switching games under an open DETAILS dialog closes it", async ({ page }) => {
+  const [first, second] = gallery.META;
+  await gallery.openGallery(page, `#${first.slug}`);
+  await page.evaluate((slug) => { location.hash = slug; }, second.slug);
+  await expect(page.locator(".play-name")).toHaveText(/./);
+  await page.click(".play-details-toggle");
+  await expect(page.locator(".details")).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(new RegExp(`#${first.slug.replace(/\./g, "\\.")}$`));
+  await expect(page.locator(".details")).toBeHidden();
+});
+
+test("on a phone the model name keeps the first row of the play bar", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "phone layout only");
+  const entry = gallery.META.find((item) => item.display_model.length > 14);
+  await gallery.openGallery(page, `#${entry.slug}`);
+  const name = await page.locator(".play-name").boundingBox();
+  const stats = await page.locator(".play-stats").boundingBox();
+  const toggle = await page.locator(".play-details-toggle").boundingBox();
+  expect(name.width).toBeGreaterThan(150);
+  expect(stats.y).toBeGreaterThan(name.y + name.height - 1);
+  expect(Math.abs(toggle.y + toggle.height / 2 - (stats.y + stats.height / 2))).toBeLessThan(12);
+});
