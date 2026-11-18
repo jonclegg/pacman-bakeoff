@@ -130,3 +130,29 @@ test("a #slug link opens that game directly", async ({ page }) => {
     .poll(() => page.locator(".play-frame").evaluate((frame) => frame.contentWindow.location.pathname))
     .toContain(`/entries/${entry.slug}.html`);
 });
+
+test("DETAILS on the play screen opens the run details and Escape closes only them", async ({ page }) => {
+  const entry = gallery.META.find((item) => item.score != null && item.note);
+  await gallery.openGallery(page, `#${entry.slug}`);
+  await expect(page.locator(".play")).toBeVisible();
+
+  await page.click(".play-details-toggle");
+  const details = page.locator(".details");
+  await expect(details).toBeVisible();
+  await expect(details.locator(".details-harness")).toHaveText(entry.harness);
+  await expect(details.locator(".cab-why .cab-panel-head")).toContainText(`SCORE ${entry.score}/100`);
+  await expect(details.locator(".cab-detail-list")).toContainText(entry.harness);
+  await expect(details.locator(".details-notes")).toContainText(entry.note.slice(0, 40));
+
+  await page.keyboard.press("Escape");
+  await expect(details).toBeHidden();
+  await expect(page.locator(".play")).toBeVisible();
+
+  await page.click(".play-stats");
+  await expect(details).toBeVisible();
+  await page.click(".details-close");
+  await expect(details).toBeHidden();
+
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".play")).toBeHidden();
+});
