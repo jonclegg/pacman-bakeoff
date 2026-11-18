@@ -2399,6 +2399,29 @@
     "released": "2026-11-18",
     "display_model": "Gemini 4 Neon",
     "phase": 2,
-    "score": null
+    "score": 8,
+    "score_summary": "ReferenceError: pacDotSpeed; blank canvas",
+    "score_notes": {
+      "controls": {
+        "mark": "na",
+        "note": ""
+      },
+      "ghosts": {
+        "mark": "major",
+        "note": "ReferenceError: pacDotSpeed is not defined on construct; game never runs"
+      },
+      "stuck": {
+        "mark": "major",
+        "note": "could not start / Pac never moved (live: blank canvas)"
+      },
+      "maze": {
+        "mark": "ok",
+        "note": "classic 28\u00d731, 0 dead ends, 0/244 unreachable, symmetric"
+      },
+      "sound": {
+        "mark": "na",
+        "note": "never reached"
+      }
+    }
   }
 ]
