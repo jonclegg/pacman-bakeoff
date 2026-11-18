@@ -2,6 +2,12 @@
 
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
+
+## 2026-11-17: DETAILS on the play screen (PR #63)
+
+- **What changed:** while playing a game, a yellow ⓘ DETAILS button in the top bar (or a click on the TIME / COST / SCORE stats) opens a modal with the score breakdown, all run data and the run notes. The run notes were not shown anywhere before. RELEASED moves from the play bar into the modal so the model name keeps room. Esc, ✕ or a click outside closes the modal and leaves the game open.
+- **Operator:** nothing to do. Static change to `index.html`, `arcade.js`, `arcade.css`.
+- **Cost:** none.
 ## 2026-11-17: agent notes for new models (PR #62)
 
 - **What changed:** nothing on the site. New `AGENTS.md` tells any agent (including the Grok bot) what to do when it spots a new model: check `entries/meta.json`, ask Jon, then follow the add-model playbook to `/dev/`. It also lists where production is published. The add-model playbook now checks wooten-labs.com after a merge.
