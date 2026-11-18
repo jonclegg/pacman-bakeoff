@@ -2,7 +2,7 @@
 
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
-## 2026-11-18: add gemini-4-neon (8) (PR TBD)
+## 2026-11-18: add gemini-4-neon (8) (PR #66)
 
 - **What changed:** new card gemini-4-neon (Gemini 4 Neon, released 2026-11-18), scored 8 on v4 (52nd of 56, level with deepseek-v4-pro). Scoring docs updated; ranks below move down.
 - **Operator:** nothing.
