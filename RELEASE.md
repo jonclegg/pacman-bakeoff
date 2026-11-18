@@ -2,6 +2,12 @@
 
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
+## 2026-11-18: add gemini-4-neon (8) (PR TBD)
+
+- **What changed:** new card gemini-4-neon (Gemini 4 Neon, released 2026-11-18), scored 8 on v4 (52nd of 56, level with deepseek-v4-pro). Scoring docs updated; ranks below move down.
+- **Operator:** nothing.
+- **Cost:** fair cell $3.631 at OpenRouter listed Google Gemini 4 Neon rates (generation total; key usage moved $3.832 including smoke/canary). Scoring used playtest + source audit only (blank canvas; no visual judges).
+
 ## 2026-11-18: add tencent-hy4-flash (76) (PR #64)
 
 - **What changed:** a new card, `tencent-hy4-flash` (Tencent Hy4 Flash, released 2026-11-16), scored 76 on v4 (25th of 55). Scoring docs v2/v3/v4 gain its rows and a findings row; ranks below it move down one.
