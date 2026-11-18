@@ -2,6 +2,12 @@
 
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
+## 2026-11-18: retry the scroll-speed test once in CI (PR #TBD)
+
+- **What changed:** nothing on the site. The scroll frame-budget test in `tests/perf.spec.js` now gets one retry on GitHub Actions. It failed about one run in four on GitHub's shared machines (6.3% and 5.04% slow frames against a 5% limit) with no real slowdown, and three times on 2026-11-17 it held up the wooten-labs.com deploy until someone re-ran it by hand. A real slowdown still fails both tries and blocks the deploy; the report marks a pass on retry as "flaky". Every other test still fails on its first try, and local runs never retry.
+- **Operator:** nothing to do.
+- **Cost:** up to about 20 seconds more on a run where the test fails once (6 s desktop, 18 s mobile); nothing otherwise.
+
 ## 2026-11-18: add tencent-hy4-flash (76) (PR #64)
 
 - **What changed:** a new card, `tencent-hy4-flash` (Tencent Hy4 Flash, released 2026-11-16), scored 76 on v4 (25th of 55). Scoring docs v2/v3/v4 gain its rows and a findings row; ranks below it move down one.
