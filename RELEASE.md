@@ -3,7 +3,7 @@
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
 
-## 2026-11-17: DETAILS on the play screen (PR #TBD)
+## 2026-11-17: DETAILS on the play screen (PR #63)
 
 - **What changed:** while playing a game, a yellow ⓘ DETAILS button in the top bar (or a click on the TIME / COST / SCORE stats) opens a modal with the score breakdown, all run data and the run notes. The run notes were not shown anywhere before. RELEASED moves from the play bar into the modal so the model name keeps room. Esc, ✕ or a click outside closes the modal and leaves the game open.
 - **Operator:** nothing to do. Static change to `index.html`, `arcade.js`, `arcade.css`.
