@@ -2382,45 +2382,44 @@
   {
     "slug": "gemini-4-neon",
     "harness": "OpenRouter / Claude Code",
-    "run": "claude-code-openrouter__google--gemini-4-neon",
+    "run": "claude-code-openrouter__google--gemini-4-neon__2026-11-19",
     "requested": "google/gemini-4-neon",
     "actual": "google/gemini-4-neon",
     "effort": "high",
-    "duration_ms": 649500,
-    "input_tokens": 836676,
+    "duration_ms": 774400,
+    "input_tokens": 1444387,
     "cached_input_tokens": 0,
     "cache_write_tokens": 0,
-    "output_tokens": 74718,
-    "thinking_tokens": 25371,
+    "output_tokens": 85993,
+    "thinking_tokens": 22907,
     "tokens_total": null,
-    "cost_usd": 3.630798,
-    "html_bytes": 85986,
-    "note": "OpenRouter Claude Code fair cell on 2026-11-18 (release day): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in an empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, effort high, no web tools, Claude Code 2.1.303 on a Cursor cloud VM (bubblewrap sandbox, node in /opt/homebrew/bin, writable cell TMPDIR, repo locked during the cell). Every Claude Code model slot was google/gemini-4-neon. Provider pin Google via bench/or_proxy.py (fallbacks off); all 13 responses came from Google (google/gemini-4-neon-20261118). Canary probes all failed first; plain, forced-tool, and Claude-Code-shaped tool smokes passed. Wall 10.8 min (649.5 s). Turns: 14 (1 Write, 1 Edit, 11 Bash). git status shows only pacman.html. The run ended on OpenRouter 402 (key credit could not cover another max_tokens=128000 request after the game was written); pacman.html is the model's last successful edit, not hand-edited. Claude Code reported a placeholder total_cost_usd of 6.05 (costBasis unknown). cost_usd here is the sum of total_cost over the run's 13 OpenRouter generation records ($3.630798), matching result usage at OpenRouter listed rates ($3.00 in, $0.15 cache read, $0.0833 cache write, $15.00 out per 1M; openrouter.ai/api/v1/models, read 2026-11-18). Tokens: 836,676 input, 0 cache read, 0 cache write, 74,718 output (25,371 thinking). Cache tokens are zero because the Google endpoint reports no implicit caching. The key's usage moved $3.832 over the run window (smoke/canary billed into it). Cursor-injected OPENROUTER_API_KEY returned 401; the cell used the working key from the Mac ~/.pacbake/secrets/openrouter_api_key (one-time read, Jon-approved).",
+    "cost_usd": 5.623056,
+    "html_bytes": 93042,
+    "note": "OpenRouter Claude Code fair-cell RERUN on 2026-11-19 (replaces the 2026-11-18 card that ended on OpenRouter 402 after writing a broken pacman.html): full fair-cell PROMPT.md (bench/prompts/pacman.md, sha256 55c6d2ec) in a fresh empty sandboxed git cell via bench/run_cell.py claude-code-openrouter, effort high, no web tools, Claude Code 2.1.303 on a Cursor cloud VM (bubblewrap sandbox, node in /opt/homebrew/bin, writable cell TMPDIR, repo locked during the cell). Every Claude Code model slot was google/gemini-4-neon. Provider pin Google via bench/or_proxy.py (fallbacks off); all 18 responses came from Google (google/gemini-4-neon-20261118). Wall 12.9 min (774.4 s). Turns: 23 (1 Write, 4 Edit, 14 Bash, 3 Read). exit 0, no API errors. git status shows only pacman.html. Claude Code reported a placeholder total_cost_usd (costBasis unknown). cost_usd here is the sum of total_cost over the run's 18 OpenRouter generation records ($5.623056), matching result usage at OpenRouter listed rates ($3.00 in, $0.15 cache read, $0.0833 cache write, $15.00 out per 1M; openrouter.ai/api/v1/models, read 2026-11-19). Tokens: 1,444,387 input, 0 cache read, 0 cache write, 85,993 output (22,907 thinking). Cache tokens are zero because the Google endpoint reports no implicit caching. The key's usage moved $5.625 over the run window (smoke billed into it).",
     "released": "2026-11-18",
     "display_model": "Gemini 4 Neon",
     "phase": 2,
-    "score": 8,
-    "score_summary": "ReferenceError: pacDotSpeed; blank canvas",
+    "score": 98,
     "score_notes": {
       "controls": {
-        "mark": "na",
-        "note": ""
+        "mark": "minor",
+        "note": "arrows, WASD, Enter/Space/click/arrow start, P/Esc, R, M, cornering, instant reverse, preventDefault, auto-pause; no touch/swipe"
       },
       "ghosts": {
-        "mark": "major",
-        "note": "ReferenceError: pacDotSpeed is not defined on construct; game never runs"
+        "mark": "ok",
+        "note": "arcade targeting incl. Pinky/Inky up-quirk, waves, Elroy, tunnel slow, eyes home and revive unfrightened; no freeze at 30\u2013240 fps"
       },
       "stuck": {
-        "mark": "major",
-        "note": "could not start / Pac never moved (live: blank canvas)"
+        "mark": "ok",
+        "note": "never; fixed 60 Hz step; live pac_path_tiles 259.7, no stuck events"
       },
       "maze": {
         "mark": "ok",
         "note": "classic 28\u00d731, 0 dead ends, 0/244 unreachable, symmetric"
       },
       "sound": {
-        "mark": "na",
-        "note": "never reached"
+        "mark": "ok",
+        "note": "arcade intro with bass, alternating waka, continuous 5-tier siren, fright/eyes, full one-shots, mute, gesture unlock, master gain"
       }
     }
   }
