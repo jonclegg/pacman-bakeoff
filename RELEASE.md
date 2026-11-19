@@ -2,7 +2,7 @@
 
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
-## 2026-11-19: rerun gemini-4-neon (98) (PR TBD)
+## 2026-11-19: rerun gemini-4-neon (98) (PR #67)
 
 - **What changed:** replaces the gemini-4-neon card (was 8 after a 402 mid-run blank canvas). Clean OpenRouter fair-cell rerun scored 98 on v4 (~4th of 56, level with gemini-4-carbon). Scoring docs updated.
 - **Operator:** nothing.
