@@ -2,6 +2,12 @@
 
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
+## 2026-11-19: rerun gemini-4-neon (98) (PR #67)
+
+- **What changed:** replaces the gemini-4-neon card (was 8 after a 402 mid-run blank canvas). Clean OpenRouter fair-cell rerun scored 98 on v4 (~4th of 56, level with gemini-4-carbon). Scoring docs updated.
+- **Operator:** nothing.
+- **Cost:** fair cell $5.623 at OpenRouter listed rates. Scoring: playtest, audit, two blind visual judges, bonus probe.
+
 ## 2026-11-18: add gemini-4-neon (8) (PR #66)
 
 - **What changed:** new card gemini-4-neon (Gemini 4 Neon, released 2026-11-18), scored 8 on v4 (52nd of 56, level with deepseek-v4-pro). Scoring docs updated; ranks below move down.
