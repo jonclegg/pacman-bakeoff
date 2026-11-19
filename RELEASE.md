@@ -2,6 +2,12 @@
 
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
+## 2026-11-19: the scroll-speed test no longer blocks deploys (PR #65)
+
+- **What changed:** nothing on the site. The scroll frame-budget test in `tests/perf.spec.js` times frames on the machine GitHub lends for each run, and failed about one run in ten (6 of 59 recent runs), always on a slower machine and never because of a site change. Each failure held up a deploy to wooten-labs.com or GitHub Pages until someone re-ran it. Deploys (`pages.yml` and `wooten-labs.yml`, including `dev` previews) now run every test except that one; pull requests and branch pushes still run all of them.
+- **Operator:** nothing to do. If a PR's scroll test fails, look at whether the change touched gallery rendering before merging; a merge no longer stops on it.
+- **Cost:** none. Deploys run about 25 seconds faster.
+
 ## 2026-11-19: rerun gemini-4-neon (98) (PR #67)
 
 - **What changed:** replaces the gemini-4-neon card (was 8 after a 402 mid-run blank canvas). Clean OpenRouter fair-cell rerun scored 98 on v4 (~4th of 56, level with gemini-4-carbon). Scoring docs updated.

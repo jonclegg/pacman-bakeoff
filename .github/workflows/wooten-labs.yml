@@ -17,6 +17,8 @@ concurrency:
 jobs:
   test:
     uses: ./.github/workflows/tests.yml
+    with:
+      skip_scroll_budget: true
 
   # Mirrors main to https://wooten-labs.com/pacman-bench/ (S3 bucket behind CloudFront).
   # The AWS role only trusts this repo's main branch and can only write under pacman-bench/.

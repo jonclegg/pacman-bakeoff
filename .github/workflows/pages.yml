@@ -18,6 +18,8 @@ concurrency:
 jobs:
   test:
     uses: ./.github/workflows/tests.yml
+    with:
+      skip_scroll_budget: true
     permissions:
       contents: read
 
