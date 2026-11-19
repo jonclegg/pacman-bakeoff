@@ -6,6 +6,12 @@ on:
   push:
     branches-ignore: [main, dev]
   workflow_call:
+    inputs:
+      # Deploys skip the scroll frame-budget test: it times frames on GitHub's shared
+      # machines and fails on a slow one with no change to the site. PRs still run it.
+      skip_scroll_budget:
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -22,7 +28,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test
+      - run: npx playwright test ${{ inputs.skip_scroll_budget && '--grep-invert "scrolling the whole gallery stays within the frame budget"' || '' }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

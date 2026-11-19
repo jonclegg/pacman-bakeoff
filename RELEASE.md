@@ -2,11 +2,11 @@
 
 Newest first. Each entry: date, PR, what changed for gallery visitors, what an operator must do and what it cost.
 
-## 2026-11-18: retry the scroll-speed test once in CI (PR #65)
+## 2026-11-19: the scroll-speed test no longer blocks deploys (PR #65)
 
-- **What changed:** nothing on the site. The scroll frame-budget test in `tests/perf.spec.js` now gets one retry on GitHub Actions. It failed about one run in four on GitHub's shared machines (6.3% and 5.04% slow frames against a 5% limit) with no real slowdown, and three times on 2026-11-17 it held up the wooten-labs.com deploy until someone re-ran it by hand. A real slowdown still fails both tries and blocks the deploy; the report marks a pass on retry as "flaky". Every other test still fails on its first try, and local runs never retry.
-- **Operator:** nothing to do.
-- **Cost:** up to about 20 seconds more on a run where the test fails once (6 s desktop, 18 s mobile); nothing otherwise.
+- **What changed:** nothing on the site. The scroll frame-budget test in `tests/perf.spec.js` times frames on the machine GitHub lends for each run, and failed about one run in ten (6 of 59 recent runs), always on a slower machine and never because of a site change. Each failure held up a deploy to wooten-labs.com or GitHub Pages until someone re-ran it. Deploys (`pages.yml` and `wooten-labs.yml`, including `dev` previews) now run every test except that one; pull requests and branch pushes still run all of them.
+- **Operator:** nothing to do. If a PR's scroll test fails, look at whether the change touched gallery rendering before merging; a merge no longer stops on it.
+- **Cost:** none. Deploys run about 25 seconds faster.
 
 ## 2026-11-18: add tencent-hy4-flash (76) (PR #64)
 
