@@ -1,0 +1,2820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAC-MAN</title>
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 35%, #11132a 0%, #06060d 62%, #020205 100%);
+    color: #e8ecff;
+    font-family: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .arcade-shell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  .cabinet-frame {
+    position: relative;
+    padding: 10px;
+    border-radius: 14px;
+    background: linear-gradient(160deg, #1b1e36 0%, #0d0f1d 55%, #070811 100%);
+    box-shadow:
+      0 22px 60px rgba(0, 0, 0, 0.85),
+      0 0 0 1px rgba(80, 110, 255, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 0 38px rgba(33, 33, 255, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .screen-bezel {
+    position: relative;
+    background: #000000;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow:
+      inset 0 0 0 2px #05050a,
+      inset 0 0 24px rgba(0, 0, 0, 0.9);
+    line-height: 0;
+  }
+
+  canvas#game {
+    display: block;
+    background: #000000;
+    cursor: pointer;
+    image-rendering: crisp-edges;
+  }
+
+  .scanlines {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.14) 3px,
+      rgba(0, 0, 0, 0.14) 4px
+    );
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .scanlines.on {
+    opacity: 1;
+  }
+
+  .control-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    font-size: 12px;
+    color: #9ba5cc;
+    letter-spacing: 0.03em;
+  }
+
+  .keys-legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .key-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    color: #f4f6ff;
+    background: #171a2f;
+    border: 1px solid #303763;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+  }
+
+  .btn-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .hud-btn {
+    appearance: none;
+    border: 1px solid #303763;
+    background: #14172b;
+    color: #dce3ff;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+
+  .hud-btn:hover {
+    background: #1f2445;
+    border-color: #4f5cb3;
+    color: #ffffff;
+  }
+
+  .hud-btn:active {
+    transform: translateY(1px);
+  }
+
+  .hud-btn.active {
+    background: #252b63;
+    border-color: #6f7dff;
+    color: #ffea54;
+  }
+
+  @media (max-height: 620px) {
+    .arcade-shell {
+      gap: 6px;
+      padding: 6px;
+    }
+    .cabinet-frame {
+      padding: 6px;
+    }
+    .control-bar {
+      font-size: 11px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="arcade-shell">
+  <div class="cabinet-frame">
+    <div class="screen-bezel">
+      <canvas id="game" width="448" height="576" aria-label="Pac-Man Arcade Game"></canvas>
+      <div id="scanlines" class="scanlines" aria-hidden="true"></div>
+    </div>
+  </div>
+  <div class="control-bar">
+    <div class="keys-legend">
+      <span class="key-item"><kbd>ARROWS</kbd> / <kbd>WASD</kbd> Move</span>
+      <span class="key-item"><kbd>P</kbd> Pause</span>
+      <span class="key-item"><kbd>M</kbd> Mute</span>
+      <span class="key-item"><kbd>R</kbd> Restart</span>
+    </div>
+    <div class="btn-group">
+      <button id="btn-pause" class="hud-btn" type="button" title="Pause / Resume (P)">PAUSE</button>
+      <button id="btn-mute" class="hud-btn" type="button" title="Toggle Sound (M)">SOUND: ON</button>
+      <button id="btn-crt" class="hud-btn" type="button" title="Toggle CRT Scanlines">CRT: OFF</button>
+      <button id="btn-restart" class="hud-btn" type="button" title="Restart Game (R)">NEW GAME</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // =========================================================================
+  // 1. ARCADE CONSTANTS & DATA TABLES
+  // =========================================================================
+  const COLS = 28;
+  const ROWS = 31;
+  const SCREEN_ROWS = 36; // Rows 0-2 top HUD, 3-33 maze, 34-35 bottom HUD
+  const MAZE_ROW_OFFSET = 3;
+  const LOGIC_TILE = 8; // Original arcade 8x8 pixel tiles (224x288 logical)
+  const LOGIC_W = COLS * LOGIC_TILE;        // 224
+  const LOGIC_H = SCREEN_ROWS * LOGIC_TILE; // 288
+  const FIXED_DT = 1 / 60;
+  const BASE_SPEED = 9.47; // Tiles per second at 100% arcade speed (~75.75 arcade px/sec)
+
+  const DIR = {
+    NONE:  { x:  0, y:  0, id: -1, angle: 0 },
+    UP:    { x:  0, y: -1, id:  0, angle: -Math.PI / 2 },
+    LEFT:  { x: -1, y:  0, id:  1, angle: Math.PI },
+    DOWN:  { x:  0, y:  1, id:  2, angle: Math.PI / 2 },
+    RIGHT: { x:  1, y:  0, id:  3, angle: 0 }
+  };
+
+  // Authentic arcade tie-breaking order: UP > LEFT > DOWN > RIGHT
+  const DIR_PRIORITY = [DIR.UP, DIR.LEFT, DIR.DOWN, DIR.RIGHT];
+
+  function oppositeDir(d) {
+    if (d === DIR.UP) return DIR.DOWN;
+    if (d === DIR.DOWN) return DIR.UP;
+    if (d === DIR.LEFT) return DIR.RIGHT;
+    if (d === DIR.RIGHT) return DIR.LEFT;
+    return DIR.NONE;
+  }
+
+  // Exact 28x31 classic arcade Pac-Man maze (240 regular pellets + 4 power pellets = 244)
+  // '#' wall, '.' pellet, 'o' power pellet, ' ' empty, '-' ghost door, '=' house interior, 'T' tunnel
+  const MAZE_TEMPLATE = [
+    '############################', // 00
+    '#............##............#', // 01
+    '#.####.#####.##.#####.####.#', // 02
+    '#o####.#####.##.#####.####o#', // 03
+    '#.####.#####.##.#####.####.#', // 04
+    '#..........................#', // 05
+    '#.####.##.########.##.####.#', // 06
+    '#.####.##.########.##.####.#', // 07
+    '#......##....##....##......#', // 08
+    '######.##### ## #####.######', // 09
+    '######.##### ## #####.######', // 10
+    '######.##          ##.######', // 11
+    '######.## ###--### ##.######', // 12
+    '######.## #======# ##.######', // 13
+    'TTTTTT.   #======#   .TTTTTT', // 14
+    '######.## #======# ##.######', // 15
+    '######.## ######## ##.######', // 16
+    '######.##          ##.######', // 17
+    '######.## ######## ##.######', // 18
+    '######.## ######## ##.######', // 19
+    '#............##............#', // 20
+    '#.####.#####.##.#####.####.#', // 21
+    '#.####.#####.##.#####.####.#', // 22
+    '#o..##.......  .......##..o#', // 23
+    '###.##.##.########.##.##.###', // 24
+    '###.##.##.########.##.##.###', // 25
+    '#......##....##....##......#', // 26
+    '#.##########.##.##########.#', // 27
+    '#.##########.##.##########.#', // 28
+    '#..........................#', // 29
+    '############################'  // 30
+  ];
+
+  // Classic 4 intersections where ghosts cannot turn UP during Chase/Scatter/Frightened
+  const NO_UP_TILES = new Set(['12,11', '15,11', '12,23', '15,23']);
+
+  const COLORS = {
+    bg: '#000000',
+    wall: '#2121ff',
+    wallFlash: '#ffffff',
+    door: '#ffb8de',
+    pellet: '#ffb897',
+    pacman: '#ffff00',
+    blinky: '#ff0000',
+    pinky: '#ffb8ff',
+    inky: '#00ffff',
+    clyde: '#ffb852',
+    frightBody: '#2121de',
+    frightFace: '#ffb897',
+    frightFlashBody: '#ffffff',
+    frightFlashFace: '#ff0000',
+    scoreCyan: '#00ffff',
+    fruitScore: '#ffb8ff',
+    textWhite: '#dedeff',
+    textYellow: '#ffff00',
+    textRed: '#ff0000',
+    textCyan: '#00ffff',
+    textPink: '#ffb8ff',
+    textOrange: '#ffb852'
+  };
+
+  // Authentic arcade level progression table
+  const FRUITS = [
+    { id: 'cherry',     name: 'CHERRY',     pts: 100  },
+    { id: 'strawberry', name: 'STRAWBERRY', pts: 300  },
+    { id: 'orange',     name: 'ORANGE',     pts: 500  },
+    { id: 'apple',      name: 'APPLE',      pts: 700  },
+    { id: 'melon',      name: 'MELON',      pts: 1000 },
+    { id: 'galaxian',   name: 'GALAXIAN',   pts: 2000 },
+    { id: 'bell',       name: 'BELL',       pts: 3000 },
+    { id: 'key',        name: 'KEY',        pts: 5000 }
+  ];
+
+  function getLevelConfig(level) {
+    let fruitIdx;
+    if (level === 1) fruitIdx = 0;
+    else if (level === 2) fruitIdx = 1;
+    else if (level <= 4) fruitIdx = 2;
+    else if (level <= 6) fruitIdx = 3;
+    else if (level <= 8) fruitIdx = 4;
+    else if (level <= 10) fruitIdx = 5;
+    else if (level <= 12) fruitIdx = 6;
+    else fruitIdx = 7;
+
+    // Frightened durations (seconds) & flash counts from arcade ROM
+    const frightTable = [
+      [6, 5], [5, 5], [4, 5], [3, 5], [2, 5], [5, 5], [2, 5], [2, 5],
+      [1, 3], [5, 5], [2, 5], [1, 3], [1, 3], [3, 5], [1, 3], [1, 3],
+      [0, 0], [1, 3]
+    ];
+    const [frightSec, frightFlashes] = level <= frightTable.length ? frightTable[level - 1] : [0, 0];
+
+    // Elroy 1 dot thresholds
+    const elroyTable = [20, 30, 40, 40, 40, 50, 50, 50, 60, 60, 60, 80, 80, 80, 100, 100, 100, 100];
+    const elroy1Dots = level <= elroyTable.length ? elroyTable[level - 1] : 120;
+    const elroy2Dots = Math.floor(elroy1Dots / 2);
+
+    // Speeds (fraction of BASE_SPEED)
+    let pacSpeed, pacFrightSpeed, ghostSpeed, ghostFrightSpeed, ghostTunnelSpeed, elroy1Speed, elroy2Speed;
+    if (level === 1) {
+      pacSpeed = 0.80; pacFrightSpeed = 0.90;
+      ghostSpeed = 0.75; ghostFrightSpeed = 0.50; ghostTunnelSpeed = 0.40;
+      elroy1Speed = 0.80; elroy2Speed = 0.85;
+    } else if (level <= 4) {
+      pacSpeed = 0.90; pacFrightSpeed = 0.95;
+      ghostSpeed = 0.85; ghostFrightSpeed = 0.55; ghostTunnelSpeed = 0.45;
+      elroy1Speed = 0.90; elroy2Speed = 0.95;
+    } else if (level <= 20) {
+      pacSpeed = 1.00; pacFrightSpeed = 1.00;
+      ghostSpeed = 0.95; ghostFrightSpeed = 0.60; ghostTunnelSpeed = 0.50;
+      elroy1Speed = 1.00; elroy2Speed = 1.05;
+    } else {
+      pacSpeed = 0.90; pacFrightSpeed = 0.90;
+      ghostSpeed = 0.95; ghostFrightSpeed = 0.60; ghostTunnelSpeed = 0.50;
+      elroy1Speed = 1.00; elroy2Speed = 1.05;
+    }
+
+    // Scatter/Chase schedule in seconds: [S1, C1, S2, C2, S3, C3, S4, C4]
+    let waves;
+    if (level === 1) {
+      waves = [7, 20, 7, 20, 5, 20, 5, Infinity];
+    } else if (level <= 4) {
+      waves = [7, 20, 7, 20, 5, 1033, 1 / 60, Infinity];
+    } else {
+      waves = [5, 20, 5, 20, 5, 1037, 1 / 60, Infinity];
+    }
+
+    // Ghost personal dot limits inside ghost house
+    const inkyDotLimit = level === 1 ? 30 : 0;
+    const clydeDotLimit = level === 1 ? 60 : (level === 2 ? 50 : 0);
+    const dotTimeoutSec = level < 5 ? 4.0 : 3.0;
+
+    return {
+      level,
+      fruit: FRUITS[fruitIdx],
+      frightSec,
+      frightFlashes,
+      elroy1Dots,
+      elroy2Dots,
+      pacSpeed,
+      pacFrightSpeed,
+      ghostSpeed,
+      ghostFrightSpeed,
+      ghostTunnelSpeed,
+      elroy1Speed,
+      elroy2Speed,
+      waves,
+      inkyDotLimit,
+      clydeDotLimit,
+      dotTimeoutSec
+    };
+  }
+
+  // =========================================================================
+  // 2. BUILT-IN 8x8 ARCADE BITMAP FONT (Zero external fonts!)
+  // =========================================================================
+  const FONT_8X8 = {
+    ' ': [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00],
+    '0': [0x3C,0x66,0x6E,0x76,0x66,0x66,0x3C,0x00],
+    '1': [0x18,0x38,0x18,0x18,0x18,0x18,0x7E,0x00],
+    '2': [0x3C,0x66,0x06,0x1C,0x30,0x60,0x7E,0x00],
+    '3': [0x3C,0x66,0x06,0x1C,0x06,0x66,0x3C,0x00],
+    '4': [0x0C,0x1C,0x3C,0x6C,0x7E,0x0C,0x0C,0x00],
+    '5': [0x7E,0x60,0x7C,0x06,0x06,0x66,0x3C,0x00],
+    '6': [0x3C,0x60,0x7C,0x66,0x66,0x66,0x3C,0x00],
+    '7': [0x7E,0x66,0x0C,0x18,0x18,0x18,0x18,0x00],
+    '8': [0x3C,0x66,0x66,0x3C,0x66,0x66,0x3C,0x00],
+    '9': [0x3C,0x66,0x66,0x3E,0x06,0x0C,0x38,0x00],
+    'A': [0x18,0x3C,0x66,0x66,0x7E,0x66,0x66,0x00],
+    'B': [0x7C,0x66,0x66,0x7C,0x66,0x66,0x7C,0x00],
+    'C': [0x3C,0x66,0x60,0x60,0x60,0x66,0x3C,0x00],
+    'D': [0x78,0x6C,0x66,0x66,0x66,0x6C,0x78,0x00],
+    'E': [0x7E,0x60,0x60,0x78,0x60,0x60,0x7E,0x00],
+    'F': [0x7E,0x60,0x60,0x78,0x60,0x60,0x60,0x00],
+    'G': [0x3C,0x66,0x60,0x6E,0x66,0x66,0x3E,0x00],
+    'H': [0x66,0x66,0x66,0x7E,0x66,0x66,0x66,0x00],
+    'I': [0x3C,0x18,0x18,0x18,0x18,0x18,0x3C,0x00],
+    'J': [0x1E,0x0C,0x0C,0x0C,0x6C,0x6C,0x38,0x00],
+    'K': [0x66,0x6C,0x78,0x70,0x78,0x6C,0x66,0x00],
+    'L': [0x60,0x60,0x60,0x60,0x60,0x60,0x7E,0x00],
+    'M': [0x63,0x77,0x7F,0x6B,0x63,0x63,0x63,0x00],
+    'N': [0x66,0x76,0x7E,0x7E,0x6E,0x66,0x66,0x00],
+    'O': [0x3C,0x66,0x66,0x66,0x66,0x66,0x3C,0x00],
+    'P': [0x7C,0x66,0x66,0x7C,0x60,0x60,0x60,0x00],
+    'Q': [0x3C,0x66,0x66,0x66,0x6A,0x6C,0x36,0x00],
+    'R': [0x7C,0x66,0x66,0x7C,0x6C,0x66,0x66,0x00],
+    'S': [0x3C,0x66,0x60,0x3C,0x06,0x66,0x3C,0x00],
+    'T': [0x7E,0x18,0x18,0x18,0x18,0x18,0x18,0x00],
+    'U': [0x66,0x66,0x66,0x66,0x66,0x66,0x3C,0x00],
+    'V': [0x66,0x66,0x66,0x66,0x66,0x3C,0x18,0x00],
+    'W': [0x63,0x63,0x63,0x6B,0x7F,0x77,0x63,0x00],
+    'X': [0x66,0x66,0x3C,0x18,0x3C,0x66,0x66,0x00],
+    'Y': [0x66,0x66,0x66,0x3C,0x18,0x18,0x18,0x00],
+    'Z': [0x7E,0x06,0x0C,0x18,0x30,0x60,0x7E,0x00],
+    '!': [0x18,0x3C,0x3C,0x18,0x18,0x00,0x18,0x00],
+    '-': [0x00,0x00,0x00,0x7E,0x00,0x00,0x00,0x00],
+    '.': [0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x00],
+    ',': [0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x30],
+    ':': [0x00,0x18,0x18,0x00,0x18,0x18,0x00,0x00],
+    '/': [0x02,0x06,0x0C,0x18,0x30,0x60,0x40,0x00],
+    '"': [0x66,0x66,0x24,0x00,0x00,0x00,0x00,0x00],
+    "'": [0x18,0x18,0x30,0x00,0x00,0x00,0x00,0x00],
+    '(': [0x0C,0x18,0x30,0x30,0x30,0x18,0x0C,0x00],
+    ')': [0x30,0x18,0x0C,0x0C,0x0C,0x18,0x30,0x00],
+    '+': [0x00,0x18,0x18,0x7E,0x18,0x18,0x00,0x00]
+  };
+
+  // =========================================================================
+  // 3. WEB AUDIO API ARCADE SOUND SYNTHESIZER
+  // =========================================================================
+  class SoundEngine {
+    constructor() {
+      this.ctx = null;
+      this.master = null;
+      this.musicGain = null;
+      this.muted = false;
+      this.wakaFlip = false;
+      this.bgMode = 'none'; // 'none', 'siren', 'fright', 'eyes'
+      this.sirenGear = 0;
+      this.bgOsc = null;
+      this.bgGain = null;
+      this.bgLfo = null;
+      this.bgLfoGain = null;
+      this.active = false;
+    }
+
+    unlock() {
+      if (!this.ctx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        try {
+          this.ctx = new AudioCtx();
+          this.master = this.ctx.createGain();
+          this.master.gain.value = this.muted ? 0 : 0.28;
+          this.master.connect(this.ctx.destination);
+          this.musicGain = this.ctx.createGain();
+          this.musicGain.gain.value = 1;
+          this.musicGain.connect(this.master);
+        } catch (e) {
+          this.ctx = null;
+          return;
+        }
+      }
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+      this.active = true;
+    }
+
+    stopMusic() {
+      if (!this.ctx || !this.master) return;
+      if (this.musicGain) {
+        try { this.musicGain.disconnect(); } catch (e) {}
+      }
+      this.musicGain = this.ctx.createGain();
+      this.musicGain.gain.value = 1;
+      this.musicGain.connect(this.master);
+    }
+
+    setMuted(m) {
+      this.muted = m;
+      if (this.master && this.ctx) {
+        this.master.gain.setTargetAtTime(m ? 0 : 0.28, this.ctx.currentTime, 0.015);
+      }
+    }
+
+    stopBackground() {
+      if (this.bgOsc) {
+        try { this.bgOsc.stop(); } catch (e) {}
+        try { this.bgOsc.disconnect(); } catch (e) {}
+        this.bgOsc = null;
+      }
+      if (this.bgLfo) {
+        try { this.bgLfo.stop(); } catch (e) {}
+        try { this.bgLfo.disconnect(); } catch (e) {}
+        this.bgLfo = null;
+      }
+      if (this.bgGain) {
+        try { this.bgGain.disconnect(); } catch (e) {}
+        this.bgGain = null;
+      }
+      if (this.bgLfoGain) {
+        try { this.bgLfoGain.disconnect(); } catch (e) {}
+        this.bgLfoGain = null;
+      }
+      this.bgMode = 'none';
+    }
+
+    setBackground(mode, gear) {
+      if (!this.ctx || !this.active) return;
+      if (mode === 'none') {
+        this.stopBackground();
+        return;
+      }
+      if (this.bgMode === mode && (mode !== 'siren' || this.sirenGear === gear)) {
+        return;
+      }
+      this.stopBackground();
+      this.bgMode = mode;
+      this.sirenGear = gear;
+
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const lfo = this.ctx.createOscillator();
+      const lfoGain = this.ctx.createGain();
+
+      if (mode === 'siren') {
+        // 5 classic arcade siren gears rising in pitch & sweep rate
+        const baseFreqs = [340, 390, 445, 510, 585];
+        const lfoRates  = [2.1, 2.55, 3.05, 3.65, 4.35];
+        const depths    = [78,  88,   98,   110,  125];
+        const gIdx = Math.max(0, Math.min(4, gear | 0));
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(baseFreqs[gIdx], now);
+        lfo.type = 'triangle';
+        lfo.frequency.setValueAtTime(lfoRates[gIdx], now);
+        lfoGain.gain.setValueAtTime(depths[gIdx], now);
+        gain.gain.setValueAtTime(0.24, now);
+      } else if (mode === 'fright') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(215, now);
+        lfo.type = 'sawtooth';
+        lfo.frequency.setValueAtTime(7.2, now);
+        lfoGain.gain.setValueAtTime(68, now);
+        gain.gain.setValueAtTime(0.26, now);
+      } else if (mode === 'eyes') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(720, now);
+        lfo.type = 'sawtooth';
+        lfo.frequency.setValueAtTime(9.5, now);
+        lfoGain.gain.setValueAtTime(-260, now);
+        gain.gain.setValueAtTime(0.18, now);
+      }
+
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      osc.connect(gain);
+      gain.connect(this.master);
+      osc.start(now);
+      lfo.start(now);
+
+      this.bgOsc = osc;
+      this.bgGain = gain;
+      this.bgLfo = lfo;
+      this.bgLfoGain = lfoGain;
+    }
+
+    playWaka() {
+      if (!this.ctx || !this.active) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+
+      if (this.wakaFlip) {
+        osc.frequency.setValueAtTime(260, now);
+        osc.frequency.exponentialRampToValueAtTime(490, now + 0.065);
+      } else {
+        osc.frequency.setValueAtTime(460, now);
+        osc.frequency.exponentialRampToValueAtTime(215, now + 0.065);
+      }
+      this.wakaFlip = !this.wakaFlip;
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.linearRampToValueAtTime(0.36, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+
+      osc.connect(gain);
+      gain.connect(this.master);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    }
+
+    playEatGhost() {
+      if (!this.ctx || !this.active) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(210, now);
+      osc.frequency.exponentialRampToValueAtTime(960, now + 0.16);
+      osc.frequency.exponentialRampToValueAtTime(1480, now + 0.28);
+
+      gain.gain.setValueAtTime(0.24, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.30);
+
+      osc.connect(gain);
+      gain.connect(this.master);
+      osc.start(now);
+      osc.stop(now + 0.32);
+    }
+
+    playEatFruit() {
+      if (!this.ctx || !this.active) return;
+      const now = this.ctx.currentTime;
+      const notes = [523, 659, 784, 659, 1046];
+      notes.forEach((freq, i) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        const t = now + i * 0.048;
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.32, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
+        osc.connect(gain);
+        gain.connect(this.master);
+        osc.start(t);
+        osc.stop(t + 0.06);
+      });
+    }
+
+    playExtraLife() {
+      if (!this.ctx || !this.active) return;
+      const now = this.ctx.currentTime;
+      const seq = [659, 784, 1318, 1046, 1175, 1568, 659, 784, 1318, 1046, 1175, 1568];
+      seq.forEach((freq, i) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        const t = now + i * 0.095;
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.088);
+        osc.connect(gain);
+        gain.connect(this.master);
+        osc.start(t);
+        osc.stop(t + 0.092);
+      });
+    }
+
+    playDeath() {
+      if (!this.ctx || !this.active) return;
+      this.stopBackground();
+      const now = this.ctx.currentTime;
+      // Classic 6 descending wavy steps + 2 quick low pops
+      for (let i = 0; i < 6; i++) {
+        const t = now + i * 0.16;
+        const base = 520 - i * 52;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(base, t);
+        osc.frequency.linearRampToValueAtTime(base + 55, t + 0.05);
+        osc.frequency.linearRampToValueAtTime(base - 95, t + 0.15);
+        gain.gain.setValueAtTime(0.19, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.155);
+        osc.connect(gain);
+        gain.connect(this.master);
+        osc.start(t);
+        osc.stop(t + 0.16);
+      }
+      // Two final arcade pops
+      for (let j = 0; j < 2; j++) {
+        const t = now + 1.02 + j * 0.15;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(160, t);
+        osc.frequency.exponentialRampToValueAtTime(620, t + 0.06);
+        osc.frequency.exponentialRampToValueAtTime(110, t + 0.12);
+        gain.gain.setValueAtTime(0.28, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+        osc.connect(gain);
+        gain.connect(this.master);
+        osc.start(t);
+        osc.stop(t + 0.135);
+      }
+    }
+
+    playIntro() {
+      if (!this.ctx || !this.active) return;
+      this.stopBackground();
+      this.stopMusic();
+      const now = this.ctx.currentTime;
+      const step = 0.125; // 16th note at ~120 BPM (~4.0s total)
+
+      // Iconic Pac-Man opening theme (lead + bass)
+      const lead = [
+        [493.88, 0, 0.9],  [987.77, 1, 0.9],  [739.99, 2, 0.9],  [622.25, 3, 0.9],
+        [987.77, 4, 0.5],  [739.99, 5, 1.3],  [622.25, 6.5, 1.3],
+        [523.25, 8, 0.9],  [1046.5, 9, 0.9],  [783.99, 10, 0.9], [659.25, 11, 0.9],
+        [1046.5, 12, 0.5], [783.99, 13, 1.3], [659.25, 14.5, 1.3],
+        [493.88, 16, 0.9], [987.77, 17, 0.9], [739.99, 18, 0.9], [622.25, 19, 0.9],
+        [987.77, 20, 0.5], [739.99, 21, 1.3], [622.25, 22.5, 1.3],
+        [622.25, 24, 0.5], [659.25, 24.5, 0.5], [698.46, 25, 0.9],
+        [698.46, 26, 0.5], [739.99, 26.5, 0.5], [783.99, 27, 0.9],
+        [783.99, 28, 0.5], [830.61, 28.5, 0.5], [880.00, 29, 0.9],
+        [987.77, 30, 1.8]
+      ];
+      const bass = [
+        [123.47, 0, 2.5], [185.00, 3, 0.9], [123.47, 4, 2.5], [185.00, 7, 0.9],
+        [130.81, 8, 2.5], [196.00, 11, 0.9], [130.81, 12, 2.5], [196.00, 15, 0.9],
+        [123.47, 16, 2.5], [185.00, 19, 0.9], [123.47, 20, 2.5], [185.00, 23, 0.9],
+        [185.00, 24, 1.8], [207.65, 26, 1.8], [233.08, 28, 1.8], [246.94, 30, 1.8]
+      ];
+
+      const dest = this.musicGain;
+      const schedule = (notes, type, vol) => {
+        for (const [freq, startStep, durStep] of notes) {
+          const t = now + startStep * step;
+          const dur = durStep * step;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(0.001, t);
+          gain.gain.linearRampToValueAtTime(vol, t + 0.01);
+          gain.gain.setValueAtTime(vol * 0.85, t + dur * 0.72);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+          osc.connect(gain);
+          gain.connect(dest);
+          osc.start(t);
+          osc.stop(t + dur + 0.015);
+        }
+      };
+
+      schedule(lead, 'square', 0.16);
+      schedule(bass, 'triangle', 0.28);
+    }
+
+    playIntermission() {
+      if (!this.ctx || !this.active) return;
+      this.stopBackground();
+      this.stopMusic();
+      const now = this.ctx.currentTime;
+      const step = 0.135;
+      const dest = this.musicGain;
+      const melody = [
+        [698.46, 0, 0.8], [698.46, 1, 0.8], [698.46, 2, 0.8],
+        [587.33, 3, 0.5], [523.25, 3.5, 0.5], [698.46, 4, 0.9], [783.99, 5, 1.6],
+        [698.46, 8, 0.8], [698.46, 9, 0.8], [698.46, 10, 0.8],
+        [587.33, 11, 0.5], [523.25, 11.5, 0.5], [698.46, 12, 0.9], [523.25, 13, 1.6],
+        [698.46, 16, 0.8], [698.46, 17, 0.8], [698.46, 18, 0.8],
+        [587.33, 19, 0.5], [523.25, 19.5, 0.5], [698.46, 20, 0.9], [783.99, 21, 1.4],
+        [880.00, 23, 0.8], [932.33, 24, 0.8], [880.00, 25, 0.8], [783.99, 26, 0.8], [698.46, 27, 2.0]
+      ];
+      for (const [freq, s, d] of melody) {
+        const t = now + s * step;
+        const dur = d * step;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.14, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        osc.connect(gain);
+        gain.connect(dest);
+        osc.start(t);
+        osc.stop(t + dur + 0.01);
+      }
+    }
+  }
+
+  // =========================================================================
+  // 4. MAZE GEOMETRY & HIGH-DPI ARCADE RENDERER
+  // =========================================================================
+
+  // Helper: trace an orthogonal polyline or closed polygon with circular arcs at corners
+  function traceRoundedPath(ctx, pts, radius, closed, scale, offsetY) {
+    const n = pts.length;
+    if (n < 2) return;
+    ctx.beginPath();
+    const tx = (p) => p[0] * scale;
+    const ty = (p) => (p[1] + offsetY) * scale;
+    const rad = radius * scale;
+
+    if (closed) {
+      const last = pts[n - 1];
+      const first = pts[0];
+      ctx.moveTo((tx(last) + tx(first)) * 0.5, (ty(last) + ty(first)) * 0.5);
+      for (let i = 0; i < n; i++) {
+        const p1 = pts[i];
+        const p2 = pts[(i + 1) % n];
+        ctx.arcTo(tx(p1), ty(p1), tx(p2), ty(p2), rad);
+      }
+      ctx.closePath();
+    } else {
+      ctx.moveTo(tx(pts[0]), ty(pts[0]));
+      for (let i = 1; i < n - 1; i++) {
+        ctx.arcTo(tx(pts[i]), ty(pts[i]), tx(pts[i + 1]), ty(pts[i + 1]), rad);
+      }
+      ctx.lineTo(tx(pts[n - 1]), ty(pts[n - 1]));
+    }
+  }
+
+  function rectPoly(c1, r1, c2, r2, pad) {
+    return [
+      [c1 + pad, r1 + pad],
+      [c2 + 1 - pad, r1 + pad],
+      [c2 + 1 - pad, r2 + 1 - pad],
+      [c1 + pad, r2 + 1 - pad]
+    ];
+  }
+
+  // Exact vector shapes matching every wall tile in MAZE_TEMPLATE
+  function getMazeShapes() {
+    const p = 0.25; // Inset inside wall tile edges
+    const q = 0.37; // Outer double-line offset from outer edge
+
+    const upperInner = [
+      [-0.2, 13.75], [5.75, 13.75], [5.75, 9.25], [0.75, 9.25], [0.75, 0.75],
+      [13.25, 0.75], [13.25, 4.75], [14.75, 4.75], [14.75, 0.75],
+      [27.25, 0.75], [27.25, 9.25], [22.25, 9.25], [22.25, 13.75], [28.2, 13.75]
+    ];
+    const upperOuter = [
+      [-0.2, 13.37], [5.37, 13.37], [5.37, 9.63], [0.37, 9.63], [0.37, 0.37],
+      [27.63, 0.37], [27.63, 9.63], [22.63, 9.63], [22.63, 13.37], [28.2, 13.37]
+    ];
+
+    const lowerInner = [
+      [-0.2, 15.25], [5.75, 15.25], [5.75, 19.75], [0.75, 19.75],
+      [0.75, 24.25], [2.75, 24.25], [2.75, 25.75], [0.75, 25.75],
+      [0.75, 30.25], [27.25, 30.25],
+      [27.25, 25.75], [25.25, 25.75], [25.25, 24.25], [27.25, 24.25],
+      [27.25, 19.75], [22.25, 19.75], [22.25, 15.25], [28.2, 15.25]
+    ];
+    const lowerOuter = [
+      [-0.2, 15.63], [5.37, 15.63], [5.37, 19.37], [0.37, 19.37],
+      [0.37, 30.63], [27.63, 30.63], [27.63, 19.37],
+      [22.63, 19.37], [22.63, 15.63], [28.2, 15.63]
+    ];
+
+    // 19 internal obstacle polygons (exact mirror symmetry)
+    const obstacles = [
+      // Top row boxes
+      rectPoly(2, 2, 5, 4, p),
+      rectPoly(22, 2, 25, 4, p),
+      rectPoly(7, 2, 11, 4, p),
+      rectPoly(16, 2, 20, 4, p),
+      // Upper-side thin bars
+      rectPoly(2, 6, 5, 7, p),
+      rectPoly(22, 6, 25, 7, p),
+      // Sideways T (left): cols 7-8 rows 6-13 + cols 9-11 rows 9-10
+      [
+        [7 + p, 6 + p], [9 - p, 6 + p], [9 - p, 9 + p], [12 - p, 9 + p],
+        [12 - p, 11 - p], [9 - p, 11 - p], [9 - p, 14 - p], [7 + p, 14 - p]
+      ],
+      // Sideways T (right): cols 19-20 rows 6-13 + cols 16-18 rows 9-10
+      [
+        [19 + p, 6 + p], [21 - p, 6 + p], [21 - p, 14 - p], [19 + p, 14 - p],
+        [19 + p, 11 - p], [16 + p, 11 - p], [16 + p, 9 + p], [19 + p, 9 + p]
+      ],
+      // Upper-center T: cols 10-17 rows 6-7 + cols 13-14 rows 8-10
+      [
+        [10 + p, 6 + p], [18 - p, 6 + p], [18 - p, 8 - p], [15 - p, 8 - p],
+        [15 - p, 11 - p], [13 + p, 11 - p], [13 + p, 8 - p], [10 + p, 8 - p]
+      ],
+      // Lower-side vertical bars
+      rectPoly(7, 15, 8, 19, p),
+      rectPoly(19, 15, 20, 19, p),
+      // Middle-center T: cols 10-17 rows 18-19 + cols 13-14 rows 20-22
+      [
+        [10 + p, 18 + p], [18 - p, 18 + p], [18 - p, 20 - p], [15 - p, 20 - p],
+        [15 - p, 23 - p], [13 + p, 23 - p], [13 + p, 20 - p], [10 + p, 20 - p]
+      ],
+      // Lower-inner rects
+      rectPoly(7, 21, 11, 22, p),
+      rectPoly(16, 21, 20, 22, p),
+      // Upside-down L (left): cols 2-5 rows 21-22 + cols 4-5 rows 23-25
+      [
+        [2 + p, 21 + p], [6 - p, 21 + p], [6 - p, 26 - p],
+        [4 + p, 26 - p], [4 + p, 23 - p], [2 + p, 23 - p]
+      ],
+      // Upside-down L (right): cols 22-25 rows 21-22 + cols 22-23 rows 23-25
+      [
+        [22 + p, 21 + p], [26 - p, 21 + p], [26 - p, 23 - p],
+        [24 - p, 23 - p], [24 - p, 26 - p], [22 + p, 26 - p]
+      ],
+      // Bottom-center T: cols 10-17 rows 24-25 + cols 13-14 rows 26-28
+      [
+        [10 + p, 24 + p], [18 - p, 24 + p], [18 - p, 26 - p], [15 - p, 26 - p],
+        [15 - p, 29 - p], [13 + p, 29 - p], [13 + p, 26 - p], [10 + p, 26 - p]
+      ],
+      // Bottom-left inverted T: cols 2-11 rows 27-28 + cols 7-8 rows 24-26
+      [
+        [2 + p, 27 + p], [7 + p, 27 + p], [7 + p, 24 + p], [9 - p, 24 + p],
+        [9 - p, 27 + p], [12 - p, 27 + p], [12 - p, 29 - p], [2 + p, 29 - p]
+      ],
+      // Bottom-right inverted T: cols 16-25 rows 27-28 + cols 19-20 rows 24-26
+      [
+        [16 + p, 27 + p], [19 + p, 27 + p], [19 + p, 24 + p], [21 - p, 24 + p],
+        [21 - p, 27 + p], [26 - p, 27 + p], [26 - p, 29 - p], [16 + p, 29 - p]
+      ]
+    ];
+
+    return { upperInner, upperOuter, lowerInner, lowerOuter, obstacles, p, q };
+  }
+
+  class Renderer {
+    constructor(canvas) {
+      this.canvas = canvas;
+      this.ctx = canvas.getContext('2d');
+      this.tilePx = 16; // Physical pixels per tile (updated on resize)
+      this.mazeBlueCanvas = document.createElement('canvas');
+      this.mazeWhiteCanvas = document.createElement('canvas');
+      this.shapes = getMazeShapes();
+      this.resize();
+    }
+
+    resize() {
+      const shellPadH = 88;
+      const shellPadW = 48;
+      const availW = Math.max(240, window.innerWidth - shellPadW);
+      const availH = Math.max(300, window.innerHeight - shellPadH);
+      const aspect = LOGIC_W / LOGIC_H;
+
+      let cssW, cssH;
+      if (availW / availH > aspect) {
+        cssH = availH;
+        cssW = Math.floor(cssH * aspect);
+      } else {
+        cssW = availW;
+        cssH = Math.floor(cssW / aspect);
+      }
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      this.cssW = cssW;
+      this.cssH = cssH;
+      this.width = Math.round(cssW * dpr);
+      this.height = Math.round(cssH * dpr);
+      this.tilePx = this.width / COLS;
+
+      this.canvas.style.width = cssW + 'px';
+      this.canvas.style.height = cssH + 'px';
+      this.canvas.width = this.width;
+      this.canvas.height = this.height;
+
+      this.renderMazeCache(this.mazeBlueCanvas, COLORS.wall, COLORS.door);
+      this.renderMazeCache(this.mazeWhiteCanvas, COLORS.wallFlash, COLORS.wallFlash);
+    }
+
+    renderMazeCache(targetCanvas, wallColor, doorColor) {
+      targetCanvas.width = this.width;
+      targetCanvas.height = this.height;
+      const ctx = targetCanvas.getContext('2d');
+      const s = this.tilePx;
+      const oy = MAZE_ROW_OFFSET;
+
+      ctx.clearRect(0, 0, this.width, this.height);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      const lineW = Math.max(1.5, s * 0.145);
+      const { upperInner, upperOuter, lowerInner, lowerOuter, obstacles } = this.shapes;
+
+      // Subtle arcade CRT phosphor bloom on blue maze
+      if (wallColor === COLORS.wall) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(40, 60, 255, 0.55)';
+        ctx.shadowBlur = s * 0.35;
+      }
+
+      ctx.strokeStyle = wallColor;
+      ctx.lineWidth = lineW;
+
+      // Outer double-walled boundaries
+      traceRoundedPath(ctx, upperInner, 0.32, false, s, oy);
+      ctx.stroke();
+      traceRoundedPath(ctx, upperOuter, 0.42, false, s, oy);
+      ctx.stroke();
+
+      traceRoundedPath(ctx, lowerInner, 0.32, false, s, oy);
+      ctx.stroke();
+      traceRoundedPath(ctx, lowerOuter, 0.42, false, s, oy);
+      ctx.stroke();
+
+      // 19 internal rounded obstacle shapes
+      for (const poly of obstacles) {
+        traceRoundedPath(ctx, poly, 0.28, true, s, oy);
+        ctx.stroke();
+      }
+
+      // Ghost House (classic crisp square double-line box)
+      const ghOuter = [
+        [13.0, 12.25], [10.25, 12.25], [10.25, 16.75],
+        [17.75, 16.75], [17.75, 12.25], [15.0, 12.25]
+      ];
+      const ghInner = [
+        [13.0, 12.66], [10.66, 12.66], [10.66, 16.34],
+        [17.34, 16.34], [17.34, 12.66], [15.0, 12.66]
+      ];
+      ctx.beginPath();
+      ghOuter.forEach((pt, i) => {
+        const x = pt[0] * s, y = (pt[1] + oy) * s;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      ctx.beginPath();
+      ghInner.forEach((pt, i) => {
+        const x = pt[0] * s, y = (pt[1] + oy) * s;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Connect door posts vertically
+      ctx.beginPath();
+      ctx.moveTo(13.0 * s, (12.25 + oy) * s);
+      ctx.lineTo(13.0 * s, (12.66 + oy) * s);
+      ctx.moveTo(15.0 * s, (12.25 + oy) * s);
+      ctx.lineTo(15.0 * s, (12.66 + oy) * s);
+      ctx.stroke();
+
+      if (wallColor === COLORS.wall) {
+        ctx.restore();
+      }
+
+      // Pink ghost house door
+      ctx.fillStyle = doorColor;
+      ctx.fillRect(13.05 * s, (12.34 + oy) * s, 1.9 * s, 0.24 * s);
+    }
+
+    drawText(text, tileX, tileY, color, scaleFactor = 1, align = 'left') {
+      const ctx = this.ctx;
+      const str = String(text).toUpperCase();
+      const s = this.tilePx * scaleFactor;
+      const px = s / 8;
+      let startX = tileX * this.tilePx;
+      if (align === 'center') startX -= (str.length * s) / 2;
+      else if (align === 'right') startX -= str.length * s;
+      const startY = tileY * this.tilePx;
+
+      ctx.fillStyle = color;
+      for (let i = 0; i < str.length; i++) {
+        const glyph = FONT_8X8[str[i]] || FONT_8X8[' '];
+        const gx = startX + i * s;
+        for (let r = 0; r < 8; r++) {
+          const rowBits = glyph[r];
+          if (!rowBits) continue;
+          for (let c = 0; c < 8; c++) {
+            if (rowBits & (0x80 >> c)) {
+              ctx.fillRect(
+                Math.floor(gx + c * px),
+                Math.floor(startY + r * px),
+                Math.ceil(px),
+                Math.ceil(px)
+              );
+            }
+          }
+        }
+      }
+    }
+
+    drawPacMan(xTile, yTile, dir, mouthOpen, radiusTiles = 0.78, screenY = false) {
+      const ctx = this.ctx;
+      const s = this.tilePx;
+      const cx = xTile * s;
+      const cy = (yTile + (screenY ? 0 : MAZE_ROW_OFFSET)) * s;
+      const r = radiusTiles * s;
+
+      ctx.save();
+      ctx.fillStyle = COLORS.pacman;
+      ctx.beginPath();
+      const angle = dir && dir.id >= 0 ? dir.angle : Math.PI;
+      const spread = mouthOpen * 0.42 * Math.PI; // 0 to ~75 deg half-angle
+      if (spread < 0.03) {
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      } else {
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, angle + spread, angle + Math.PI * 2 - spread);
+        ctx.closePath();
+      }
+      ctx.fill();
+      ctx.restore();
+    }
+
+    drawPacManDeath(xTile, yTile, progress) {
+      const ctx = this.ctx;
+      const s = this.tilePx;
+      const cx = xTile * s;
+      const cy = (yTile + MAZE_ROW_OFFSET) * s;
+      const r = 0.78 * s;
+
+      ctx.save();
+      if (progress < 0.82) {
+        const t = progress / 0.82;
+        const spread = 0.15 * Math.PI + t * 0.85 * Math.PI; // Opens upward until gone
+        const base = -Math.PI / 2;
+        ctx.fillStyle = COLORS.pacman;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, base + spread, base + Math.PI * 2 - spread);
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        // Classic radial burst pop
+        const burst = (progress - 0.82) / 0.18;
+        ctx.strokeStyle = COLORS.pacman;
+        ctx.lineWidth = Math.max(1.5, s * 0.12);
+        const rays = 10;
+        const innerR = r * (0.25 + burst * 0.45);
+        const outerR = r * (0.65 + burst * 0.55);
+        for (let i = 0; i < rays; i++) {
+          const a = (i / rays) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(a) * innerR, cy + Math.sin(a) * innerR);
+          ctx.lineTo(cx + Math.cos(a) * outerR, cy + Math.sin(a) * outerR);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
+
+    drawGhost(xTile, yTile, color, dir, mode, flashWhite, animFrame, screenY = false) {
+      const ctx = this.ctx;
+      const s = this.tilePx;
+      const cx = xTile * s;
+      const cy = (yTile + (screenY ? 0 : MAZE_ROW_OFFSET)) * s;
+      const r = 0.76 * s;
+
+      ctx.save();
+
+      const drawBody = (bodyColor) => {
+        ctx.fillStyle = bodyColor;
+        ctx.beginPath();
+        // Rounded dome top
+        ctx.arc(cx, cy - r * 0.12, r, Math.PI, 0, false);
+        // Right side down
+        const bottom = cy + r * 0.92;
+        ctx.lineTo(cx + r, bottom);
+        // Animated wavy skirt (3 bumps oscillating)
+        const waves = 3;
+        const stepW = (r * 2) / (waves * 2);
+        const phase = animFrame % 2 === 0 ? 1 : -1;
+        for (let i = waves * 2 - 1; i >= 0; i--) {
+          const wx = cx - r + i * stepW;
+          const wy = bottom - ((i % 2 === 0 ? (phase > 0 ? 0 : 0.28) : (phase > 0 ? 0.28 : 0)) * r);
+          ctx.lineTo(wx, wy);
+        }
+        ctx.closePath();
+        ctx.fill();
+      };
+
+      if (mode === 'frightened') {
+        const bodyCol = flashWhite ? COLORS.frightFlashBody : COLORS.frightBody;
+        const faceCol = flashWhite ? COLORS.frightFlashFace : COLORS.frightFace;
+        drawBody(bodyCol);
+
+        // Two small square eyes
+        ctx.fillStyle = faceCol;
+        const eyeSize = r * 0.26;
+        ctx.fillRect(cx - r * 0.44, cy - r * 0.28, eyeSize, eyeSize);
+        ctx.fillRect(cx + r * 0.18, cy - r * 0.28, eyeSize, eyeSize);
+
+        // Squiggly frightened mouth
+        ctx.strokeStyle = faceCol;
+        ctx.lineWidth = Math.max(1.2, r * 0.13);
+        ctx.lineCap = 'square';
+        ctx.beginPath();
+        const my = cy + r * 0.28;
+        const pts = 6;
+        const mw = r * 1.24;
+        for (let i = 0; i <= pts; i++) {
+          const px = cx - mw / 2 + (i / pts) * mw;
+          const py = my + (i % 2 === 0 ? r * 0.10 : -r * 0.10);
+          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        ctx.restore();
+        return;
+      }
+
+      if (mode !== 'eaten') {
+        drawBody(color);
+      }
+
+      // Directional eyes (sclera + blue pupils)
+      const dx = dir && dir.x ? dir.x : 0;
+      const dy = dir && dir.y ? dir.y : 0;
+      const eyeOffX = dx * r * 0.14;
+      const eyeOffY = dy * r * 0.16;
+      const pupilOffX = dx * r * 0.18;
+      const pupilOffY = dy * r * 0.18;
+
+      const eyeRx = r * 0.28;
+      const eyeRy = r * 0.34;
+      const leftEyeX = cx - r * 0.34 + eyeOffX;
+      const rightEyeX = cx + r * 0.34 + eyeOffX;
+      const eyeY = cy - r * 0.16 + eyeOffY;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(leftEyeX, eyeY, eyeRx, eyeRy, 0, 0, Math.PI * 2);
+      ctx.ellipse(rightEyeX, eyeY, eyeRx, eyeRy, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#1919e6';
+      const pr = r * 0.15;
+      ctx.beginPath();
+      ctx.arc(leftEyeX + pupilOffX, eyeY + pupilOffY, pr, 0, Math.PI * 2);
+      ctx.arc(rightEyeX + pupilOffX, eyeY + pupilOffY, pr, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    drawFruit(fruitId, xTile, yTile, scaleMult = 1, screenY = false) {
+      const ctx = this.ctx;
+      const s = this.tilePx * scaleMult;
+      const cx = xTile * this.tilePx;
+      const cy = (yTile + (screenY ? 0 : MAZE_ROW_OFFSET)) * this.tilePx;
+      const r = 0.65 * s;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+
+      if (fruitId === 'cherry') {
+        // Stems
+        ctx.strokeStyle = '#c88030';
+        ctx.lineWidth = Math.max(1.2, r * 0.18);
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.35, r * 0.25);
+        ctx.quadraticCurveTo(0, -r * 0.75, r * 0.55, -r * 0.85);
+        ctx.moveTo(r * 0.32, r * 0.42);
+        ctx.quadraticCurveTo(r * 0.25, -r * 0.4, r * 0.55, -r * 0.85);
+        ctx.stroke();
+        // Cherries
+        ctx.fillStyle = '#ff1c1c';
+        ctx.beginPath();
+        ctx.arc(-r * 0.38, r * 0.35, r * 0.44, 0, Math.PI * 2);
+        ctx.arc(r * 0.32, r * 0.50, r * 0.44, 0, Math.PI * 2);
+        ctx.fill();
+        // Highlights
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-r * 0.55, r * 0.18, r * 0.18, r * 0.18);
+        ctx.fillRect(r * 0.16, r * 0.33, r * 0.18, r * 0.18);
+      } else if (fruitId === 'strawberry') {
+        ctx.fillStyle = '#ff1c1c';
+        ctx.beginPath();
+        ctx.moveTo(0, r * 0.9);
+        ctx.bezierCurveTo(-r * 0.95, r * 0.2, -r * 0.85, -r * 0.6, 0, -r * 0.55);
+        ctx.bezierCurveTo(r * 0.85, -r * 0.6, r * 0.95, r * 0.2, 0, r * 0.9);
+        ctx.fill();
+        // Green cap
+        ctx.fillStyle = '#00e600';
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.55, -r * 0.55);
+        ctx.lineTo(r * 0.55, -r * 0.55);
+        ctx.lineTo(0, -r * 0.2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-r * 0.08, -r * 0.85, r * 0.16, r * 0.32);
+        // Seeds
+        ctx.fillStyle = '#ffe6a0';
+        for (const [sx, sy] of [[-0.32,-0.1],[0.28,-0.1],[0,0.12],[-0.2,0.38],[0.2,0.38]]) {
+          ctx.fillRect(sx * r, sy * r, r * 0.13, r * 0.13);
+        }
+      } else if (fruitId === 'orange') {
+        ctx.fillStyle = '#ffb830';
+        ctx.beginPath();
+        ctx.arc(0, r * 0.14, r * 0.74, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#00d800';
+        ctx.beginPath();
+        ctx.ellipse(r * 0.26, -r * 0.68, r * 0.36, r * 0.18, -0.35, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#b06820';
+        ctx.fillRect(-r * 0.08, -r * 0.82, r * 0.16, r * 0.32);
+      } else if (fruitId === 'apple') {
+        ctx.fillStyle = '#ff1c1c';
+        ctx.beginPath();
+        ctx.arc(-r * 0.24, r * 0.16, r * 0.58, 0, Math.PI * 2);
+        ctx.arc(r * 0.24, r * 0.16, r * 0.58, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#c88030';
+        ctx.fillRect(-r * 0.07, -r * 0.8, r * 0.14, r * 0.45);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(r * 0.22, -r * 0.1, r * 0.18, r * 0.28);
+      } else if (fruitId === 'melon') {
+        ctx.fillStyle = '#24d860';
+        ctx.beginPath();
+        ctx.arc(0, r * 0.14, r * 0.74, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#0c7830';
+        ctx.lineWidth = Math.max(1, r * 0.12);
+        ctx.beginPath();
+        ctx.arc(0, r * 0.14, r * 0.74, 0, Math.PI * 2);
+        ctx.moveTo(-r * 0.45, -r * 0.3); ctx.lineTo(r * 0.45, r * 0.55);
+        ctx.moveTo(r * 0.45, -r * 0.3); ctx.lineTo(-r * 0.45, r * 0.55);
+        ctx.stroke();
+        ctx.fillStyle = '#d8e840';
+        ctx.fillRect(-r * 0.1, -r * 0.82, r * 0.2, r * 0.26);
+      } else if (fruitId === 'galaxian') {
+        // Classic yellow/blue/red Galaxian flagship
+        ctx.fillStyle = '#ffff00';
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 0.85);
+        ctx.lineTo(r * 0.85, r * 0.4);
+        ctx.lineTo(r * 0.3, r * 0.4);
+        ctx.lineTo(0, r * 0.85);
+        ctx.lineTo(-r * 0.3, r * 0.4);
+        ctx.lineTo(-r * 0.85, r * 0.4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#ff1c1c';
+        ctx.fillRect(-r * 0.22, -r * 0.55, r * 0.44, r * 0.45);
+        ctx.fillStyle = '#2040ff';
+        ctx.fillRect(-r * 0.75, r * 0.15, r * 0.3, r * 0.45);
+        ctx.fillRect(r * 0.45, r * 0.15, r * 0.3, r * 0.45);
+      } else if (fruitId === 'bell') {
+        ctx.fillStyle = '#ffe030';
+        ctx.beginPath();
+        ctx.arc(0, -r * 0.15, r * 0.56, Math.PI, 0);
+        ctx.lineTo(r * 0.78, r * 0.6);
+        ctx.lineTo(-r * 0.78, r * 0.6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#00e8ff';
+        ctx.fillRect(-r * 0.62, r * 0.58, r * 1.24, r * 0.22);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-r * 0.14, r * 0.62, r * 0.28, r * 0.28);
+      } else {
+        // Key
+        ctx.fillStyle = '#00e8ff';
+        ctx.fillRect(-r * 0.45, -r * 0.82, r * 0.9, r * 0.58);
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(-r * 0.2, -r * 0.66, r * 0.4, r * 0.22);
+        ctx.fillStyle = '#e8e8ff';
+        ctx.fillRect(-r * 0.14, -r * 0.24, r * 0.28, r * 1.08);
+        ctx.fillRect(r * 0.14, r * 0.18, r * 0.32, r * 0.18);
+        ctx.fillRect(r * 0.14, r * 0.54, r * 0.32, r * 0.18);
+      }
+
+      ctx.restore();
+    }
+
+    drawMaze(flashWhite) {
+      const src = flashWhite ? this.mazeWhiteCanvas : this.mazeBlueCanvas;
+      this.ctx.drawImage(src, 0, 0);
+    }
+
+    drawPellets(grid, powerBlinkOn) {
+      const ctx = this.ctx;
+      const s = this.tilePx;
+      const oy = MAZE_ROW_OFFSET;
+      const dotR = Math.max(1.4, s * 0.13);
+      const powerR = Math.max(3.2, s * 0.36);
+
+      ctx.fillStyle = COLORS.pellet;
+      for (let r = 0; r < ROWS; r++) {
+        const row = grid[r];
+        for (let c = 0; c < COLS; c++) {
+          const cell = row[c];
+          if (cell === '.') {
+            const x = (c + 0.5) * s - dotR;
+            const y = (r + oy + 0.5) * s - dotR;
+            ctx.fillRect(x, y, dotR * 2, dotR * 2);
+          } else if (cell === 'o' && powerBlinkOn) {
+            ctx.beginPath();
+            ctx.arc((c + 0.5) * s, (r + oy + 0.5) * s, powerR, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+    }
+
+    drawTunnelMasks() {
+      // Mask tiny outer slivers so sprites emerge smoothly from tunnel edges
+      const ctx = this.ctx;
+      const s = this.tilePx;
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(-s * 2, (13.6 + MAZE_ROW_OFFSET) * s, s * 2.02, s * 1.8);
+      ctx.fillRect(COLS * s - 0.02 * s, (13.6 + MAZE_ROW_OFFSET) * s, s * 2.02, s * 1.8);
+    }
+  }
+
+  // =========================================================================
+  // 5. CORE PAC-MAN GAME ENGINE
+  // =========================================================================
+  const HIGH_SCORE_KEY = 'arcade_pacman_high_score_v1';
+
+  class PacManGame {
+    constructor(canvas, sound, uiCallbacks) {
+      this.renderer = new Renderer(canvas);
+      this.sound = sound;
+      this.ui = uiCallbacks;
+
+      this.highScore = this.loadHighScore();
+      this.score = 0;
+      this.lives = 3;
+      this.extraLifeAwarded = false;
+      this.level = 1;
+      this.levelFruits = [];
+
+      // States: 'ATTRACT', 'START_INTRO', 'READY', 'PLAYING', 'EAT_GHOST_PAUSE',
+      //         'DYING_FREEZE', 'DYING', 'LEVEL_CLEAR', 'INTERMISSION', 'GAME_OVER'
+      this.state = 'ATTRACT';
+      this.stateTimer = 0;
+      this.paused = false;
+
+      this.globalTimer = 0;
+      this.attractTimer = 0;
+      this.intermissionTimer = 0;
+
+      // Grid & pellet tracking
+      this.grid = [];
+      this.totalPellets = 0;
+      this.pelletsEaten = 0;
+      this.pelletsLeft = 0;
+
+      // Mode / wave / fright tracking
+      this.cfg = getLevelConfig(1);
+      this.waveIdx = 0;
+      this.waveTimer = 0;
+      this.scatterMode = true;
+
+      this.frightTimer = 0;
+      this.frightGhostCombo = 0;
+      this.eatPauseGhost = null;
+      this.eatPauseScore = 0;
+
+      // Ghost house release tracking
+      this.useGlobalDotCounter = false;
+      this.globalDotCounter = 0;
+      this.timeSinceLastDot = 0;
+
+      // Bonus fruit
+      this.fruitActive = false;
+      this.fruitTimer = 0;
+      this.fruitPopupTimer = 0;
+      this.fruitPopupPts = 0;
+      this.fruitsSpawnedThisLevel = 0;
+
+      // Floating score popups (for ghost eat / fruit)
+      this.floatingPopup = null;
+
+      // Entities
+      this.pac = this.createPacMan();
+      this.ghosts = this.createGhosts();
+
+      this.resetMaze();
+      this.resetPositions();
+
+      // Main loop timing
+      this.lastTime = performance.now();
+      this.accumulator = 0;
+      this.rafId = null;
+    }
+
+    loadHighScore() {
+      try {
+        const val = parseInt(localStorage.getItem(HIGH_SCORE_KEY), 10);
+        return Number.isFinite(val) && val > 0 ? val : 0;
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    saveHighScore(val) {
+      try {
+        localStorage.setItem(HIGH_SCORE_KEY, String(val));
+      } catch (e) {}
+    }
+
+    addScore(pts) {
+      this.score += pts;
+      if (this.score > this.highScore) {
+        this.highScore = this.score;
+        this.saveHighScore(this.highScore);
+      }
+      if (!this.extraLifeAwarded && this.score >= 10000) {
+        this.extraLifeAwarded = true;
+        this.lives = Math.min(this.lives + 1, 6);
+        this.sound.playExtraLife();
+      }
+    }
+
+    createPacMan() {
+      return {
+        x: 14.0,
+        y: 23.5,
+        dir: DIR.LEFT,
+        nextDir: DIR.LEFT,
+        moving: false,
+        mouthPhase: 0.25,
+        dotFreezeFrames: 0
+      };
+    }
+
+    createGhosts() {
+      return [
+        {
+          id: 'blinky', name: 'BLINKY', nickname: 'SHADOW', color: COLORS.blinky,
+          x: 14.0, y: 11.5, homeX: 14.0, homeY: 14.5,
+          scatterTarget: { c: 25, r: -3 },
+          dir: DIR.LEFT, state: 'active', // 'active' | 'house' | 'exiting' | 'entering'
+          frightened: false, eaten: false, pendingReverse: false,
+          dotCounter: 0, dotLimit: 0, lastTileKey: ''
+        },
+        {
+          id: 'pinky', name: 'PINKY', nickname: 'SPEEDY', color: COLORS.pinky,
+          x: 14.0, y: 14.5, homeX: 14.0, homeY: 14.5,
+          scatterTarget: { c: 2, r: -3 },
+          dir: DIR.DOWN, state: 'house',
+          frightened: false, eaten: false, pendingReverse: false,
+          dotCounter: 0, dotLimit: 0, lastTileKey: ''
+        },
+        {
+          id: 'inky', name: 'INKY', nickname: 'BASHFUL', color: COLORS.inky,
+          x: 12.0, y: 14.5, homeX: 12.0, homeY: 14.5,
+          scatterTarget: { c: 27, r: 32 },
+          dir: DIR.UP, state: 'house',
+          frightened: false, eaten: false, pendingReverse: false,
+          dotCounter: 0, dotLimit: 30, lastTileKey: ''
+        },
+        {
+          id: 'clyde', name: 'CLYDE', nickname: 'POKEY', color: COLORS.clyde,
+          x: 16.0, y: 14.5, homeX: 16.0, homeY: 14.5,
+          scatterTarget: { c: 0, r: 32 },
+          dir: DIR.UP, state: 'house',
+          frightened: false, eaten: false, pendingReverse: false,
+          dotCounter: 0, dotLimit: 60, lastTileKey: ''
+        }
+      ];
+    }
+
+    resetMaze() {
+      this.grid = MAZE_TEMPLATE.map(row => row.split(''));
+      this.totalPellets = 0;
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (this.grid[r][c] === '.' || this.grid[r][c] === 'o') {
+            this.totalPellets++;
+          }
+        }
+      }
+      this.pelletsEaten = 0;
+      this.pelletsLeft = this.totalPellets;
+      this.fruitActive = false;
+      this.fruitTimer = 0;
+      this.fruitPopupTimer = 0;
+      this.fruitsSpawnedThisLevel = 0;
+      this.useGlobalDotCounter = false;
+      this.globalDotCounter = 0;
+
+      // Reset personal dot counters for the new level
+      this.cfg = getLevelConfig(this.level);
+      this.ghosts[0].dotCounter = 0; this.ghosts[0].dotLimit = 0;
+      this.ghosts[1].dotCounter = 0; this.ghosts[1].dotLimit = 0;
+      this.ghosts[2].dotCounter = 0; this.ghosts[2].dotLimit = this.cfg.inkyDotLimit;
+      this.ghosts[3].dotCounter = 0; this.ghosts[3].dotLimit = this.cfg.clydeDotLimit;
+    }
+
+    resetPositions() {
+      this.pac.x = 14.0;
+      this.pac.y = 23.5;
+      this.pac.dir = DIR.LEFT;
+      this.pac.nextDir = DIR.LEFT;
+      this.pac.moving = false;
+      this.pac.mouthPhase = 0;
+      this.pac.dotFreezeFrames = 0;
+
+      const starts = [
+        { x: 14.0, y: 11.5, dir: DIR.LEFT, state: 'active' },
+        { x: 14.0, y: 14.5, dir: DIR.DOWN, state: 'house'  },
+        { x: 12.0, y: 14.5, dir: DIR.UP,   state: 'house'  },
+        { x: 16.0, y: 14.5, dir: DIR.UP,   state: 'house'  }
+      ];
+
+      this.ghosts.forEach((g, idx) => {
+        const st = starts[idx];
+        g.x = st.x;
+        g.y = st.y;
+        g.dir = st.dir;
+        g.state = st.state;
+        g.frightened = false;
+        g.eaten = false;
+        g.pendingReverse = false;
+        g.lastTileKey = '';
+      });
+
+      this.waveIdx = 0;
+      this.waveTimer = this.cfg.waves[0];
+      this.scatterMode = true;
+      this.frightTimer = 0;
+      this.frightGhostCombo = 0;
+      this.timeSinceLastDot = 0;
+      this.floatingPopup = null;
+      this.eatPauseGhost = null;
+    }
+
+    // ---- Game Flow Transitions ----
+
+    startNewGame() {
+      this.sound.unlock();
+      this.paused = false;
+      this.ui.onPauseChange(false);
+
+      this.score = 0;
+      this.lives = 3;
+      this.extraLifeAwarded = false;
+      this.level = 1;
+      this.levelFruits = [getLevelConfig(1).fruit.id];
+
+      this.resetMaze();
+      this.resetPositions();
+
+      this.state = 'START_INTRO';
+      this.stateTimer = 4.2;
+      this.sound.playIntro();
+    }
+
+    startNextLevel() {
+      this.level++;
+      this.cfg = getLevelConfig(this.level);
+      this.levelFruits.push(this.cfg.fruit.id);
+      if (this.levelFruits.length > 7) {
+        this.levelFruits.shift();
+      }
+      this.resetMaze();
+      this.resetPositions();
+      this.state = 'READY';
+      this.stateTimer = 2.0;
+      this.sound.stopBackground();
+      this.sound.stopMusic();
+    }
+
+    togglePause() {
+      if (this.state === 'ATTRACT' || this.state === 'GAME_OVER') return;
+      this.paused = !this.paused;
+      if (this.paused) {
+        this.sound.stopBackground();
+        this.sound.stopMusic();
+      }
+      this.ui.onPauseChange(this.paused);
+    }
+
+    setPaused(p) {
+      if (this.state === 'ATTRACT' || this.state === 'GAME_OVER') return;
+      if (this.paused === p) return;
+      this.paused = p;
+      if (this.paused) {
+        this.sound.stopBackground();
+        this.sound.stopMusic();
+      }
+      this.ui.onPauseChange(this.paused);
+    }
+
+    queueDirection(dir) {
+      this.sound.unlock();
+      if (this.state === 'ATTRACT' || this.state === 'GAME_OVER') {
+        this.startNewGame();
+        this.pac.nextDir = dir;
+        return;
+      }
+      if (this.paused) return;
+      this.pac.nextDir = dir;
+    }
+
+    handleActionKey() {
+      this.sound.unlock();
+      if (this.state === 'ATTRACT' || this.state === 'GAME_OVER') {
+        this.startNewGame();
+      } else if (this.state === 'INTERMISSION') {
+        this.startNextLevel();
+      } else if (this.paused) {
+        this.togglePause();
+      }
+    }
+
+    // ---- Tile & Collision Helpers ----
+
+    getTile(c, r) {
+      if (r < 0 || r >= ROWS) return '#';
+      if (r === 14 && (c < 0 || c >= COLS)) return 'T';
+      if (c < 0 || c >= COLS) return '#';
+      return this.grid[r][c];
+    }
+
+    isPacWalkable(c, r) {
+      const t = this.getTile(c, r);
+      return t !== '#' && t !== '-' && t !== '=';
+    }
+
+    isGhostWalkable(c, r, ghost) {
+      const t = this.getTile(c, r);
+      if (t === '#') return false;
+      if (t === '-' || t === '=') {
+        return ghost.state === 'entering' || ghost.state === 'exiting' || ghost.state === 'house';
+      }
+      return true;
+    }
+
+    isTunnelTile(c, r) {
+      return r === 14 && (c <= 5 || c >= 22);
+    }
+
+    // ---- Simulation Tick (60Hz fixed timestep) ----
+
+    step(dt) {
+      this.globalTimer += dt;
+
+      if (this.state === 'ATTRACT') {
+        this.attractTimer += dt;
+        return;
+      }
+
+      if (this.paused) return;
+
+      if (this.state === 'START_INTRO') {
+        this.stateTimer -= dt;
+        if (this.stateTimer <= 0) {
+          this.state = 'PLAYING';
+          this.updateBackgroundSound();
+        }
+        return;
+      }
+
+      if (this.state === 'READY') {
+        this.stateTimer -= dt;
+        if (this.stateTimer <= 0) {
+          this.state = 'PLAYING';
+          this.updateBackgroundSound();
+        }
+        return;
+      }
+
+      if (this.state === 'EAT_GHOST_PAUSE') {
+        this.stateTimer -= dt;
+        if (this.stateTimer <= 0) {
+          this.state = 'PLAYING';
+          this.eatPauseGhost = null;
+          this.floatingPopup = null;
+          this.updateBackgroundSound();
+        }
+        return;
+      }
+
+      if (this.state === 'DYING_FREEZE') {
+        this.stateTimer -= dt;
+        if (this.stateTimer <= 0) {
+          this.state = 'DYING';
+          this.stateTimer = 1.45;
+          this.sound.playDeath();
+        }
+        return;
+      }
+
+      if (this.state === 'DYING') {
+        this.stateTimer -= dt;
+        if (this.stateTimer <= 0) {
+          this.lives--;
+          if (this.lives <= 0) {
+            this.state = 'GAME_OVER';
+            this.stateTimer = 0;
+            this.sound.stopBackground();
+          } else {
+            // Classic arcade rule: after losing a life, switch to global dot counter
+            this.useGlobalDotCounter = true;
+            this.globalDotCounter = 0;
+            this.fruitActive = false;
+            this.resetPositions();
+            this.state = 'READY';
+            this.stateTimer = 2.0;
+          }
+        }
+        return;
+      }
+
+      if (this.state === 'LEVEL_CLEAR') {
+        this.stateTimer -= dt;
+        if (this.stateTimer <= 0) {
+          // Play classic Act 1 intermission after Level 2!
+          if (this.level === 2) {
+            this.state = 'INTERMISSION';
+            this.intermissionTimer = 0;
+            this.sound.playIntermission();
+          } else {
+            this.startNextLevel();
+          }
+        }
+        return;
+      }
+
+      if (this.state === 'INTERMISSION') {
+        this.intermissionTimer += dt;
+        if (this.intermissionTimer >= 6.8) {
+          this.startNextLevel();
+        }
+        return;
+      }
+
+      if (this.state === 'GAME_OVER') {
+        this.stateTimer += dt;
+        return;
+      }
+
+      // ---- PLAYING STATE ----
+      this.updateTimers(dt);
+      this.updatePacMan(dt);
+      this.checkPelletAndFruit();
+      if (this.state !== 'PLAYING') return; // Level clear triggered
+
+      this.updateGhostHouseReleases(dt);
+      this.updateGhosts(dt);
+      this.checkGhostCollisions();
+      if (this.state === 'PLAYING') {
+        this.updateBackgroundSound();
+      }
+    }
+
+    updateTimers(dt) {
+      // Bonus fruit timer
+      if (this.fruitActive) {
+        this.fruitTimer -= dt;
+        if (this.fruitTimer <= 0) {
+          this.fruitActive = false;
+        }
+      }
+      if (this.fruitPopupTimer > 0) {
+        this.fruitPopupTimer -= dt;
+      }
+
+      // Frightened mode timer (pauses scatter/chase wave timer, just like arcade!)
+      if (this.frightTimer > 0) {
+        this.frightTimer -= dt;
+        if (this.frightTimer <= 0) {
+          this.frightTimer = 0;
+          this.frightGhostCombo = 0;
+          for (const g of this.ghosts) {
+            g.frightened = false;
+          }
+        }
+      } else {
+        // Advance Scatter / Chase wave schedule
+        this.waveTimer -= dt;
+        if (this.waveTimer <= 0 && this.waveIdx < this.cfg.waves.length - 1) {
+          this.waveIdx++;
+          this.waveTimer = this.cfg.waves[this.waveIdx];
+          this.scatterMode = (this.waveIdx % 2 === 0);
+          // Classic arcade rule: active ghosts reverse on Scatter<->Chase transition
+          for (const g of this.ghosts) {
+            if (g.state === 'active' && !g.eaten) {
+              g.pendingReverse = true;
+            }
+          }
+        }
+      }
+    }
+
+    // ---- Pac-Man Movement with Authentic Cornering & Dot Freeze ----
+
+    updatePacMan(dt) {
+      const p = this.pac;
+
+      if (p.dotFreezeFrames > 0) {
+        p.dotFreezeFrames--;
+        return;
+      }
+
+      const speedFrac = this.frightTimer > 0 ? this.cfg.pacFrightSpeed : this.cfg.pacSpeed;
+      const dist = speedFrac * BASE_SPEED * dt;
+
+      // Instant 180-degree reversal allowed anywhere
+      if (p.nextDir !== DIR.NONE && p.nextDir === oppositeDir(p.dir)) {
+        p.dir = p.nextDir;
+      }
+
+      const col = Math.floor(p.x);
+      const row = Math.floor(p.y);
+      const centerX = col + 0.5;
+      const centerY = row + 0.5;
+
+      // Check if queued turn is perpendicular and walkable from current tile
+      if (p.nextDir !== DIR.NONE && p.nextDir !== p.dir) {
+        const turnCol = col + p.nextDir.x;
+        const turnRow = row + p.nextDir.y;
+        const canTurn = this.isPacWalkable(turnCol, turnRow);
+
+        if (canTurn) {
+          // Cornering tolerance: allow pre-turning within 0.38 tiles of tile center!
+          const distToCenter = Math.abs(p.x - centerX) + Math.abs(p.y - centerY);
+          if (distToCenter <= 0.38) {
+            p.dir = p.nextDir;
+          }
+        }
+      }
+
+      // Check if moving forward in p.dir is blocked by a wall
+      const nextCol = col + p.dir.x;
+      const nextRow = row + p.dir.y;
+      const forwardBlocked = !this.isPacWalkable(nextCol, nextRow);
+
+      let moved = false;
+      const prevX = p.x;
+      const prevY = p.y;
+
+      if (p.dir.x !== 0) {
+        // Smoothly pull Y toward lane center (authentic cornering glide!)
+        const dy = centerY - p.y;
+        const alignStep = Math.min(Math.abs(dy), dist * 1.15);
+        p.y += Math.sign(dy) * alignStep;
+
+        if (forwardBlocked) {
+          // Allow moving up to centerX, then stop flush
+          if (p.dir.x > 0 && p.x < centerX) {
+            p.x = Math.min(centerX, p.x + dist);
+          } else if (p.dir.x < 0 && p.x > centerX) {
+            p.x = Math.max(centerX, p.x - dist);
+          }
+        } else {
+          p.x += p.dir.x * dist;
+        }
+      } else if (p.dir.y !== 0) {
+        // Smoothly pull X toward lane center
+        const dx = centerX - p.x;
+        const alignStep = Math.min(Math.abs(dx), dist * 1.15);
+        p.x += Math.sign(dx) * alignStep;
+
+        if (forwardBlocked) {
+          if (p.dir.y > 0 && p.y < centerY) {
+            p.y = Math.min(centerY, p.y + dist);
+          } else if (p.dir.y < 0 && p.y > centerY) {
+            p.y = Math.max(centerY, p.y - dist);
+          }
+        } else {
+          p.y += p.dir.y * dist;
+        }
+      }
+
+      // Side tunnel wrap-around
+      if (p.x < -0.5) p.x += COLS + 1.0;
+      else if (p.x >= COLS + 0.5) p.x -= COLS + 1.0;
+
+      moved = Math.hypot(p.x - prevX, p.y - prevY) > 0.0005;
+      p.moving = moved;
+
+      if (moved) {
+        p.mouthPhase = (p.mouthPhase + dt * 15.5) % 2;
+      } else {
+        // Keep mouth slightly open when stopped against a wall (classic arcade look!)
+        p.mouthPhase = 0.55;
+      }
+    }
+
+    checkPelletAndFruit() {
+      const col = Math.floor(this.pac.x);
+      const row = Math.floor(this.pac.y);
+
+      if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
+        const cell = this.grid[row][col];
+        if (cell === '.' || cell === 'o') {
+          this.grid[row][col] = ' ';
+          this.pelletsEaten++;
+          this.pelletsLeft--;
+          this.timeSinceLastDot = 0;
+
+          // Update ghost house dot counters
+          this.recordDotForGhostHouse();
+
+          if (cell === '.') {
+            this.addScore(10);
+            this.pac.dotFreezeFrames = 1;
+            this.sound.playWaka();
+          } else {
+            this.addScore(50);
+            this.pac.dotFreezeFrames = 3;
+            this.sound.playWaka();
+            this.triggerFrightenedMode();
+          }
+
+          // Bonus fruit spawns at 70 and 170 dots eaten
+          if ((this.pelletsEaten === 70 && this.fruitsSpawnedThisLevel === 0) ||
+              (this.pelletsEaten === 170 && this.fruitsSpawnedThisLevel === 1)) {
+            this.fruitsSpawnedThisLevel++;
+            this.fruitActive = true;
+            this.fruitTimer = 9.5;
+          }
+
+          // Level cleared!
+          if (this.pelletsLeft <= 0) {
+            this.state = 'LEVEL_CLEAR';
+            this.stateTimer = 2.4;
+            this.fruitActive = false;
+            this.sound.stopBackground();
+            return;
+          }
+        }
+      }
+
+      // Bonus fruit pickup at (14.0, 17.5)
+      if (this.fruitActive) {
+        const dist = Math.hypot(this.pac.x - 14.0, this.pac.y - 17.5);
+        if (dist < 0.72) {
+          this.fruitActive = false;
+          const pts = this.cfg.fruit.pts;
+          this.addScore(pts);
+          this.fruitPopupPts = pts;
+          this.fruitPopupTimer = 2.0;
+          this.sound.playEatFruit();
+        }
+      }
+    }
+
+    triggerFrightenedMode() {
+      this.frightGhostCombo = 0;
+      const dur = this.cfg.frightSec;
+      if (dur > 0) {
+        this.frightTimer = dur;
+        for (const g of this.ghosts) {
+          if (!g.eaten) {
+            g.frightened = true;
+            if (g.state === 'active') {
+              g.pendingReverse = true;
+            }
+          }
+        }
+      } else {
+        // Levels 17 and 19+: ghosts don't turn blue, but still reverse direction!
+        for (const g of this.ghosts) {
+          if (!g.eaten && g.state === 'active') {
+            g.pendingReverse = true;
+          }
+        }
+      }
+    }
+
+    // ---- Ghost House Release System ----
+
+    recordDotForGhostHouse() {
+      if (this.useGlobalDotCounter) {
+        this.globalDotCounter++;
+        // Disable global counter if Clyde is in house when counter hits 32
+        if (this.globalDotCounter === 32 && this.ghosts[3].state === 'house') {
+          this.useGlobalDotCounter = false;
+        }
+      } else {
+        // Increment personal counter of the preferred waiting ghost (Pinky -> Inky -> Clyde)
+        for (let i = 1; i < 4; i++) {
+          if (this.ghosts[i].state === 'house') {
+            this.ghosts[i].dotCounter++;
+            break;
+          }
+        }
+      }
+    }
+
+    updateGhostHouseReleases(dt) {
+      this.timeSinceLastDot += dt;
+
+      // Priority order: Pinky (1), Inky (2), Clyde (3)
+      const globalLimits = [0, 7, 17, 32];
+      let nextWaiting = null;
+      let nextIdx = -1;
+      for (let i = 1; i < 4; i++) {
+        if (this.ghosts[i].state === 'house') {
+          nextWaiting = this.ghosts[i];
+          nextIdx = i;
+          break;
+        }
+      }
+
+      if (!nextWaiting) return;
+
+      let shouldRelease = false;
+      if (this.timeSinceLastDot >= this.cfg.dotTimeoutSec) {
+        shouldRelease = true;
+        this.timeSinceLastDot = 0;
+      } else if (this.useGlobalDotCounter) {
+        if (this.globalDotCounter >= globalLimits[nextIdx]) {
+          shouldRelease = true;
+        }
+      } else {
+        if (nextWaiting.dotCounter >= nextWaiting.dotLimit) {
+          shouldRelease = true;
+        }
+      }
+
+      if (shouldRelease) {
+        nextWaiting.state = 'exiting';
+      }
+    }
+
+    // ---- Authentic 4-Ghost AI & Movement ----
+
+    getBlinkyElroyLevel() {
+      // Classic arcade quirk: Elroy pauses after a life loss until Clyde leaves the house
+      if (this.useGlobalDotCounter && this.ghosts[3].state === 'house') {
+        return 0;
+      }
+      if (this.pelletsLeft <= this.cfg.elroy2Dots) return 2;
+      if (this.pelletsLeft <= this.cfg.elroy1Dots) return 1;
+      return 0;
+    }
+
+    getGhostTargetTile(g) {
+      if (g.eaten) {
+        return { c: 13, r: 11 };
+      }
+
+      const elroy = g.id === 'blinky' ? this.getBlinkyElroyLevel() : 0;
+      if (this.scatterMode && elroy === 0) {
+        return g.scatterTarget;
+      }
+
+      const pacC = Math.floor(this.pac.x);
+      const pacR = Math.floor(this.pac.y);
+      const pDir = this.pac.dir;
+
+      if (g.id === 'blinky') {
+        return { c: pacC, r: pacR };
+      }
+
+      if (g.id === 'pinky') {
+        // 4 tiles ahead of Pac-Man (including classic arcade UP (-4, -4) overflow)
+        let tc = pacC + pDir.x * 4;
+        let tr = pacR + pDir.y * 4;
+        if (pDir === DIR.UP) tc -= 4;
+        return { c: tc, r: tr };
+      }
+
+      if (g.id === 'inky') {
+        // Pivot 2 tiles ahead of Pac-Man, then double vector from Blinky to pivot
+        let pivC = pacC + pDir.x * 2;
+        let pivR = pacR + pDir.y * 2;
+        if (pDir === DIR.UP) pivC -= 2;
+        const blinky = this.ghosts[0];
+        const bC = Math.floor(blinky.x);
+        const bR = Math.floor(blinky.y);
+        return {
+          c: pivC + (pivC - bC),
+          r: pivR + (pivR - bR)
+        };
+      }
+
+      // Clyde: chase Pac-Man when > 8 tiles away, otherwise retreat to scatter corner
+      const gC = Math.floor(g.x);
+      const gR = Math.floor(g.y);
+      const dSq = (gC - pacC) * (gC - pacC) + (gR - pacR) * (gR - pacR);
+      if (dSq > 64) {
+        return { c: pacC, r: pacR };
+      }
+      return g.scatterTarget;
+    }
+
+    getGhostSpeed(g) {
+      if (g.state === 'house' || g.state === 'exiting') return 0.45 * BASE_SPEED;
+      if (g.state === 'entering') return 1.55 * BASE_SPEED;
+      if (g.eaten) return 1.65 * BASE_SPEED;
+
+      const col = Math.floor(g.x);
+      const row = Math.floor(g.y);
+      if (this.isTunnelTile(col, row)) {
+        return this.cfg.ghostTunnelSpeed * BASE_SPEED;
+      }
+      if (g.frightened) {
+        return this.cfg.ghostFrightSpeed * BASE_SPEED;
+      }
+      if (g.id === 'blinky') {
+        const elroy = this.getBlinkyElroyLevel();
+        if (elroy === 2) return this.cfg.elroy2Speed * BASE_SPEED;
+        if (elroy === 1) return this.cfg.elroy1Speed * BASE_SPEED;
+      }
+      return this.cfg.ghostSpeed * BASE_SPEED;
+    }
+
+    chooseGhostDirection(g, col, row) {
+      const opp = oppositeDir(g.dir);
+      const tileKey = col + ',' + row;
+      const forbidUp = !g.eaten && NO_UP_TILES.has(tileKey);
+
+      const candidates = [];
+      for (const d of DIR_PRIORITY) {
+        if (d === opp) continue;
+        if (d === DIR.UP && forbidUp) continue;
+        const nc = col + d.x;
+        const nr = row + d.y;
+        if (this.isGhostWalkable(nc, nr, g)) {
+          candidates.push(d);
+        }
+      }
+
+      if (candidates.length === 0) {
+        // Dead-end fallback (should never occur in valid Pac-Man maze)
+        return this.isGhostWalkable(col + opp.x, row + opp.y, g) ? opp : g.dir;
+      }
+
+      if (candidates.length === 1) {
+        return candidates[0];
+      }
+
+      // Frightened mode: pseudo-random turn
+      if (g.frightened && !g.eaten) {
+        return candidates[Math.floor(Math.random() * candidates.length)];
+      }
+
+      // Chase / Scatter / Eaten: minimize Euclidean distance squared to target tile
+      // Ties automatically broken by DIR_PRIORITY (UP > LEFT > DOWN > RIGHT)
+      const target = this.getGhostTargetTile(g);
+      let bestDir = candidates[0];
+      let bestDistSq = Infinity;
+      for (const d of candidates) {
+        const nc = col + d.x;
+        const nr = row + d.y;
+        const dx = nc - target.c;
+        const dy = nr - target.r;
+        const dSq = dx * dx + dy * dy;
+        if (dSq < bestDistSq) {
+          bestDistSq = dSq;
+          bestDir = d;
+        }
+      }
+      return bestDir;
+    }
+
+    updateGhosts(dt) {
+      for (const g of this.ghosts) {
+        const step = this.getGhostSpeed(g) * dt;
+
+        if (g.state === 'house') {
+          // Bob gently up and down inside the ghost house
+          g.y += g.dir.y * step;
+          if (g.y <= 14.0) {
+            g.y = 14.0;
+            g.dir = DIR.DOWN;
+          } else if (g.y >= 15.0) {
+            g.y = 15.0;
+            g.dir = DIR.UP;
+          }
+          continue;
+        }
+
+        if (g.state === 'exiting') {
+          // First align horizontally to center door x=14.0, then glide up to y=11.5
+          if (Math.abs(g.x - 14.0) > 0.02) {
+            const dx = 14.0 - g.x;
+            g.dir = dx > 0 ? DIR.RIGHT : DIR.LEFT;
+            g.x += Math.sign(dx) * Math.min(Math.abs(dx), step);
+          } else {
+            g.x = 14.0;
+            g.dir = DIR.UP;
+            g.y -= step;
+            if (g.y <= 11.5) {
+              g.y = 11.5;
+              g.dir = DIR.LEFT;
+              g.state = 'active';
+              g.pendingReverse = false;
+              g.lastTileKey = '';
+            }
+          }
+          continue;
+        }
+
+        if (g.state === 'entering') {
+          // Descend through the gate into the house center, then regenerate & exit!
+          g.x = 14.0;
+          g.dir = DIR.DOWN;
+          g.y += step;
+          if (g.y >= 14.5) {
+            g.y = 14.5;
+            g.eaten = false;
+            g.frightened = false;
+            g.pendingReverse = false;
+            g.state = 'exiting';
+          }
+          continue;
+        }
+
+        // ---- ACTIVE MAZE NAVIGATION ----
+        // Check if eaten eyes have arrived at ghost house door (14.0, 11.5)
+        if (g.eaten && Math.abs(g.y - 11.5) < 0.25 && Math.abs(g.x - 14.0) <= step + 0.12) {
+          g.x = 14.0;
+          g.y = 11.5;
+          g.state = 'entering';
+          continue;
+        }
+
+        // Move along current direction, checking tile-center crossings cleanly
+        let remaining = step;
+        let guard = 0;
+        while (remaining > 0.0001 && guard++ < 4) {
+          const col = Math.floor(g.x);
+          const row = Math.floor(g.y);
+          const cx = col + 0.5;
+          const cy = row + 0.5;
+
+          // Snap perpendicular axis cleanly onto corridor center
+          if (g.dir.x !== 0) g.y = cy;
+          else if (g.dir.y !== 0) g.x = cx;
+
+          // Distance to the center of the current tile along our heading
+          let distToCenter = -1;
+          if (g.dir.x > 0 && g.x <= cx) distToCenter = cx - g.x;
+          else if (g.dir.x < 0 && g.x >= cx) distToCenter = g.x - cx;
+          else if (g.dir.y > 0 && g.y <= cy) distToCenter = cy - g.y;
+          else if (g.dir.y < 0 && g.y >= cy) distToCenter = g.y - cy;
+
+          const tileKey = col + ',' + row;
+          if (distToCenter >= 0 && distToCenter <= remaining && g.lastTileKey !== tileKey) {
+            // Advance exactly to tile center and make intersection decision
+            g.x = cx;
+            g.y = cy;
+            remaining -= distToCenter;
+            g.lastTileKey = tileKey;
+
+            if (g.pendingReverse && !g.eaten) {
+              const rev = oppositeDir(g.dir);
+              if (this.isGhostWalkable(col + rev.x, row + rev.y, g)) {
+                g.dir = rev;
+                g.pendingReverse = false;
+              } else {
+                g.dir = this.chooseGhostDirection(g, col, row);
+                g.pendingReverse = false;
+              }
+            } else {
+              g.dir = this.chooseGhostDirection(g, col, row);
+            }
+          } else {
+            // Advance freely
+            g.x += g.dir.x * remaining;
+            g.y += g.dir.y * remaining;
+            remaining = 0;
+          }
+
+          // Tunnel wrap-around
+          if (g.x < -0.5) {
+            g.x += COLS + 1.0;
+            g.lastTileKey = '';
+          } else if (g.x >= COLS + 0.5) {
+            g.x -= COLS + 1.0;
+            g.lastTileKey = '';
+          }
+
+          // Re-check ghost house door entry for fast eaten eyes
+          if (g.eaten && Math.abs(g.y - 11.5) < 0.25 && Math.abs(g.x - 14.0) <= 0.18) {
+            g.x = 14.0;
+            g.y = 11.5;
+            g.state = 'entering';
+            break;
+          }
+        }
+      }
+    }
+
+    checkGhostCollisions() {
+      const px = this.pac.x;
+      const py = this.pac.y;
+      const hitDistSq = 0.62 * 0.62;
+
+      let lethalHit = false;
+      for (const g of this.ghosts) {
+        if (g.state !== 'active' || g.eaten) continue;
+        const dx = g.x - px;
+        const dy = g.y - py;
+        if (dx * dx + dy * dy < hitDistSq) {
+          if (g.frightened) {
+            // Eat frightened ghost!
+            g.frightened = false;
+            g.eaten = true;
+            g.pendingReverse = false;
+            this.frightGhostCombo++;
+            const pts = 200 * Math.pow(2, Math.min(3, this.frightGhostCombo - 1));
+            this.addScore(pts);
+            this.eatPauseGhost = g;
+            this.floatingPopup = {
+              text: String(pts),
+              x: g.x,
+              y: g.y,
+              color: COLORS.scoreCyan
+            };
+            this.state = 'EAT_GHOST_PAUSE';
+            this.stateTimer = 0.78;
+            this.sound.playEatGhost();
+            return;
+          } else {
+            lethalHit = true;
+          }
+        }
+      }
+
+      if (lethalHit) {
+        this.state = 'DYING_FREEZE';
+        this.stateTimer = 0.95;
+        this.sound.stopBackground();
+      }
+    }
+
+    updateBackgroundSound() {
+      if (this.state !== 'PLAYING' || this.paused) {
+        this.sound.stopBackground();
+        return;
+      }
+      const anyEyes = this.ghosts.some(g => g.eaten || g.state === 'entering');
+      if (anyEyes) {
+        this.sound.setBackground('eyes', 0);
+      } else if (this.frightTimer > 0) {
+        this.sound.setBackground('fright', 0);
+      } else {
+        // 5 classic siren gears based on remaining pellets
+        let gear = 0;
+        if (this.pelletsLeft <= 15) gear = 4;
+        else if (this.pelletsLeft <= 40) gear = 3;
+        else if (this.pelletsLeft <= 80) gear = 2;
+        else if (this.pelletsLeft <= 140) gear = 1;
+        this.sound.setBackground('siren', gear);
+      }
+    }
+
+    // ---- Rendering ----
+
+    render() {
+      const r = this.renderer;
+      const ctx = r.ctx;
+      ctx.fillStyle = COLORS.bg;
+      ctx.fillRect(0, 0, r.width, r.height);
+
+      // Top HUD (always visible)
+      this.renderTopHud();
+
+      if (this.state === 'ATTRACT') {
+        this.renderAttractScreen();
+        return;
+      }
+
+      if (this.state === 'INTERMISSION') {
+        this.renderIntermission();
+        return;
+      }
+
+      // Draw Maze (flash white 4 times on LEVEL_CLEAR)
+      let mazeWhite = false;
+      if (this.state === 'LEVEL_CLEAR' && this.stateTimer < 1.65) {
+        mazeWhite = Math.floor(this.stateTimer * 5.2) % 2 === 0;
+      }
+      r.drawMaze(mazeWhite);
+
+      // Draw Pellets
+      const powerBlink = (this.state === 'PLAYING' || this.state === 'EAT_GHOST_PAUSE')
+        ? (Math.floor(this.globalTimer * 6) % 2 === 0)
+        : true;
+      r.drawPellets(this.grid, powerBlink);
+
+      // Draw Bonus Fruit or Fruit Score Popup
+      if (this.fruitActive && this.state !== 'LEVEL_CLEAR') {
+        r.drawFruit(this.cfg.fruit.id, 14.0, 17.5, 1.05);
+      } else if (this.fruitPopupTimer > 0 && this.state === 'PLAYING') {
+        r.drawText(String(this.fruitPopupPts), 14.0, 17.1 + MAZE_ROW_OFFSET, COLORS.fruitScore, 0.85, 'center');
+      }
+
+      // Draw Ready / Player One / Game Over Labels inside maze
+      if (this.state === 'START_INTRO') {
+        r.drawText('PLAYER ONE', 14.0, 11.1 + MAZE_ROW_OFFSET, COLORS.textCyan, 1, 'center');
+        r.drawText('READY!', 14.0, 17.1 + MAZE_ROW_OFFSET, COLORS.textYellow, 1, 'center');
+      } else if (this.state === 'READY') {
+        r.drawText('READY!', 14.0, 17.1 + MAZE_ROW_OFFSET, COLORS.textYellow, 1, 'center');
+      } else if (this.state === 'GAME_OVER') {
+        r.drawText('GAME  OVER', 14.0, 17.1 + MAZE_ROW_OFFSET, COLORS.textRed, 1, 'center');
+      }
+
+      // Draw Entities
+      const animFrame = Math.floor(this.globalTimer * 10);
+      const mouthOpen = this.state === 'READY' || this.state === 'START_INTRO'
+        ? 0
+        : (this.pac.mouthPhase <= 1 ? this.pac.mouthPhase : 2 - this.pac.mouthPhase);
+
+      if (this.state === 'DYING') {
+        const progress = Math.max(0, Math.min(1, 1 - this.stateTimer / 1.45));
+        r.drawPacManDeath(this.pac.x, this.pac.y, progress);
+      } else if (this.state !== 'GAME_OVER') {
+        // Hide Pac-Man during eat-ghost score freeze (authentic arcade!)
+        if (this.state !== 'EAT_GHOST_PAUSE') {
+          const drawMouth = this.state === 'LEVEL_CLEAR' ? 0 : mouthOpen;
+          r.drawPacMan(this.pac.x, this.pac.y, this.pac.dir, drawMouth);
+        }
+
+        // Draw Ghosts (hidden during LEVEL_CLEAR flash phase)
+        const showGhosts = !(this.state === 'LEVEL_CLEAR' && this.stateTimer < 1.85);
+        if (showGhosts) {
+          // Determine frightened flashing
+          const flashWindow = this.cfg.frightFlashes * 0.4;
+          const isFlashing = this.frightTimer > 0 && this.frightTimer <= flashWindow;
+          const flashWhite = isFlashing && (Math.floor(this.frightTimer * 6.5) % 2 === 0);
+
+          for (const g of this.ghosts) {
+            if (this.state === 'EAT_GHOST_PAUSE' && g === this.eatPauseGhost) continue;
+            const gMode = g.eaten ? 'eaten' : (g.frightened ? 'frightened' : 'normal');
+            r.drawGhost(g.x, g.y, g.color, g.dir, gMode, flashWhite, animFrame);
+          }
+        }
+      }
+
+      // Floating ghost-eat score popup
+      if (this.state === 'EAT_GHOST_PAUSE' && this.floatingPopup) {
+        r.drawText(
+          this.floatingPopup.text,
+          this.floatingPopup.x,
+          this.floatingPopup.y - 0.35 + MAZE_ROW_OFFSET,
+          this.floatingPopup.color,
+          0.85,
+          'center'
+        );
+      }
+
+      // Tunnel masks
+      r.drawTunnelMasks();
+
+      // Bottom HUD (Lives & Fruit History)
+      this.renderBottomHud();
+
+      // Overlays (Paused / Game Over restart prompt)
+      if (this.paused) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+        ctx.fillRect(0, 0, r.width, r.height);
+        r.drawText('PAUSED', 14.0, 15.5, COLORS.textYellow, 1.35, 'center');
+        r.drawText('PRESS P TO RESUME', 14.0, 18.2, COLORS.textWhite, 0.85, 'center');
+        r.drawText('PRESS R TO RESTART', 14.0, 19.8, COLORS.textCyan, 0.85, 'center');
+      } else if (this.state === 'GAME_OVER' && Math.floor(this.stateTimer * 2) % 2 === 0) {
+        r.drawText('PRESS ENTER TO PLAY', 14.0, 20.1 + MAZE_ROW_OFFSET, COLORS.textYellow, 0.82, 'center');
+      }
+    }
+
+    renderTopHud() {
+      const r = this.renderer;
+      const blink1up = this.state === 'PLAYING' ? (Math.floor(this.globalTimer * 3.5) % 2 === 0) : true;
+      if (blink1up) {
+        r.drawText('1UP', 3.0, 0.15, COLORS.textWhite, 1, 'left');
+      }
+      r.drawText('HIGH SCORE', 14.0, 0.15, COLORS.textWhite, 1, 'center');
+
+      const scoreStr = this.score === 0 ? '00' : String(this.score);
+      const hiStr = this.highScore === 0 ? '00' : String(this.highScore);
+      r.drawText(scoreStr, 7.0, 1.25, COLORS.textWhite, 1, 'right');
+      r.drawText(hiStr, 17.0, 1.25, COLORS.textWhite, 1, 'right');
+
+      // Show current level subtly on the right
+      if (this.state !== 'ATTRACT') {
+        r.drawText('LV' + this.level, 25.5, 1.25, COLORS.textCyan, 0.85, 'right');
+      }
+    }
+
+    renderBottomHud() {
+      const r = this.renderer;
+      // Lives remaining (drawn as Pac-Man icons facing left)
+      const shownLives = Math.max(0, this.lives - 1);
+      for (let i = 0; i < shownLives; i++) {
+        r.drawPacMan(2.5 + i * 2.0, 34.95, DIR.LEFT, 0.55, 0.68, true);
+      }
+
+      // Level fruit icons (right-aligned, up to last 7 levels)
+      const count = this.levelFruits.length;
+      for (let i = 0; i < count; i++) {
+        const fx = 25.5 - (count - 1 - i) * 2.0;
+        r.drawFruit(this.levelFruits[i], fx, 34.95, 0.9, true);
+      }
+    }
+
+    renderAttractScreen() {
+      const r = this.renderer;
+      const t = this.attractTimer;
+      const anim = Math.floor(t * 10);
+
+      // Classic Arcade Cast Header
+      r.drawText('CHARACTER / NICKNAME', 14.0, 5.2, COLORS.textWhite, 0.92, 'center');
+
+      const cast = [
+        { color: COLORS.blinky, title: '-SHADOW',  nick: '"BLINKY"' },
+        { color: COLORS.pinky,  title: '-SPEEDY',  nick: '"PINKY"'  },
+        { color: COLORS.inky,   title: '-BASHFUL', nick: '"INKY"'   },
+        { color: COLORS.clyde,  title: '-POKEY',   nick: '"CLYDE"'  }
+      ];
+
+      cast.forEach((c, idx) => {
+        const rowY = 7.8 + idx * 2.9;
+        if (t > idx * 0.45) {
+          r.drawGhost(4.2, rowY + 0.45, c.color, DIR.RIGHT, 'normal', false, anim, true);
+          r.drawText(c.title, 6.8, rowY, c.color, 0.92, 'left');
+          if (t > idx * 0.45 + 0.22) {
+            r.drawText(c.nick, 17.5, rowY, c.color, 0.92, 'left');
+          }
+        }
+      });
+
+      // Animated Arcade Chase Demo!
+      const cycle = t % 11.0;
+      const chaseY = 20.6;
+      const mouth = Math.abs(Math.sin(t * 14)) * 0.95;
+
+      if (cycle < 4.5) {
+        // Phase 1: Blinking power pellet on left, Pac-Man chased left by 4 ghosts
+        const px = 29.0 - cycle * 5.8;
+        if (px > 4.2 && Math.floor(t * 6) % 2 === 0) {
+          r.ctx.fillStyle = COLORS.pellet;
+          r.ctx.beginPath();
+          r.ctx.arc(4.2 * r.tilePx, chaseY * r.tilePx, r.tilePx * 0.38, 0, Math.PI * 2);
+          r.ctx.fill();
+        }
+        r.drawPacMan(px, chaseY, DIR.LEFT, mouth, 0.78, true);
+        cast.forEach((c, i) => {
+          r.drawGhost(px + 2.5 + i * 2.1, chaseY, c.color, DIR.LEFT, 'normal', false, anim, true);
+        });
+      } else {
+        // Phase 2: Pac-Man turns right and devours frightened blue ghosts!
+        const dt2 = cycle - 4.5;
+        const px = 2.9 + dt2 * 4.4;
+        r.drawPacMan(px, chaseY, DIR.RIGHT, mouth, 0.78, true);
+        cast.forEach((c, i) => {
+          const gx = 5.6 + i * 2.3 + dt2 * 2.6;
+          if (px < gx - 0.5) {
+            r.drawGhost(gx, chaseY, c.color, DIR.RIGHT, 'frightened', false, anim, true);
+          } else if (px < gx + 1.8) {
+            const pts = 200 * Math.pow(2, i);
+            r.drawText(String(pts), gx, chaseY - 0.4, COLORS.scoreCyan, 0.85, 'center');
+          }
+        });
+      }
+
+      // Pellet Legend
+      const s = r.tilePx;
+      r.ctx.fillStyle = COLORS.pellet;
+      r.ctx.fillRect(10.0 * s - s * 0.14, 24.4 * s - s * 0.14, s * 0.28, s * 0.28);
+      r.drawText('10 PTS', 11.8, 24.0, COLORS.textWhite, 0.9, 'left');
+
+      if (Math.floor(t * 6) % 2 === 0) {
+        r.ctx.fillStyle = COLORS.pellet;
+        r.ctx.beginPath();
+        r.ctx.arc(10.0 * s, 26.2 * s, s * 0.36, 0, Math.PI * 2);
+        r.ctx.fill();
+      }
+      r.drawText('50 PTS', 11.8, 25.8, COLORS.textWhite, 0.9, 'left');
+
+      // Start Prompt
+      if (Math.floor(t * 2.4) % 2 === 0) {
+        r.drawText('PRESS ENTER OR SPACE', 14.0, 29.3, COLORS.textYellow, 0.92, 'center');
+      }
+      r.drawText('OR CLICK TO START', 14.0, 30.8, COLORS.textCyan, 0.82, 'center');
+      r.drawText('BONUS PAC-MAN AT 10000 PTS', 14.0, 33.4, COLORS.textPink, 0.72, 'center');
+    }
+
+    renderIntermission() {
+      const r = this.renderer;
+      const t = this.intermissionTimer;
+      const anim = Math.floor(t * 10);
+      const mouth = Math.abs(Math.sin(t * 15)) * 0.95;
+      const y = 18.0;
+
+      if (t < 3.2) {
+        // Blinky chases Pac-Man right-to-left
+        const px = 29.5 - t * 10.2;
+        const bx = px + 3.2 - t * 0.4;
+        r.drawPacMan(px, y, DIR.LEFT, mouth, 0.82, true);
+        r.drawGhost(bx, y, COLORS.blinky, DIR.LEFT, 'normal', false, anim, true);
+      } else {
+        // Giant Pac-Man chases frightened Blinky left-to-right!
+        const dt2 = t - 3.2;
+        const bx = -1.5 + dt2 * 9.8;
+        const px = bx - 5.2;
+        r.drawGhost(bx, y, COLORS.blinky, DIR.RIGHT, 'frightened', false, anim, true);
+        r.drawPacMan(px, y - 0.5, DIR.RIGHT, mouth, 2.2, true);
+      }
+    }
+
+    // ---- Main Animation Loop ----
+
+    startLoop() {
+      this.lastTime = performance.now();
+      const frame = (now) => {
+        const rawDt = (now - this.lastTime) / 1000;
+        this.lastTime = now;
+        const clampedDt = Math.min(rawDt, 0.1);
+        this.accumulator += clampedDt;
+
+        while (this.accumulator >= FIXED_DT) {
+          this.step(FIXED_DT);
+          this.accumulator -= FIXED_DT;
+        }
+
+        this.render();
+        this.rafId = requestAnimationFrame(frame);
+      };
+      this.rafId = requestAnimationFrame(frame);
+    }
+  }
+
+  // =========================================================================
+  // 6. INITIALIZATION, INPUT & UI WIRING
+  // =========================================================================
+  const canvas = document.getElementById('game');
+  const scanlinesEl = document.getElementById('scanlines');
+  const btnPause = document.getElementById('btn-pause');
+  const btnMute = document.getElementById('btn-mute');
+  const btnCrt = document.getElementById('btn-crt');
+  const btnRestart = document.getElementById('btn-restart');
+
+  const sound = new SoundEngine();
+  const game = new PacManGame(canvas, sound, {
+    onPauseChange(isPaused) {
+      btnPause.textContent = isPaused ? 'RESUME' : 'PAUSE';
+      btnPause.classList.toggle('active', isPaused);
+    }
+  });
+
+  // Expose handle for clean debugging/testing if needed
+  window.__pacmanGame = game;
+
+  function toggleMute() {
+    sound.unlock();
+    sound.setMuted(!sound.muted);
+    btnMute.textContent = sound.muted ? 'SOUND: OFF' : 'SOUND: ON';
+    btnMute.classList.toggle('active', sound.muted);
+  }
+
+  function toggleCrt() {
+    const on = scanlinesEl.classList.toggle('on');
+    btnCrt.textContent = on ? 'CRT: ON' : 'CRT: OFF';
+    btnCrt.classList.toggle('active', on);
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const code = e.code;
+    const key = e.key ? e.key.toLowerCase() : '';
+
+    if (code === 'ArrowUp' || code === 'ArrowDown' || code === 'ArrowLeft' || code === 'ArrowRight' || code === 'Space') {
+      e.preventDefault();
+    }
+
+    if (code === 'ArrowUp' || key === 'w') {
+      game.queueDirection(DIR.UP);
+    } else if (code === 'ArrowDown' || key === 's') {
+      game.queueDirection(DIR.DOWN);
+    } else if (code === 'ArrowLeft' || key === 'a') {
+      game.queueDirection(DIR.LEFT);
+    } else if (code === 'ArrowRight' || key === 'd') {
+      game.queueDirection(DIR.RIGHT);
+    } else if (key === 'p' || code === 'Escape') {
+      game.togglePause();
+    } else if (key === 'm') {
+      toggleMute();
+    } else if (key === 'r') {
+      game.startNewGame();
+    } else if (code === 'Enter' || code === 'Space') {
+      game.handleActionKey();
+    }
+  });
+
+  canvas.addEventListener('click', () => {
+    if (game.state === 'ATTRACT' || game.state === 'GAME_OVER' || game.state === 'INTERMISSION') {
+      game.handleActionKey();
+    } else if (game.paused) {
+      game.togglePause();
+    }
+  });
+
+  btnPause.addEventListener('click', () => {
+    btnPause.blur();
+    game.togglePause();
+  });
+
+  btnMute.addEventListener('click', () => {
+    btnMute.blur();
+    toggleMute();
+  });
+
+  btnCrt.addEventListener('click', () => {
+    btnCrt.blur();
+    toggleCrt();
+  });
+
+  btnRestart.addEventListener('click', () => {
+    btnRestart.blur();
+    game.startNewGame();
+  });
+
+  // Auto-pause when tab is hidden so player never loses a life unexpectedly
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && game.state === 'PLAYING' && !game.paused) {
+      game.setPaused(true);
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    game.renderer.resize();
+  });
+
+  game.startLoop();
+})();
+</script>
+</body>
+</html>
